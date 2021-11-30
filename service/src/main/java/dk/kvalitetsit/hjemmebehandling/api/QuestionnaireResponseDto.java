@@ -14,7 +14,6 @@ public class QuestionnaireResponseDto {
     private Instant answered;
     private ExaminationStatus examinationStatus;
     private TriagingCategory triagingCategory;
-    private PatientDto patient;
 
     public String getId() {
         return id;
@@ -70,13 +69,5 @@ public class QuestionnaireResponseDto {
 
     public void setTriagingCategory(TriagingCategory triagingCategory) {
         this.triagingCategory = triagingCategory;
-    }
-
-    public PatientDto getPatient() {
-        return patient;
-    }
-
-    public void setPatient(PatientDto patient) {
-        this.patient = patient;
     }
 }

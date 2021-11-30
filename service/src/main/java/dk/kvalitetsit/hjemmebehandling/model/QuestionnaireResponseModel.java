@@ -14,7 +14,6 @@ public class QuestionnaireResponseModel {
     private Instant answered;
     private ExaminationStatus examinationStatus;
     private TriagingCategory triagingCategory;
-    private PatientModel patient;
 
     public String getId() {
         return id;
@@ -70,13 +69,5 @@ public class QuestionnaireResponseModel {
 
     public void setTriagingCategory(TriagingCategory triagingCategory) {
         this.triagingCategory = triagingCategory;
-    }
-
-    public PatientModel getPatient() {
-        return patient;
-    }
-
-    public void setPatient(PatientModel patient) {
-        this.patient = patient;
     }
 }

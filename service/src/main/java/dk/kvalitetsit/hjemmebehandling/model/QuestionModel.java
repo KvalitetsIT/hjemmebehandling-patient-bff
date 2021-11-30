@@ -1,4 +1,4 @@
-package dk.kvalitetsit.hjemmebehandling.model.question;
+package dk.kvalitetsit.hjemmebehandling.model;
 
 import dk.kvalitetsit.hjemmebehandling.constants.QuestionType;
 

@@ -1,4 +1,4 @@
-package dk.kvalitetsit.hjemmebehandling.api.question;
+package dk.kvalitetsit.hjemmebehandling.api;
 
 import dk.kvalitetsit.hjemmebehandling.constants.QuestionType;
 

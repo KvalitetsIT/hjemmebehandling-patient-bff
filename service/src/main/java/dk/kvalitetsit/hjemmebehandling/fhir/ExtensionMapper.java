@@ -3,19 +3,17 @@ package dk.kvalitetsit.hjemmebehandling.fhir;
 import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
 import dk.kvalitetsit.hjemmebehandling.constants.Systems;
 import dk.kvalitetsit.hjemmebehandling.constants.TriagingCategory;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 
 import java.time.Instant;
-import dk.kvalitetsit.hjemmebehandling.model.ThresholdModel;
+
 import dk.kvalitetsit.hjemmebehandling.types.ThresholdType;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ExtensionMapper {
@@ -70,30 +68,5 @@ public class ExtensionMapper {
             }
         }
         throw new IllegalStateException(String.format("Could not look up url %s among the candidate extensions!", url));
-    }
-
-    public static List<ThresholdModel> extractThresholds(List<Extension> extensions) {
-        List<ThresholdModel> result = new ArrayList<>();
-
-        for (Extension thresholdExtension : extensions) {
-            ThresholdModel thresholdModel = new ThresholdModel();
-            thresholdModel.setQuestionnaireItemLinkId( thresholdExtension.getExtensionString(Systems.THRESHOLD_QUESTIONNAIRE_ITEM_LINKID) );
-            thresholdModel.setType( Enum.valueOf(ThresholdType.class, thresholdExtension.getExtensionString(Systems.THRESHOLD_TYPE)) );
-            if ( thresholdExtension.hasExtension(Systems.THRESHOLD_VALUE_BOOLEAN) ) {
-                BooleanType valueBoolean = (BooleanType) thresholdExtension.getExtensionByUrl(Systems.THRESHOLD_VALUE_BOOLEAN).getValue();
-                thresholdModel.setValueBoolean( valueBoolean.booleanValue() );
-            }
-            if ( thresholdExtension.hasExtension(Systems.THRESHOLD_VALUE_RANGE) ) {
-                Range valueRange = (Range) thresholdExtension.getExtensionByUrl(Systems.THRESHOLD_VALUE_RANGE).getValue();
-                if (valueRange.hasLow()) {
-                    thresholdModel.setValueQuantityLow( valueRange.getLow().getValue().doubleValue() );
-                }
-                if (valueRange.hasHigh()) {
-                    thresholdModel.setValueQuantityHigh( valueRange.getHigh().getValue().doubleValue() );
-                }
-            }
-            result.add(thresholdModel);
-        }
-        return result;
     }
 }

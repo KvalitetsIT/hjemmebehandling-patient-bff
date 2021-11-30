@@ -1,8 +1,5 @@
 package dk.kvalitetsit.hjemmebehandling.api;
 
-import dk.kvalitetsit.hjemmebehandling.api.answer.AnswerDto;
-import dk.kvalitetsit.hjemmebehandling.api.question.QuestionDto;
-
 public class QuestionAnswerPairDto {
     private QuestionDto question;
     private AnswerDto answer;

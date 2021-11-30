@@ -42,13 +42,3 @@ services:
      environment:
        - data_dir=/hapi-server-initializer
      command: "/hapi-server-initializer/init.sh"
-
-   person-service:
-     image: mockserver/mockserver
-     command: -logLevel DEBUG -serverPort 1081
-     environment:
-      - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/initializerJson.json
-     ports:
-      - 1081:1081
-     volumes:
-      - ./person-service/initializerJson.json:/config/initializerJson.json

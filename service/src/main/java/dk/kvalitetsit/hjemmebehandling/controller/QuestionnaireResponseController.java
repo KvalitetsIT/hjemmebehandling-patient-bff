@@ -1,7 +1,6 @@
 package dk.kvalitetsit.hjemmebehandling.controller;
 
 import dk.kvalitetsit.hjemmebehandling.api.DtoMapper;
-import dk.kvalitetsit.hjemmebehandling.api.PartialUpdateQuestionnaireResponseRequest;
 import dk.kvalitetsit.hjemmebehandling.api.QuestionnaireResponseDto;
 import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
 import dk.kvalitetsit.hjemmebehandling.model.QuestionnaireResponseModel;
@@ -32,19 +31,14 @@ public class QuestionnaireResponseController {
         this.dtoMapper = dtoMapper;
     }
 
-    @PostMapping(value = "/v1/questionnaireresponse")
-    public void createQuestionnaireResponse(QuestionnaireResponseDto questionnaireResponse) {
-        throw new UnsupportedOperationException();
-    }
-
     @GetMapping(value = "/v1/questionnaireresponse/{carePlanId}")
-    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnaireResponsesByCarePlanId(@PathVariable("carePlanId") String carePlanId, @RequestParam("questionnaireIds") List<String> questionnaireIds) {
-        if(carePlanId == null || questionnaireIds == null || questionnaireIds.isEmpty()) {
+    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnaireResponsesByCarePlanId(@PathVariable("carePlanId") String carePlanId) {
+        if(carePlanId == null) {
             return ResponseEntity.badRequest().build();
         }
 
         try {
-            List<QuestionnaireResponseModel> questionnaireResponses = questionnaireResponseService.getQuestionnaireResponses(carePlanId, questionnaireIds);
+            List<QuestionnaireResponseModel> questionnaireResponses = questionnaireResponseService.getQuestionnaireResponses(carePlanId);
             if(questionnaireResponses.isEmpty()) {
                 return ResponseEntity.noContent().build();
             }
@@ -57,45 +51,5 @@ public class QuestionnaireResponseController {
             logger.error("Could not look up questionnaire responses by cpr and questionnaire ids", e);
             return ResponseEntity.internalServerError().build();
         }
-    }
-
-    @GetMapping(value = "/v1/questionnaireresponse")
-    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnaireResponsesByStatus(@RequestParam("status") List<ExaminationStatus> statuses, int pageNumber, int pageSize) {
-        if(statuses == null || statuses.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        try {
-            List<QuestionnaireResponseModel> questionnaireResponses = questionnaireResponseService.getQuestionnaireResponsesByStatus(statuses, new PageDetails(pageNumber, pageSize));
-            if(questionnaireResponses.isEmpty()) {
-                return ResponseEntity.noContent().build();
-            }
-            return ResponseEntity.ok(questionnaireResponses.stream().map(qr -> dtoMapper.mapQuestionnaireResponseModel(qr)).collect(Collectors.toList()));
-        }
-        catch(ServiceException e) {
-            logger.error("Could not look up questionnaire responses by status", e);
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    @PatchMapping(value = "/v1/questionnaireresponse/{id}")
-    public ResponseEntity<Void> patchQuestionnaireResponse(@PathVariable String id, @RequestBody PartialUpdateQuestionnaireResponseRequest request) {
-        if(request.getExaminationStatus() == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        try {
-            questionnaireResponseService.updateExaminationStatus(id, request.getExaminationStatus());
-        }
-        catch (AccessValidationException e) {
-            logger.info("Refused to update questionnaireResponse.", e);
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        catch(ServiceException e) {
-            // TODO: Distinguish when 'id' did not exist (bad request), and anything else (internal server error).
-            logger.error("Could not update questionnaire response", e);
-            return ResponseEntity.internalServerError().build();
-        }
-        return ResponseEntity.ok().build();
     }
 }

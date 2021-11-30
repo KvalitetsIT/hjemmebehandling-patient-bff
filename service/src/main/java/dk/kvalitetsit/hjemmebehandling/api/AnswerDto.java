@@ -1,8 +1,8 @@
-package dk.kvalitetsit.hjemmebehandling.model.answer;
+package dk.kvalitetsit.hjemmebehandling.api;
 
 import dk.kvalitetsit.hjemmebehandling.constants.AnswerType;
 
-public class AnswerModel {
+public class AnswerDto {
     private String value;
     private AnswerType answerType;
 
