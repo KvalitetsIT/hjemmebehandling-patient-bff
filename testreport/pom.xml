@@ -19,11 +19,6 @@
 
         <dependency>
             <groupId>dk.kvalitetsit.hjemmebehandling-patient-bff</groupId>
-            <artifactId>integrationtest</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>dk.kvalitetsit.hjemmebehandling-patient-bff</groupId>
             <artifactId>web</artifactId>
         </dependency>
     </dependencies>
