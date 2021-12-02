@@ -6,29 +6,48 @@ import dk.kvalitetsit.hjemmebehandling.constants.TriagingCategory;
 import java.time.Instant;
 import java.util.List;
 
-public class QuestionnaireResponseModel {
-    private String id;
-    private String questionnaireId;
+public class QuestionnaireResponseModel extends BaseModel {
+    private QualifiedId questionnaireId;
+    private QualifiedId carePlanId;
+    private QualifiedId authorId;
+    private QualifiedId sourceId;
     private String questionnaireName;
     private List<QuestionAnswerPairModel> questionAnswerPairs;
     private Instant answered;
     private ExaminationStatus examinationStatus;
     private TriagingCategory triagingCategory;
+    private PatientModel patient;
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getQuestionnaireId() {
+    public QualifiedId getQuestionnaireId() {
         return questionnaireId;
     }
 
-    public void setQuestionnaireId(String questionnaireId) {
+    public void setQuestionnaireId(QualifiedId questionnaireId) {
         this.questionnaireId = questionnaireId;
+    }
+
+    public QualifiedId getCarePlanId() {
+        return carePlanId;
+    }
+
+    public void setCarePlanId(QualifiedId carePlanId) {
+        this.carePlanId = carePlanId;
+    }
+
+    public QualifiedId getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(QualifiedId authorId) {
+        this.authorId = authorId;
+    }
+
+    public QualifiedId getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(QualifiedId sourceId) {
+        this.sourceId = sourceId;
     }
 
     public String getQuestionnaireName() {
@@ -69,5 +88,13 @@ public class QuestionnaireResponseModel {
 
     public void setTriagingCategory(TriagingCategory triagingCategory) {
         this.triagingCategory = triagingCategory;
+    }
+
+    public PatientModel getPatient() {
+        return patient;
+    }
+
+    public void setPatient(PatientModel patient) {
+        this.patient = patient;
     }
 }

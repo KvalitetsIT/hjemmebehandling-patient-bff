@@ -2,15 +2,17 @@ package dk.kvalitetsit.hjemmebehandling.fhir;
 
 import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
 import dk.kvalitetsit.hjemmebehandling.constants.Systems;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExtensionMapperTest {
     @Test
@@ -23,7 +25,7 @@ public class ExtensionMapperTest {
 
         // Assert
         assertEquals(Systems.ACTIVITY_SATISFIED_UNTIL, result.getUrl());
-        assertEquals(pointInTime.toString(), result.getValue().toString());
+        assertEquals(Date.from(pointInTime), ((DateTimeType) result.getValue()).getValue());
     }
 
     @Test
@@ -36,13 +38,27 @@ public class ExtensionMapperTest {
 
         // Assert
         assertEquals(Systems.CAREPLAN_SATISFIED_UNTIL, result.getUrl());
-        assertEquals(pointInTime.toString(), result.getValue().toString());
+        assertEquals(Date.from(pointInTime), ((DateTimeType) result.getValue()).getValue());
+    }
+
+    @Test
+    public void mapOrganizationId_success() {
+        // Arrange
+        String organizationId = "Organization/organization-1";
+
+        // Act
+        Extension result = ExtensionMapper.mapOrganizationId(organizationId);
+
+        // Assert
+        assertEquals(Systems.ORGANIZATION, result.getUrl());
+        assertEquals(Reference.class, result.getValue().getClass());
+        assertEquals(organizationId, ((Reference) result.getValue()).getReference());
     }
 
     @Test
     public void extractActivitySatisfiedUntil_success() {
         // Arrange
-        Extension extension = new Extension(Systems.ACTIVITY_SATISFIED_UNTIL, new StringType("2021-12-07T10:11:12.124Z"));
+        Extension extension = new Extension(Systems.ACTIVITY_SATISFIED_UNTIL, new DateTimeType(Date.from(Instant.parse("2021-12-07T10:11:12.124Z"))));
 
         // Act
         Instant result = ExtensionMapper.extractActivitySatisfiedUntil(List.of(extension));
@@ -64,13 +80,14 @@ public class ExtensionMapperTest {
     }
 
     @Test
-    public void extractActivitySatisfiedUntil_illegalDate() {
+    public void extractOrganizationId_success() {
         // Arrange
-        Extension extension = new Extension(Systems.ACTIVITY_SATISFIED_UNTIL, new StringType("next monday"));
+        Extension extension = new Extension(Systems.ORGANIZATION, new Reference("Organization/organization-1"));
 
         // Act
+        String result = ExtensionMapper.extractOrganizationId(List.of(extension));
 
         // Assert
-        assertThrows(DateTimeParseException.class, () -> ExtensionMapper.extractActivitySatisfiedUntil(List.of(extension)));
+        assertEquals("Organization/organization-1", result);
     }
 }
