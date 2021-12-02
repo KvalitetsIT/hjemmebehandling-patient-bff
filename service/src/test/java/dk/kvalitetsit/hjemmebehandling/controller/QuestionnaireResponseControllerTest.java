@@ -17,7 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,9 +38,11 @@ public class QuestionnaireResponseControllerTest {
     public void getQuestionnaireResponses_cprParameterMissing_400() {
         // Arrange
         String carePlanId = null;
+        Optional<Integer> pageNumber = Optional.of(1);
+        Optional<Integer> pageSize = Optional.of(10);
 
         // Act
-        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId);
+        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize);
 
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
@@ -48,6 +52,8 @@ public class QuestionnaireResponseControllerTest {
     public void getQuestionnaireResponses_responsesPresent_200() throws Exception {
         // Arrange
         String carePlanId = "careplan-1";
+        Optional<Integer> pageNumber = Optional.of(1);
+        Optional<Integer> pageSize = Optional.of(10);
 
         QuestionnaireResponseModel responseModel1 = new QuestionnaireResponseModel();
         QuestionnaireResponseModel responseModel2 = new QuestionnaireResponseModel();
@@ -59,7 +65,7 @@ public class QuestionnaireResponseControllerTest {
         Mockito.when(dtoMapper.mapQuestionnaireResponseModel(responseModel2)).thenReturn(responseDto2);
 
         // Act
-        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId);
+        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize);
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
@@ -72,11 +78,13 @@ public class QuestionnaireResponseControllerTest {
     public void getQuestionnaireResponses_responsesMissing_204() throws Exception {
         // Arrange
         String carePlanId = "careplan-1";
+        Optional<Integer> pageNumber = Optional.of(1);
+        Optional<Integer> pageSize = Optional.of(10);
 
         Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId)).thenReturn(List.of());
 
         // Act
-        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId);
+        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize);
 
         // Assert
         assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
@@ -86,11 +94,13 @@ public class QuestionnaireResponseControllerTest {
     public void getQuestionnaireResponses_accessViolation_403() throws Exception {
         // Arrange
         String carePlanId = "careplan-1";
+        Optional<Integer> pageNumber = Optional.of(1);
+        Optional<Integer> pageSize = Optional.of(10);
 
         Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId)).thenThrow(AccessValidationException.class);
 
         // Act
-        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId);
+        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize);
 
         // Assert
         assertEquals(HttpStatus.FORBIDDEN, result.getStatusCode());
@@ -100,11 +110,13 @@ public class QuestionnaireResponseControllerTest {
     public void getQuestionnaireResponses_failureToFetch_500() throws Exception {
         // Arrange
         String carePlanId = "careplan-1";
+        Optional<Integer> pageNumber = Optional.of(1);
+        Optional<Integer> pageSize = Optional.of(10);
 
         Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId)).thenThrow(ServiceException.class);
 
         // Act
-        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId);
+        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize);
 
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());

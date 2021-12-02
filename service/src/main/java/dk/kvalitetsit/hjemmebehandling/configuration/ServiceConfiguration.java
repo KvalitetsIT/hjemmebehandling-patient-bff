@@ -26,11 +26,6 @@ public class ServiceConfiguration {
 	private String fhirServerUrl;
 
     @Bean
-    public QuestionnaireResponseService getQuestionnaireResponseService(@Autowired FhirClient client, @Autowired FhirMapper mapper, @Autowired AccessValidator accessValidator) {
-        return new QuestionnaireResponseService(client, mapper, accessValidator);
-    }
-
-    @Bean
     public FhirClient getFhirClient() {
         FhirContext context = FhirContext.forR4();
         return new FhirClient(context, fhirServerUrl);

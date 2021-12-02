@@ -1,6 +1,7 @@
 package dk.kvalitetsit.hjemmebehandling.service;
 
 import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
+import dk.kvalitetsit.hjemmebehandling.controller.http.LocationHeaderBuilder;
 import dk.kvalitetsit.hjemmebehandling.fhir.*;
 import dk.kvalitetsit.hjemmebehandling.model.QuestionnaireResponseModel;
 import dk.kvalitetsit.hjemmebehandling.service.access.AccessValidator;
@@ -12,10 +13,12 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hl7.fhir.r4.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Component
 public class QuestionnaireResponseService extends AccessValidatingService {
     private static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseService.class);
 

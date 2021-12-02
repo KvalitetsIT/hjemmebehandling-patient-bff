@@ -22,16 +22,16 @@ public class CarePlanController {
 
     private CarePlanService carePlanService;
     private DtoMapper dtoMapper;
-    private LocationHeaderBuilder locationHeaderBuilder;
 
-    public CarePlanController(CarePlanService carePlanService, DtoMapper dtoMapper, LocationHeaderBuilder locationHeaderBuilder) {
+    public CarePlanController(CarePlanService carePlanService, DtoMapper dtoMapper) {
         this.carePlanService = carePlanService;
         this.dtoMapper = dtoMapper;
-        this.locationHeaderBuilder = locationHeaderBuilder;
     }
 
     @GetMapping(value = "/v1/careplan")
     public ResponseEntity<CarePlanDto> getActiveCarePlan() {
+        // Should get cpr from user context and use that.
+
         throw new UnsupportedOperationException();
     }
 }

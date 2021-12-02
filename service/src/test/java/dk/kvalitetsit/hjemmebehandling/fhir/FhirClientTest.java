@@ -69,7 +69,7 @@ public class FhirClientTest {
     }
 
     private void setupSearchQuestionnaireResponseClient(int criteriaCount, QuestionnaireResponse... questionnaireResponses) {
-        setupSearchClient(criteriaCount, 1, QuestionnaireResponse.class, questionnaireResponses);
+        setupSearchClient(criteriaCount, 3, QuestionnaireResponse.class, questionnaireResponses);
     }
 
     private void setupSearchClient(int criteriaCount, int includeCount, Class<? extends Resource> resourceClass, Resource... resources) {
