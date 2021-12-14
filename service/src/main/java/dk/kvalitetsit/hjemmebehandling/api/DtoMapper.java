@@ -185,11 +185,25 @@ public class DtoMapper {
         return questionnaireDto;
     }
 
+    public QuestionnaireResponseModel mapQuestionnaireResponseDto(QuestionnaireResponseDto questionnaireResponseDto) {
+        QuestionnaireResponseModel questionnaireResponseModel = new QuestionnaireResponseModel();
+
+        mapBaseAttributesToModel(questionnaireResponseModel, questionnaireResponseDto, ResourceType.QuestionnaireResponse);
+        questionnaireResponseModel.setQuestionnaireId(toQualifiedId(questionnaireResponseDto.getQuestionnaireId(), ResourceType.Questionnaire));
+        questionnaireResponseModel.setCarePlanId(toQualifiedId(questionnaireResponseDto.getCarePlanId(), ResourceType.CarePlan));
+        questionnaireResponseModel.setQuestionnaireName(questionnaireResponseModel.getQuestionnaireName());
+        questionnaireResponseModel.setQuestionAnswerPairs(questionnaireResponseDto.getQuestionAnswerPairs().stream().map(qa -> mapQuestionAnswerPairDto(qa)).collect(Collectors.toList()));
+        questionnaireResponseModel.setPatient(mapPatientDto(questionnaireResponseDto.getPatient()));
+
+        return questionnaireResponseModel;
+    }
+
     public QuestionnaireResponseDto mapQuestionnaireResponseModel(QuestionnaireResponseModel questionnaireResponseModel) {
         QuestionnaireResponseDto questionnaireResponseDto = new QuestionnaireResponseDto();
 
         questionnaireResponseDto.setId(questionnaireResponseModel.getId().toString());
         questionnaireResponseDto.setQuestionnaireId(questionnaireResponseModel.getQuestionnaireId().toString());
+        questionnaireResponseDto.setCarePlanId(questionnaireResponseModel.getCarePlanId().toString());
         questionnaireResponseDto.setQuestionnaireName(questionnaireResponseModel.getQuestionnaireName());
         questionnaireResponseDto.setQuestionAnswerPairs(questionnaireResponseModel.getQuestionAnswerPairs().stream().map(qa -> mapQuestionAnswerPairModel(qa)).collect(Collectors.toList()));
         questionnaireResponseDto.setAnswered(questionnaireResponseModel.getAnswered());
@@ -206,14 +220,18 @@ public class DtoMapper {
             return;
         }
 
-        if(FhirUtils.isPlainId(source.getId())) {
-            target.setId(new QualifiedId(source.getId(), resourceType));
+        target.setId(toQualifiedId(source.getId(), resourceType));
+    }
+
+    private QualifiedId toQualifiedId(String id, ResourceType resourceType) {
+        if(FhirUtils.isPlainId(id)) {
+            return new QualifiedId(id, resourceType);
         }
-        else if(FhirUtils.isQualifiedId(source.getId(), resourceType)) {
-            target.setId(new QualifiedId(source.getId()));
+        else if(FhirUtils.isQualifiedId(id, resourceType)) {
+            return new QualifiedId(id);
         }
         else {
-            throw new IllegalArgumentException(String.format("Illegal id provided for resource of type %s: %s!", resourceType.toString(), source.getId()));
+            throw new IllegalArgumentException(String.format("Illegal id provided for resource of type %s: %s!", resourceType.toString(), id));
         }
     }
 
@@ -239,6 +257,15 @@ public class DtoMapper {
         contactDetailsDto.setStreet(contactDetails.getStreet());
 
         return contactDetailsDto;
+    }
+
+    private QuestionAnswerPairModel mapQuestionAnswerPairDto(QuestionAnswerPairDto questionAnswerPairDto) {
+        QuestionAnswerPairModel questionAnswerPairModel = new QuestionAnswerPairModel();
+
+        questionAnswerPairModel.setQuestion(mapQuestionDto(questionAnswerPairDto.getQuestion()));
+        questionAnswerPairModel.setAnswer(mapAnswerDto(questionAnswerPairDto.getAnswer()));
+
+        return questionAnswerPairModel;
     }
 
     private QuestionAnswerPairDto mapQuestionAnswerPairModel(QuestionAnswerPairModel questionAnswerPairModel) {
@@ -270,6 +297,15 @@ public class DtoMapper {
         questionDto.setQuestionType(questionModel.getQuestionType());
 
         return questionDto;
+    }
+
+    private AnswerModel mapAnswerDto(AnswerDto answerDto) {
+        AnswerModel answerModel = new AnswerModel();
+
+        answerModel.setValue(answerDto.getValue());
+        answerModel.setAnswerType(answerDto.getAnswerType());
+
+        return answerModel;
     }
 
     private AnswerDto mapAnswerModel(AnswerModel answerModel) {

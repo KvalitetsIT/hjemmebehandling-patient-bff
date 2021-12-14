@@ -6,9 +6,9 @@ import dk.kvalitetsit.hjemmebehandling.constants.TriagingCategory;
 import java.time.Instant;
 import java.util.List;
 
-public class QuestionnaireResponseDto {
-    private String id;
+public class QuestionnaireResponseDto extends BaseDto {
     private String questionnaireId;
+    private String carePlanId;
     private String questionnaireName;
     private List<QuestionAnswerPairDto> questionAnswerPairs;
     private Instant answered;
@@ -16,20 +16,20 @@ public class QuestionnaireResponseDto {
     private TriagingCategory triagingCategory;
     private PatientDto patient;
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public String getQuestionnaireId() {
         return questionnaireId;
     }
 
     public void setQuestionnaireId(String questionnaireId) {
         this.questionnaireId = questionnaireId;
+    }
+
+    public String getCarePlanId() {
+        return carePlanId;
+    }
+
+    public void setCarePlanId(String carePlanId) {
+        this.carePlanId = carePlanId;
     }
 
     public String getQuestionnaireName() {

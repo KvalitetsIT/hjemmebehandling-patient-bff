@@ -4,6 +4,9 @@ public class QuestionAnswerPairModel {
     private QuestionModel question;
     private AnswerModel answer;
 
+    public QuestionAnswerPairModel() {
+    }
+
     public QuestionAnswerPairModel(QuestionModel question, AnswerModel answer) {
         this.question = question;
         this.answer = answer;

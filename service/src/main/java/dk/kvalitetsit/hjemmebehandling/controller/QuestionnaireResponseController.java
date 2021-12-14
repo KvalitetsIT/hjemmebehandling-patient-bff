@@ -60,7 +60,7 @@ public class QuestionnaireResponseController extends BaseController {
     }
 
     @PostMapping(value = "/v1/questionnaireresponse")
-    public ResponseEntity<Void> submitQuestionnaireResponse(QuestionnaireResponseDto questionnaireResponseDto) {
+    public ResponseEntity<Void> submitQuestionnaireResponse(@RequestBody QuestionnaireResponseDto questionnaireResponseDto) {
         // The operations needs to compute the triaging category (based on the thresholds, which can be found on the careplan), and update the careplan with fresh SatisfiedUntil-timestamps.
         // This update must be atomic - preferably by using a fhir transaction (the medarbejder-bff project contains an example).
 
