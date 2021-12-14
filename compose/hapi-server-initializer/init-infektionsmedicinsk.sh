@@ -52,53 +52,39 @@ delete 'SearchParameter/searchparameter-organization-careplan'
 delete 'SearchParameter/searchparameter-examination-status'
 delete 'SearchParameter/searchparameter-careplan-satisfied-until'
 
-delete 'QuestionnaireResponse/questionnaireresponse-4'
-delete 'QuestionnaireResponse/questionnaireresponse-3'
-delete 'QuestionnaireResponse/questionnaireresponse-2'
-delete 'QuestionnaireResponse/questionnaireresponse-1'
+delete 'QuestionnaireResponse/questionnaireresponse-infektionsmedicinsk-4'
+delete 'QuestionnaireResponse/questionnaireresponse-infektionsmedicinsk-3'
+delete 'QuestionnaireResponse/questionnaireresponse-infektionsmedicinsk-2'
+delete 'QuestionnaireResponse/questionnaireresponse-infektionsmedicinsk-1'
 
+delete 'CarePlan/careplan-infektionsmedicinsk-2'
 delete 'CarePlan/careplan-infektionsmedicinsk-1'
-delete 'CarePlan/careplan-2'
-delete 'CarePlan/careplan-1'
 
 delete 'PlanDefinition/plandefinition-infektionsmedicinsk-1'
-delete 'PlanDefinition/plandefinition-2'
-delete 'PlanDefinition/plandefinition-1'
 
 delete 'Questionnaire/questionnaire-infektionsmedicinsk-1'
-delete 'Questionnaire/questionnaire-2'
-delete 'Questionnaire/questionnaire-1'
 
 delete 'Patient/patient-2'
 delete 'Patient/patient-1'
 
 delete 'Organization/organization-infektionsmedicinsk'
-delete 'Organization/organization-2'
-delete 'Organization/organization-1'
 
-create 'organization-1.xml' 'Organization/organization-1'
-create 'organization-2.xml' 'Organization/organization-2'
 create 'organization-infektionsmedicinsk.xml' 'Organization/organization-infektionsmedicinsk'
 
 create 'patient-1.xml' 'Patient/patient-1'
 create 'patient-2.xml' 'Patient/patient-2'
 
-create 'questionnaire-1.xml' 'Questionnaire/questionnaire-1'
-create 'questionnaire-2.xml' 'Questionnaire/questionnaire-2'
 create 'questionnaire-infektionsmedicinsk-1.xml' 'Questionnaire/questionnaire-infektionsmedicinsk-1'
 
-create 'plandefinition-1.xml' 'PlanDefinition/plandefinition-1'
-create 'plandefinition-2.xml' 'PlanDefinition/plandefinition-2'
 create 'plandefinition-infektionsmedicinsk-1.xml' 'PlanDefinition/plandefinition-infektionsmedicinsk-1'
 
-create 'careplan-1.xml' 'CarePlan/careplan-1'
-create 'careplan-2.xml' 'CarePlan/careplan-2'
 create 'careplan-infektionsmedicinsk-1.xml' 'CarePlan/careplan-infektionsmedicinsk-1'
+create 'careplan-infektionsmedicinsk-2.xml' 'CarePlan/careplan-infektionsmedicinsk-2'
 
-create 'questionnaireresponse-1.xml' 'QuestionnaireResponse/questionnaireresponse-1'
-create 'questionnaireresponse-2.xml' 'QuestionnaireResponse/questionnaireresponse-2'
-create 'questionnaireresponse-3.xml' 'QuestionnaireResponse/questionnaireresponse-3'
-create 'questionnaireresponse-4.xml' 'QuestionnaireResponse/questionnaireresponse-4'
+create 'questionnaireresponse-infektionsmedicinsk-1.xml' 'QuestionnaireResponse/questionnaireresponse-infektionsmedicinsk-1'
+create 'questionnaireresponse-infektionsmedicinsk-2.xml' 'QuestionnaireResponse/questionnaireresponse-infektionsmedicinsk-2'
+create 'questionnaireresponse-infektionsmedicinsk-3.xml' 'QuestionnaireResponse/questionnaireresponse-infektionsmedicinsk-3'
+create 'questionnaireresponse-infektionsmedicinsk-4.xml' 'QuestionnaireResponse/questionnaireresponse-infektionsmedicinsk-4'
 
 create 'searchparameter-careplan-satisfied-until.xml' 'SearchParameter/searchparameter-careplan-satisfied-until'
 create 'searchparameter-examination-status.xml' 'SearchParameter/searchparameter-examination-status'
