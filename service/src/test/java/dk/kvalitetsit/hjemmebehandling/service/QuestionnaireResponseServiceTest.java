@@ -1,10 +1,13 @@
 package dk.kvalitetsit.hjemmebehandling.service;
 
 import dk.kvalitetsit.hjemmebehandling.constants.Systems;
+import dk.kvalitetsit.hjemmebehandling.controller.exception.BadRequestException;
 import dk.kvalitetsit.hjemmebehandling.fhir.*;
+import dk.kvalitetsit.hjemmebehandling.model.CarePlanModel;
 import dk.kvalitetsit.hjemmebehandling.model.QuestionnaireResponseModel;
 import dk.kvalitetsit.hjemmebehandling.service.access.AccessValidator;
 import dk.kvalitetsit.hjemmebehandling.service.exception.AccessValidationException;
+import dk.kvalitetsit.hjemmebehandling.service.exception.ServiceException;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +35,7 @@ public class QuestionnaireResponseServiceTest {
     private AccessValidator accessValidator;
 
     private static final String CAREPLAN_ID_1 = "careplan-1";
+    private static final String CAREPLAN_ID_2 = "careplan-2";
     private static final String ORGANIZATION_ID_1 = "organization-1";
     private static final String PATIENT_ID = "patient-1";
     private static final String QUESTIONNAIRE_ID_1 = "questionnaire-1";
@@ -88,6 +92,69 @@ public class QuestionnaireResponseServiceTest {
         assertThrows(AccessValidationException.class, () -> subject.getQuestionnaireResponses(carePlanId));
     }
 
+    @Test
+    public void submitQuestionnaireResponse_noActiveCarePlan_throwsException() {
+        // Arrange
+        QuestionnaireResponseModel questionnaireResponseModel = buildQuestionnaireResponseModel();
+        String cpr = "0101010101";
+
+        Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(FhirLookupResult.fromResources());
+
+        // Act
+
+        // Assert
+        assertThrows(ServiceException.class, () -> subject.submitQuestionnaireResponse(questionnaireResponseModel, cpr));
+    }
+
+    @Test
+    public void submitQuestionnaireResponse_multipleCarePlans_throwsException() {
+        // Arrange
+        QuestionnaireResponseModel questionnaireResponseModel = buildQuestionnaireResponseModel();
+        String cpr = "0101010101";
+
+        Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(FhirLookupResult.fromResources(buildCarePlan(CAREPLAN_ID_1), buildCarePlan(CAREPLAN_ID_2)));
+
+        // Act
+
+        // Assert
+        assertThrows(IllegalStateException.class, () -> subject.submitQuestionnaireResponse(questionnaireResponseModel, cpr));
+    }
+
+    @Test
+    public void submitQuestionnaireResponse_success_returnsGeneratedId() throws Exception {
+        // Arrange
+        QuestionnaireResponseModel questionnaireResponseModel = buildQuestionnaireResponseModel();
+        String cpr = "0101010101";
+
+        CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1);
+        FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan);
+        Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
+
+        CarePlanModel carePlanModel = new CarePlanModel();
+        Mockito.when(fhirMapper.mapCarePlan(carePlan, lookupResult)).thenReturn(carePlanModel);
+
+        QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+        Mockito.when(fhirMapper.mapQuestionnaireResponseModel(questionnaireResponseModel)).thenReturn(questionnaireResponse);
+
+        Mockito.when(fhirMapper.mapCarePlanModel(carePlanModel)).thenReturn(carePlan);
+
+        Mockito.when(fhirClient.saveQuestionnaireResponse(questionnaireResponse, carePlan)).thenReturn(QUESTIONNAIRE_RESPONSE_ID_1);
+
+        // Act
+        String result = subject.submitQuestionnaireResponse(questionnaireResponseModel, cpr);
+
+        // Assert
+        assertEquals(QUESTIONNAIRE_RESPONSE_ID_1, result);
+    }
+
+    private CarePlan buildCarePlan(String carePlanId) {
+        CarePlan carePlan = new CarePlan();
+
+        carePlan.setId(carePlanId);
+
+        return carePlan;
+    }
+
     private QuestionnaireResponse buildQuestionnaireResponse(String questionnaireResponseId, String questionnaireId, String patientId) {
         return buildQuestionnaireResponse(questionnaireResponseId, questionnaireId, patientId, ORGANIZATION_ID_1);
     }
@@ -101,5 +168,11 @@ public class QuestionnaireResponseServiceTest {
         response.addExtension(Systems.ORGANIZATION, new Reference(organizationId));
 
         return response;
+    }
+
+    private QuestionnaireResponseModel buildQuestionnaireResponseModel() {
+        QuestionnaireResponseModel questionnaireResponseModel = new QuestionnaireResponseModel();
+
+        return questionnaireResponseModel;
     }
 }

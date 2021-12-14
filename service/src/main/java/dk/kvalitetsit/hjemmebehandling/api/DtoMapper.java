@@ -193,7 +193,6 @@ public class DtoMapper {
         questionnaireResponseModel.setCarePlanId(toQualifiedId(questionnaireResponseDto.getCarePlanId(), ResourceType.CarePlan));
         questionnaireResponseModel.setQuestionnaireName(questionnaireResponseModel.getQuestionnaireName());
         questionnaireResponseModel.setQuestionAnswerPairs(questionnaireResponseDto.getQuestionAnswerPairs().stream().map(qa -> mapQuestionAnswerPairDto(qa)).collect(Collectors.toList()));
-        questionnaireResponseModel.setPatient(mapPatientDto(questionnaireResponseDto.getPatient()));
 
         return questionnaireResponseModel;
     }
@@ -262,7 +261,6 @@ public class DtoMapper {
     private QuestionAnswerPairModel mapQuestionAnswerPairDto(QuestionAnswerPairDto questionAnswerPairDto) {
         QuestionAnswerPairModel questionAnswerPairModel = new QuestionAnswerPairModel();
 
-        questionAnswerPairModel.setQuestion(mapQuestionDto(questionAnswerPairDto.getQuestion()));
         questionAnswerPairModel.setAnswer(mapAnswerDto(questionAnswerPairDto.getAnswer()));
 
         return questionAnswerPairModel;

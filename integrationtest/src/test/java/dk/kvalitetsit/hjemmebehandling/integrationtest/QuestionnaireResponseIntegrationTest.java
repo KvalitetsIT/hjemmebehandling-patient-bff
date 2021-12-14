@@ -38,7 +38,6 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
     }
 
     @Test
-    @Disabled
     public void submitQuestionnaireResponse_success() throws Exception {
         // Arrange
         QuestionnaireResponseDto questionnaireResponseDto = new QuestionnaireResponseDto();

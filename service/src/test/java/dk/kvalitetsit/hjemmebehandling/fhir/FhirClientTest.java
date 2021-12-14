@@ -13,6 +13,7 @@ import dk.kvalitetsit.hjemmebehandling.context.UserContext;
 import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -40,10 +41,12 @@ public class FhirClientTest {
 
     private static final String CAREPLAN_ID_1 = "CarePlan/careplan-1";
     private static final String ORGANIZATION_ID_1 = "Organization/organization-1";
+    private static final String ORGANIZATION_ID_2 = "Organization/organization-2";
     private static final String QUESTIONNAIRE_RESPONSE_ID_1 = "questionnaireresponse-1";
     private static final String QUESTIONNAIRE_RESPONSE_ID_2 = "questionnaireresponse-2";
 
     private static final String SOR_CODE_1 = "123456";
+    private static final String SOR_CODE_2 = "654321";
 
     @BeforeEach
     public void setup() {
@@ -127,6 +130,85 @@ public class FhirClientTest {
         assertTrue(result.getQuestionnaireResponses().contains(questionnaireResponse2));
     }
 
+    @Test
+    public void saveQuestionnaireResponse_returnsQuestionnaireResponseId() {
+        // Arrange
+        QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+        CarePlan carePlan = new CarePlan();
+
+        Bundle responseBundle = buildResponseBundle("201", "QuestionnaireResponse/2", "200", "CarePlan/3");
+        setupTransactionClient(responseBundle);
+
+        // Act
+        String result = subject.saveQuestionnaireResponse(questionnaireResponse, carePlan);
+
+        // Assert
+        assertEquals("QuestionnaireResponse/2", result);
+    }
+
+    @Test
+    public void saveQuestionnaireResponse_questionnaireResponseLocationMissing_throwsException() {
+        // Arrange
+        QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+        CarePlan carePlan = new CarePlan();
+
+        Bundle responseBundle = buildResponseBundle("201", "Questionnaire/4", "200", "CarePlan/3");
+        setupTransactionClient(responseBundle);
+
+        // Act
+
+        // Assert
+        assertThrows(IllegalStateException.class, () -> subject.saveQuestionnaireResponse(questionnaireResponse, carePlan));
+    }
+
+    @Test
+    public void saveQuestionnaireResponse_unwantedHttpStatus_throwsException() {
+        // Arrange
+        QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+        CarePlan carePlan = new CarePlan();
+
+        Bundle responseBundle = buildResponseBundle("400", null, "400", null);
+        setupTransactionClient(responseBundle);
+
+        // Act
+
+        // Assert
+        assertThrows(IllegalStateException.class, () -> subject.saveQuestionnaireResponse(questionnaireResponse, carePlan));
+    }
+
+    @Test
+    @Disabled("TODO - figure out how to handle tagging")
+    public void saveQuestionnaireResponse_addsOrganizationTag() {
+        // Arrange
+        QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+        CarePlan carePlan = new CarePlan();
+
+        Bundle responseBundle = buildResponseBundle("201", "QuestionnaireResponse/2", "201", "CarePlan/3");
+        setupTransactionClient(responseBundle, SOR_CODE_2, ORGANIZATION_ID_2);
+
+        // Act
+        String result = subject.saveQuestionnaireResponse(questionnaireResponse, carePlan);
+
+        // Assert
+        assertTrue(isTaggedWithId(questionnaireResponse, ORGANIZATION_ID_2));
+    }
+
+    private Bundle buildResponseBundle(String questionnaireResponseStatus, String questionnaireResponseLocation, String carePlanStatus, String carePlanLocation) {
+        Bundle responseBundle = new Bundle();
+
+        var questionnaireResponseEntry = responseBundle.addEntry();
+        questionnaireResponseEntry.setResponse(new Bundle.BundleEntryResponseComponent());
+        questionnaireResponseEntry.getResponse().setStatus(questionnaireResponseStatus);
+        questionnaireResponseEntry.getResponse().setLocation(questionnaireResponseLocation);
+
+        var carePlanEntry = responseBundle.addEntry();
+        carePlanEntry.setResponse(new Bundle.BundleEntryResponseComponent());
+        carePlanEntry.getResponse().setStatus(carePlanStatus);
+        carePlanEntry.getResponse().setLocation(carePlanLocation);
+
+        return responseBundle;
+    }
+
     private void setupSearchCarePlanByCprClient(CarePlan... carePlans) {
         setupSearchClient(2, 2, CarePlan.class, carePlans);
 
@@ -196,5 +278,33 @@ public class FhirClientTest {
 
     private void setupSearchOrganizationClient(Organization... organizations) {
         setupSearchClient(Organization.class, organizations);
+    }
+
+    private void setupTransactionClient(Bundle responseBundle) {
+        setupTransactionClient(responseBundle, SOR_CODE_1, ORGANIZATION_ID_1);
+    }
+
+    private void setupTransactionClient(Bundle responseBundle, String sorCode, String organizationId) {
+        // TODO - decide on how to handle tagging, and comment this in!
+        // setupUserContext(sorCode);
+        // setupOrganization(sorCode, organizationId);
+
+        Mockito.when(client.transaction().withBundle(Mockito.any(Bundle.class)).execute()).thenReturn(responseBundle);
+    }
+
+    private boolean isTagged(DomainResource resource) {
+        return resource.getExtension().stream().anyMatch(e -> isOrganizationTag(e));
+    }
+
+    private boolean isTaggedWithId(DomainResource resource, String organizationId) {
+        return resource.getExtension().stream().anyMatch(e -> isOrganizationTag(e) && isTagForOrganization(e, organizationId));
+    }
+
+    private boolean isOrganizationTag(Extension e) {
+        return e.getUrl().equals(Systems.ORGANIZATION);
+    }
+
+    private boolean isTagForOrganization(Extension e, String organizationId) {
+        return e.getValue() instanceof Reference && ((Reference) e.getValue()).getReference().equals(organizationId);
     }
 }

@@ -54,7 +54,8 @@ public class FhirClient {
     public String saveQuestionnaireResponse(QuestionnaireResponse questionnaireResponse, CarePlan carePlan) {
         // Use a transaction to save the new response, along with the updated careplan.
 
-        throw new UnsupportedOperationException();
+        Bundle bundle = new BundleBuilder().buildQuestionnaireResponseBundle(questionnaireResponse, carePlan);
+        return saveInTransaction(bundle, ResourceType.QuestionnaireResponse);
     }
 
     private FhirLookupResult lookupCarePlansByCriteria(List<ICriterion<?>> criteria) {
@@ -160,5 +161,72 @@ public class FhirClient {
         var idCriterion = Organization.RES_ID.exactly().codes(organizationIds);
 
         return lookupOrganizationsByCriteria(List.of(idCriterion));
+    }
+
+    public String saveInTransaction(Bundle transactionBundle, ResourceType resourceType) {
+        addOrganizationTag(transactionBundle);
+
+        IGenericClient client = context.newRestfulGenericClient(endpoint);
+
+        // Execute the transaction
+        var responseBundle = client.transaction().withBundle(transactionBundle).execute();
+
+        // Locate the 'primary' entry in the response
+        var id = "";
+        for(var responseEntry : responseBundle.getEntry()) {
+            var status = responseEntry.getResponse().getStatus();
+            var location = responseEntry.getResponse().getLocation();
+            if(status.startsWith("201") && location.startsWith(resourceType.toString())) {
+                id = location.replaceFirst("/_history.*$", "");
+            }
+        }
+
+        if(id.isEmpty()) {
+            throw new IllegalStateException("Could not locate location-header in response when executing transaction.");
+        }
+        return id;
+    }
+
+    private void addOrganizationTag(Resource resource) {
+        if(resource.getResourceType() == ResourceType.Bundle) {
+            addOrganizationTag((Bundle) resource);
+        }
+        if(resource instanceof DomainResource) {
+            addOrganizationTag((DomainResource) resource);
+        }
+        else {
+            throw new IllegalArgumentException(String.format("Trying to add organization tag to resource %s, but the resource was of incorrect type %s!", resource.getId(), resource.getResourceType()));
+        }
+    }
+
+    private void addOrganizationTag(Bundle bundle) {
+        for(var entry : bundle.getEntry()) {
+            if(entry.getRequest().getMethod() == Bundle.HTTPVerb.POST) {
+                addOrganizationTag(entry.getResource());
+            }
+        }
+    }
+
+    private void addOrganizationTag(DomainResource extendable) {
+        if(extendable.getExtension().stream().anyMatch(e -> e.getUrl().equals(Systems.ORGANIZATION))) {
+            throw new IllegalArgumentException(String.format("Trying to add organization tag to resource, but the tag was already present!", extendable.getId()));
+        }
+
+        extendable.addExtension(Systems.ORGANIZATION, new Reference(getOrganizationId()));
+    }
+
+    private String getOrganizationId() {
+        // TODO - (figure out how to) do this properly!
+//        var context = userContextProvider.getUserContext();
+//        if(context == null) {
+//            throw new IllegalStateException("UserContext was not initialized!");
+//        }
+//
+//        var organization = lookupOrganizationBySorCode(context.getOrgId())
+//                .orElseThrow(() -> new IllegalStateException(String.format("No Organization was present for sorCode %s!", context.getOrgId())));
+//
+//        var organizationId = organization.getIdElement().toUnqualifiedVersionless().getValue();
+//        return organizationId;
+        return "Organization/organization-infektionsmedicinsk";
     }
 }
