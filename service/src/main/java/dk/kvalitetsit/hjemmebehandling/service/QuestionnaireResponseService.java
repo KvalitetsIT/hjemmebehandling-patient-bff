@@ -1,25 +1,22 @@
 package dk.kvalitetsit.hjemmebehandling.service;
 
 import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
-import dk.kvalitetsit.hjemmebehandling.constants.TriagingCategory;
 import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
-import dk.kvalitetsit.hjemmebehandling.controller.http.LocationHeaderBuilder;
 import dk.kvalitetsit.hjemmebehandling.fhir.*;
+import dk.kvalitetsit.hjemmebehandling.model.CarePlanModel;
 import dk.kvalitetsit.hjemmebehandling.model.PatientModel;
-import dk.kvalitetsit.hjemmebehandling.model.QualifiedId;
 import dk.kvalitetsit.hjemmebehandling.model.QuestionnaireResponseModel;
 import dk.kvalitetsit.hjemmebehandling.service.access.AccessValidator;
 import dk.kvalitetsit.hjemmebehandling.service.exception.AccessValidationException;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ErrorKind;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ServiceException;
-import dk.kvalitetsit.hjemmebehandling.types.PageDetails;
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import dk.kvalitetsit.hjemmebehandling.service.triage.TriageEvaluator;
+import dk.kvalitetsit.hjemmebehandling.util.DateProvider;
 import org.hl7.fhir.r4.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,11 +28,17 @@ public class QuestionnaireResponseService extends AccessValidatingService {
 
     private FhirMapper fhirMapper;
 
-    public QuestionnaireResponseService(FhirClient fhirClient, FhirMapper fhirMapper, AccessValidator accessValidator) {
+    private DateProvider dateProvider;
+
+    private TriageEvaluator triageEvaluator;
+
+    public QuestionnaireResponseService(FhirClient fhirClient, FhirMapper fhirMapper, DateProvider dateProvider, TriageEvaluator triageEvaluator, AccessValidator accessValidator) {
         super(accessValidator);
 
         this.fhirClient = fhirClient;
         this.fhirMapper = fhirMapper;
+        this.dateProvider = dateProvider;
+        this.triageEvaluator = triageEvaluator;
     }
 
     public List<QuestionnaireResponseModel> getQuestionnaireResponses(String carePlanId) throws ServiceException, AccessValidationException {
@@ -68,19 +71,36 @@ public class QuestionnaireResponseService extends AccessValidatingService {
 
         // Update the frequency timestamps on the careplan (the specific activity and the careplan itself)
 
-
-
         // Extract thresholds from the careplan, and compute the triaging category for the response
-        // (And initialize various other attributes)
-        questionnaireResponseModel.setAuthorId(new QualifiedId("Patient/patient-1"));
-        questionnaireResponseModel.setSourceId(new QualifiedId("Patient/patient-1"));
-        questionnaireResponseModel.setAnswered(Instant.now());
-        questionnaireResponseModel.setExaminationStatus(ExaminationStatus.NOT_EXAMINED);
-        questionnaireResponseModel.setTriagingCategory(TriagingCategory.GREEN);
-        questionnaireResponseModel.setPatient(new PatientModel());
-        questionnaireResponseModel.getPatient().setId(new QualifiedId("Patient/patient-1"));
+        initializeQuestionnaireResponseAttributes(questionnaireResponseModel, carePlanModel);
 
         // Save the response, along with the updated careplan, and return the generated QuestionnaireResponse id.
         return fhirClient.saveQuestionnaireResponse(fhirMapper.mapQuestionnaireResponseModel(questionnaireResponseModel), fhirMapper.mapCarePlanModel(carePlanModel));
+    }
+
+    private void initializeQuestionnaireResponseAttributes(QuestionnaireResponseModel questionnaireResponseModel, CarePlanModel carePlanModel) {
+        questionnaireResponseModel.setAuthorId(carePlanModel.getPatient().getId());
+        questionnaireResponseModel.setSourceId(carePlanModel.getPatient().getId());
+        questionnaireResponseModel.setAnswered(dateProvider.now());
+        questionnaireResponseModel.setExaminationStatus(ExaminationStatus.NOT_EXAMINED);
+        questionnaireResponseModel.setPatient(carePlanModel.getPatient());
+
+        initializeTriagingCategory(questionnaireResponseModel, carePlanModel);
+    }
+
+    private void initializeTriagingCategory(QuestionnaireResponseModel questionnaireResponseModel, CarePlanModel carePlanModel) {
+        var answers = questionnaireResponseModel.getQuestionAnswerPairs()
+                .stream()
+                .map(qa -> qa.getAnswer())
+                .collect(Collectors.toList());
+
+        var thresholds = carePlanModel.getQuestionnaires()
+                .stream()
+                .filter(q -> q.getQuestionnaire().getId().equals(questionnaireResponseModel.getQuestionnaireId()))
+                .findFirst()
+                .get()
+                .getThresholds();
+
+        questionnaireResponseModel.setTriagingCategory(triageEvaluator.determineTriagingCategory(answers, thresholds));
     }
 }
