@@ -50,7 +50,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
                 .collect(Collectors.toList());
     }
 
-    public String submitQuestionnaireResponse(QuestionnaireResponseModel questionnaireResponse, String cpr) {
+    public String submitQuestionnaireResponse(QuestionnaireResponseModel questionnaireResponse, String cpr) throws ServiceException, AccessValidationException {
         // Look up the careplan indicated in the response. Check that this is the user's active careplan.
         var carePlanResult = fhirClient.lookupActiveCarePlan(cpr);
         if(carePlanResult.getCarePlans().size() != 1) {

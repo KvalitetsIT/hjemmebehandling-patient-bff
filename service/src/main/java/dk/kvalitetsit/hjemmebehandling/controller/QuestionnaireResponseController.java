@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -61,10 +62,19 @@ public class QuestionnaireResponseController extends BaseController {
 
     @PostMapping(value = "/v1/questionnaireresponse")
     public ResponseEntity<Void> submitQuestionnaireResponse(@RequestBody QuestionnaireResponseDto questionnaireResponseDto) {
-        // The operations needs to compute the triaging category (based on the thresholds, which can be found on the careplan), and update the careplan with fresh SatisfiedUntil-timestamps.
-        // This update must be atomic - preferably by using a fhir transaction (the medarbejder-bff project contains an example).
+        String questionnaireResponseId = null;
 
-        // Return 201 on success.
-        throw new UnsupportedOperationException();
+        // TODO - get cpr from user context ...
+        String cpr = "0101010101";
+        try {
+            questionnaireResponseId = questionnaireResponseService.submitQuestionnaireResponse(dtoMapper.mapQuestionnaireResponseDto(questionnaireResponseDto), cpr);
+        }
+        catch(AccessValidationException | ServiceException e) {
+            logger.error("Error creating CarePlan", e);
+            throw toStatusCodeException(e);
+        }
+
+        URI location = locationHeaderBuilder.buildLocationHeader(questionnaireResponseId);
+        return ResponseEntity.created(location).build();
     }
 }

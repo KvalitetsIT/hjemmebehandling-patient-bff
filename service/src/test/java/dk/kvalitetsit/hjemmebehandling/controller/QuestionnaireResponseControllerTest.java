@@ -1,5 +1,6 @@
 package dk.kvalitetsit.hjemmebehandling.controller;
 
+import dk.kvalitetsit.hjemmebehandling.api.CarePlanDto;
 import dk.kvalitetsit.hjemmebehandling.api.DtoMapper;
 import dk.kvalitetsit.hjemmebehandling.api.QuestionnaireResponseDto;
 import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
@@ -7,6 +8,8 @@ import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.BadRequestException;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.ForbiddenException;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.InternalServerErrorException;
+import dk.kvalitetsit.hjemmebehandling.controller.http.LocationHeaderBuilder;
+import dk.kvalitetsit.hjemmebehandling.model.CarePlanModel;
 import dk.kvalitetsit.hjemmebehandling.model.QuestionnaireResponseModel;
 import dk.kvalitetsit.hjemmebehandling.service.QuestionnaireResponseService;
 import dk.kvalitetsit.hjemmebehandling.service.exception.AccessValidationException;
@@ -23,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import javax.swing.text.html.Option;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +42,9 @@ public class QuestionnaireResponseControllerTest {
 
     @Mock
     private DtoMapper dtoMapper;
+
+    @Mock
+    private LocationHeaderBuilder locationHeaderBuilder;
 
     @Test
     public void getQuestionnaireResponses_cprParameterMissing_400() {
@@ -106,5 +113,78 @@ public class QuestionnaireResponseControllerTest {
 
         // Assert
         assertThrows(InternalServerErrorException.class, () -> subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize));
+    }
+
+    @Test
+    public void submitQuestionnaireResponse_success_201() throws Exception {
+        // Arrange
+        QuestionnaireResponseDto questionnaireResponseDto = new QuestionnaireResponseDto();
+
+        String cpr = "0101010101";
+        QuestionnaireResponseModel questionnaireResponseModel = new QuestionnaireResponseModel();
+        Mockito.when(dtoMapper.mapQuestionnaireResponseDto(questionnaireResponseDto)).thenReturn(questionnaireResponseModel);
+        Mockito.when(questionnaireResponseService.submitQuestionnaireResponse(questionnaireResponseModel, cpr)).thenReturn("questionnaireresponse-1");
+
+        String location = "http://localhost:8080/api/v1/questionnaireresponse/questionnaireresponse-1";
+        Mockito.when(locationHeaderBuilder.buildLocationHeader("questionnaireresponse-1")).thenReturn(URI.create(location));
+
+        // Act
+        ResponseEntity<Void> result = subject.submitQuestionnaireResponse(questionnaireResponseDto);
+
+        // Assert
+        assertEquals(HttpStatus.CREATED, result.getStatusCode());
+        assertNotNull(result.getHeaders().get("Location"));
+        assertEquals(location, result.getHeaders().get("Location").get(0));
+    }
+
+    @Test
+    public void submitQuestionnaireResponse_accessViolation_403() throws Exception {
+        // Arrange
+        QuestionnaireResponseDto questionnaireResponseDto = new QuestionnaireResponseDto();
+
+        String cpr = "0101010101";
+        QuestionnaireResponseModel questionnaireResponseModel = new QuestionnaireResponseModel();
+        Mockito.when(dtoMapper.mapQuestionnaireResponseDto(questionnaireResponseDto)).thenReturn(questionnaireResponseModel);
+
+        Mockito.when(questionnaireResponseService.submitQuestionnaireResponse(questionnaireResponseModel, cpr)).thenThrow(AccessValidationException.class);
+
+        // Act
+
+        // Assert
+        assertThrows(ForbiddenException.class, () -> subject.submitQuestionnaireResponse(questionnaireResponseDto));
+    }
+
+    @Test
+    public void submitQuestionnaireResponse_badRequest_400() throws Exception {
+        // Arrange
+        QuestionnaireResponseDto questionnaireResponseDto = new QuestionnaireResponseDto();
+
+        String cpr = "0101010101";
+        QuestionnaireResponseModel questionnaireResponseModel = new QuestionnaireResponseModel();
+        Mockito.when(dtoMapper.mapQuestionnaireResponseDto(questionnaireResponseDto)).thenReturn(questionnaireResponseModel);
+
+        Mockito.when(questionnaireResponseService.submitQuestionnaireResponse(questionnaireResponseModel, cpr)).thenThrow(new ServiceException("error", ErrorKind.BAD_REQUEST, ErrorDetails. INCOMPLETE_RESPONSE));
+
+        // Act
+
+        // Assert
+        assertThrows(BadRequestException.class, () -> subject.submitQuestionnaireResponse(questionnaireResponseDto));
+    }
+
+    @Test
+    public void submitQuestionnaireResponse_failure_500() throws Exception {
+        // Arrange
+        QuestionnaireResponseDto questionnaireResponseDto = new QuestionnaireResponseDto();
+
+        String cpr = "0101010101";
+        QuestionnaireResponseModel questionnaireResponseModel = new QuestionnaireResponseModel();
+        Mockito.when(dtoMapper.mapQuestionnaireResponseDto(questionnaireResponseDto)).thenReturn(questionnaireResponseModel);
+
+        Mockito.when(questionnaireResponseService.submitQuestionnaireResponse(questionnaireResponseModel, cpr)).thenThrow(new ServiceException("error", ErrorKind.INTERNAL_SERVER_ERROR, ErrorDetails.INTERNAL_SERVER_ERROR));
+
+        // Act
+
+        // Assert
+        assertThrows(InternalServerErrorException.class, () -> subject.submitQuestionnaireResponse(questionnaireResponseDto));
     }
 }

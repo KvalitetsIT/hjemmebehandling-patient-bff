@@ -1,6 +1,7 @@
 package dk.kvalitetsit.hjemmebehandling.controller;
 
 import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
+import dk.kvalitetsit.hjemmebehandling.controller.exception.BadRequestException;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.ForbiddenException;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.InternalServerErrorException;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.ResourceNotFoundException;
@@ -34,9 +35,8 @@ public abstract class BaseController {
 
     private RuntimeException fromErrorDetails(ErrorDetails e) {
         switch(e) {
-            // TODO - uncomment when status code 400 is required.
-//            case CAREPLAN_EXISTS:
-//                throw new BadRequestException(e);
+            case INCOMPLETE_RESPONSE:
+                throw new BadRequestException(e);
             case NO_ACTIVE_CAREPLAN_EXISTS:
                 throw new ResourceNotFoundException(e);
             case ACCESS_VIOLATION:
