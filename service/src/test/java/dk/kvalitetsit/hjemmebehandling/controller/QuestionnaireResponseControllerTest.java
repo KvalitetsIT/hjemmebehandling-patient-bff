@@ -3,9 +3,14 @@ package dk.kvalitetsit.hjemmebehandling.controller;
 import dk.kvalitetsit.hjemmebehandling.api.DtoMapper;
 import dk.kvalitetsit.hjemmebehandling.api.QuestionnaireResponseDto;
 import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
+import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
+import dk.kvalitetsit.hjemmebehandling.controller.exception.BadRequestException;
+import dk.kvalitetsit.hjemmebehandling.controller.exception.ForbiddenException;
+import dk.kvalitetsit.hjemmebehandling.controller.exception.InternalServerErrorException;
 import dk.kvalitetsit.hjemmebehandling.model.QuestionnaireResponseModel;
 import dk.kvalitetsit.hjemmebehandling.service.QuestionnaireResponseService;
 import dk.kvalitetsit.hjemmebehandling.service.exception.AccessValidationException;
+import dk.kvalitetsit.hjemmebehandling.service.exception.ErrorKind;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ServiceException;
 import dk.kvalitetsit.hjemmebehandling.types.PageDetails;
 import org.junit.jupiter.api.Test;
@@ -42,10 +47,9 @@ public class QuestionnaireResponseControllerTest {
         Optional<Integer> pageSize = Optional.of(10);
 
         // Act
-        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize);
 
         // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        assertThrows(BadRequestException.class, () -> subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize));
     }
 
     @Test
@@ -75,22 +79,6 @@ public class QuestionnaireResponseControllerTest {
     }
 
     @Test
-    public void getQuestionnaireResponses_responsesMissing_204() throws Exception {
-        // Arrange
-        String carePlanId = "careplan-1";
-        Optional<Integer> pageNumber = Optional.of(1);
-        Optional<Integer> pageSize = Optional.of(10);
-
-        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId)).thenReturn(List.of());
-
-        // Act
-        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize);
-
-        // Assert
-        assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
-    }
-
-    @Test
     public void getQuestionnaireResponses_accessViolation_403() throws Exception {
         // Arrange
         String carePlanId = "careplan-1";
@@ -100,10 +88,9 @@ public class QuestionnaireResponseControllerTest {
         Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId)).thenThrow(AccessValidationException.class);
 
         // Act
-        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize);
 
         // Assert
-        assertEquals(HttpStatus.FORBIDDEN, result.getStatusCode());
+        assertThrows(ForbiddenException.class, () -> subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize));
     }
 
     @Test
@@ -113,12 +100,11 @@ public class QuestionnaireResponseControllerTest {
         Optional<Integer> pageNumber = Optional.of(1);
         Optional<Integer> pageSize = Optional.of(10);
 
-        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId)).thenThrow(ServiceException.class);
+        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId)).thenThrow(new ServiceException("error", ErrorKind.INTERNAL_SERVER_ERROR, ErrorDetails.INTERNAL_SERVER_ERROR));
 
         // Act
-        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize);
 
         // Assert
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+        assertThrows(InternalServerErrorException.class, () -> subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize));
     }
 }

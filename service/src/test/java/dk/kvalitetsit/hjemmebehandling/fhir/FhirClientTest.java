@@ -38,14 +38,71 @@ public class FhirClientTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private IGenericClient client;
 
-
+    private static final String CAREPLAN_ID_1 = "CarePlan/careplan-1";
+    private static final String ORGANIZATION_ID_1 = "Organization/organization-1";
     private static final String QUESTIONNAIRE_RESPONSE_ID_1 = "questionnaireresponse-1";
     private static final String QUESTIONNAIRE_RESPONSE_ID_2 = "questionnaireresponse-2";
+
+    private static final String SOR_CODE_1 = "123456";
 
     @BeforeEach
     public void setup() {
         Mockito.when(context.newRestfulGenericClient(endpoint)).thenReturn(client);
         subject = new FhirClient(context, endpoint);
+    }
+
+    @Test
+    public void lookupCarePlanByCpr_carePlanPresent_success() {
+        // Arrange
+        String cpr = "0101010101";
+        CarePlan carePlan = new CarePlan();
+        carePlan.setId(CAREPLAN_ID_1);
+        carePlan.addIdentifier().setSystem(Systems.CPR).setValue(cpr);
+
+        setupSearchCarePlanByCprClient(carePlan);
+        setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
+
+        // Act
+        FhirLookupResult result = subject.lookupActiveCarePlan(cpr);
+
+        // Assert
+        assertTrue(result.getCarePlan(CAREPLAN_ID_1).isPresent());
+        assertEquals(carePlan, result.getCarePlan(CAREPLAN_ID_1).get());
+        assertEquals(Systems.CPR, result.getCarePlan(CAREPLAN_ID_1).get().getIdentifierFirstRep().getSystem());
+        assertEquals(cpr, result.getCarePlan(CAREPLAN_ID_1).get().getIdentifierFirstRep().getValue());
+    }
+
+    @Test
+    public void lookupCarePlanByCpr_carePlanMissing_empty() {
+        // Arrange
+        String cpr = "0101010101";
+
+        setupSearchCarePlanByCprClient();
+        setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
+
+        // Act
+        FhirLookupResult result = subject.lookupActiveCarePlan(cpr);
+
+        // Assert
+        assertFalse(result.getCarePlan(CAREPLAN_ID_1).isPresent());
+    }
+
+    @Test
+    public void lookupCarePlanByCpr_resultIncludesOrganization() {
+        // Arrange
+        String cpr = "0101010101";
+        CarePlan carePlan = new CarePlan();
+        carePlan.setId(CAREPLAN_ID_1);
+        carePlan.addIdentifier().setSystem(Systems.CPR).setValue(cpr);
+
+        setupSearchCarePlanByCprClient(carePlan);
+        setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
+
+        // Act
+        FhirLookupResult result = subject.lookupActiveCarePlan(cpr);
+
+        // Assert
+        assertTrue(result.getOrganization(ORGANIZATION_ID_1).isPresent());
     }
 
     @Test
@@ -59,6 +116,8 @@ public class FhirClientTest {
         questionnaireResponse2.setId(QUESTIONNAIRE_RESPONSE_ID_2);
         setupSearchQuestionnaireResponseClient(1, questionnaireResponse1, questionnaireResponse2);
 
+        setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
+
         // Act
         FhirLookupResult result = subject.lookupQuestionnaireResponses(carePlanId);
 
@@ -68,8 +127,24 @@ public class FhirClientTest {
         assertTrue(result.getQuestionnaireResponses().contains(questionnaireResponse2));
     }
 
+    private void setupSearchCarePlanByCprClient(CarePlan... carePlans) {
+        setupSearchClient(2, 2, CarePlan.class, carePlans);
+
+        if(carePlans.length > 0) {
+            setupSearchQuestionnaireClient();
+        }
+    }
+
+    private void setupSearchQuestionnaireClient(Questionnaire... questionnaires) {
+        setupSearchClient(1, 0, Questionnaire.class, questionnaires);
+    }
+
     private void setupSearchQuestionnaireResponseClient(int criteriaCount, QuestionnaireResponse... questionnaireResponses) {
         setupSearchClient(criteriaCount, 3, QuestionnaireResponse.class, questionnaireResponses);
+    }
+
+    private void setupSearchClient(Class<? extends Resource> resourceClass, Resource... resources) {
+        setupSearchClient(1, 0, resourceClass, resources);
     }
 
     private void setupSearchClient(int criteriaCount, int includeCount, Class<? extends Resource> resourceClass, Resource... resources) {
@@ -109,5 +184,17 @@ public class FhirClientTest {
         Mockito.when(query
                 .execute())
                 .thenReturn(bundle);
+    }
+
+    private void setupOrganization(String sorCode, String organizationId) {
+        var organization = new Organization();
+        organization.setId(organizationId);
+        organization.addIdentifier().setSystem(Systems.SOR).setValue(sorCode);
+
+        setupSearchOrganizationClient(organization);
+    }
+
+    private void setupSearchOrganizationClient(Organization... organizations) {
+        setupSearchClient(Organization.class, organizations);
     }
 }

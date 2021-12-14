@@ -49,4 +49,24 @@ public class QuestionnaireResponseService extends AccessValidatingService {
                 .map(qr -> fhirMapper.mapQuestionnaireResponse(qr, lookupResult))
                 .collect(Collectors.toList());
     }
+
+    public String submitQuestionnaireResponse(QuestionnaireResponseModel questionnaireResponse, String cpr) {
+        // Look up the careplan indicated in the response. Check that this is the user's active careplan.
+        var carePlanResult = fhirClient.lookupActiveCarePlan(cpr);
+        if(carePlanResult.getCarePlans().size() != 1) {
+            throw new IllegalStateException(String.format("Error looking up active careplan! Expected to retrieve exactly one reosurce!"));
+        }
+        var carePlanModel = fhirMapper.mapCarePlan(carePlanResult.getCarePlans().get(0), carePlanResult);
+
+        // Update the frequency timestamps on the careplan (the specific activity and the careplan itself)
+
+
+
+        // Extract thresholds from the careplan, and compute the triaging category for the response
+
+
+        // Save the response, along with the updated careplan, and return the generated QuestionnaireResponse id.
+
+        throw new UnsupportedOperationException();
+    }
 }

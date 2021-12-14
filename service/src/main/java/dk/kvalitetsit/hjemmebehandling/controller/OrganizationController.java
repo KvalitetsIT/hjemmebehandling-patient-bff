@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Tag(name = "Organization", description = "API for retrieving Organizations.")
-public class OrganizationController {
+public class OrganizationController extends BaseController {
     private static final Logger logger = LoggerFactory.getLogger(OrganizationController.class);
 
     private OrganizationService organizationService;

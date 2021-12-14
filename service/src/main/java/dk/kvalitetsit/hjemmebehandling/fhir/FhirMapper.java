@@ -17,6 +17,10 @@ import java.util.stream.Collectors;
 
 @Component
 public class FhirMapper {
+    public CarePlanModel mapCarePlan(CarePlan carePlan, FhirLookupResult lookupResult) {
+        throw new UnsupportedOperationException();
+    }
+
     public PatientModel mapPatient(Patient patient) {
         PatientModel patientModel = new PatientModel();
 
