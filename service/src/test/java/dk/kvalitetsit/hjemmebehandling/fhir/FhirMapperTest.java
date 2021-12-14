@@ -1,12 +1,9 @@
 package dk.kvalitetsit.hjemmebehandling.fhir;
 
-import dk.kvalitetsit.hjemmebehandling.constants.AnswerType;
-import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
-import dk.kvalitetsit.hjemmebehandling.constants.Systems;
-import dk.kvalitetsit.hjemmebehandling.constants.TriagingCategory;
+import dk.kvalitetsit.hjemmebehandling.constants.*;
+
 import dk.kvalitetsit.hjemmebehandling.model.*;
-import dk.kvalitetsit.hjemmebehandling.model.AnswerModel;
-import dk.kvalitetsit.hjemmebehandling.model.QuestionModel;
+import dk.kvalitetsit.hjemmebehandling.types.ThresholdType;
 import dk.kvalitetsit.hjemmebehandling.types.Weekday;
 import dk.kvalitetsit.hjemmebehandling.util.DateProvider;
 import org.hl7.fhir.r4.model.*;
@@ -37,6 +34,101 @@ public class FhirMapperTest {
     private static final String QUESTIONNAIRERESPONSE_ID_1 = "QuestionnaireResponse/questionnaireresponse-1";
 
     private static final Instant POINT_IN_TIME = Instant.parse("2021-11-23T00:00:00.000Z");
+
+    @Test
+    public void mapCarePlanModel_mapsSubject() {
+        // Arrange
+        CarePlanModel carePlanModel = buildCarePlanModel();
+
+        // Act
+        CarePlan result = subject.mapCarePlanModel(carePlanModel);
+
+        // Assert
+        assertEquals(result.getSubject().getReference(), carePlanModel.getPatient().getId().toString());
+    }
+
+    @Test
+    public void mapCarePlan_mapsPeriod() {
+        // Arrange
+        CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1, PATIENT_ID_1, QUESTIONNAIRE_ID_1, PLANDEFINITION_ID_1);
+        Patient patient = buildPatient(PATIENT_ID_1, "0101010101");
+        Questionnaire questionnaire = buildQuestionnaire(QUESTIONNAIRE_ID_1);
+        Organization organization = buildOrganization(ORGANIZATION_ID_1);
+        PlanDefinition planDefinition = buildPlanDefinition(PLANDEFINITION_ID_1);
+
+        FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan, patient, questionnaire, organization, planDefinition);
+
+        // Act
+        CarePlanModel result = subject.mapCarePlan(carePlan, lookupResult);
+
+        // Assert
+        assertEquals(result.getStartDate(), Instant.parse("2021-10-28T00:00:00Z"));
+        assertEquals(result.getEndDate(), Instant.parse("2021-10-29T00:00:00Z"));
+    }
+
+    @Test
+    public void mapCarePlan_roundtrip_preservesExtensions() {
+        // Arrange
+        CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1, PATIENT_ID_1, QUESTIONNAIRE_ID_1, PLANDEFINITION_ID_1);
+        Patient patient = buildPatient(PATIENT_ID_1, "0101010101");
+        Questionnaire questionnaire = buildQuestionnaire(QUESTIONNAIRE_ID_1);
+        Organization organization = buildOrganization(ORGANIZATION_ID_1);
+        PlanDefinition planDefinition = buildPlanDefinition(PLANDEFINITION_ID_1);
+
+        FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan, patient, questionnaire, organization, planDefinition);
+
+        // Act
+        CarePlan result = subject.mapCarePlanModel(subject.mapCarePlan(carePlan, lookupResult));
+
+        // Assert
+        assertEquals(carePlan.getExtension().size(), result.getExtension().size());
+        assertTrue(result.getExtension().stream().anyMatch(e -> e.getUrl().equals(Systems.ORGANIZATION)));
+        assertTrue(result.getExtension().stream().anyMatch(e -> e.getUrl().equals(Systems.CAREPLAN_SATISFIED_UNTIL)));
+    }
+
+    @Test
+    public void mapCarePlan_roundtrip_preservesActivities() {
+        // Arrange
+        CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1, PATIENT_ID_1, QUESTIONNAIRE_ID_1, PLANDEFINITION_ID_1);
+        Patient patient = buildPatient(PATIENT_ID_1, "0101010101");
+        Questionnaire questionnaire = buildQuestionnaire(QUESTIONNAIRE_ID_1);
+        Organization organization = buildOrganization(ORGANIZATION_ID_1);
+        PlanDefinition planDefinition = buildPlanDefinition(PLANDEFINITION_ID_1);
+
+        FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan, patient, questionnaire, organization, planDefinition);
+
+        // Act
+        CarePlan result = subject.mapCarePlanModel(subject.mapCarePlan(carePlan, lookupResult));
+
+        // Assert
+        assertEquals(carePlan.getActivity().size(), result.getActivity().size());
+        assertEquals(carePlan.getActivity().get(0).getDetail().getInstantiatesCanonical().get(0).getValue(), result.getActivity().get(0).getDetail().getInstantiatesCanonical().get(0).getValue());
+        assertEquals(carePlan.getActivity().get(0).getDetail().getScheduledTiming().getRepeat().getDayOfWeek().get(0).getValue(), result.getActivity().get(0).getDetail().getScheduledTiming().getRepeat().getDayOfWeek().get(0).getValue());
+
+        assertTrue(result.getActivity().get(0).getDetail().getExtension().stream().anyMatch(e -> e.getUrl().equals(Systems.ACTIVITY_SATISFIED_UNTIL)));
+
+        assertTrue(result.getActivity().get(0).getDetail().getExtension().stream().anyMatch(e -> e.getUrl().equals(Systems.THRESHOLD)));
+    }
+
+    @Test
+    public void mapCarePlan_includesQuestionnaires() {
+        // Arrange
+        CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1, PATIENT_ID_1, QUESTIONNAIRE_ID_1, PLANDEFINITION_ID_1);
+        Patient patient = buildPatient(PATIENT_ID_1, "0101010101");
+        Questionnaire questionnaire = buildQuestionnaire(QUESTIONNAIRE_ID_1);
+        Organization organization = buildOrganization(ORGANIZATION_ID_1);
+        PlanDefinition planDefinition = buildPlanDefinition(PLANDEFINITION_ID_1);
+
+        FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan, patient, questionnaire, organization, planDefinition);
+
+        // Act
+        CarePlanModel result = subject.mapCarePlan(carePlan, lookupResult);
+
+        // Assert
+        assertEquals(1, result.getQuestionnaires().size());
+
+        assertEquals(QUESTIONNAIRE_ID_1, result.getQuestionnaires().get(0).getQuestionnaire().getId().toString());
+    }
 
     @Test
     public void mapQuestionnaireResponseModel_mapsAnswers() {
@@ -140,6 +232,76 @@ public class FhirMapperTest {
         assertTrue(result.getItem().stream().anyMatch(item -> item.getLinkId().equals("2")));
     }
 
+    private CarePlan buildCarePlan(String careplanId, String patientId, String questionnaireId, String planDefinitionId) {
+        CarePlan carePlan = new CarePlan();
+
+        carePlan.setId(careplanId);
+        carePlan.setStatus(CarePlan.CarePlanStatus.ACTIVE);
+        carePlan.setSubject(new Reference(patientId));
+        carePlan.addInstantiatesCanonical(planDefinitionId);
+        carePlan.setPeriod(new Period());
+        carePlan.setCreated(Date.from(Instant.parse("2021-10-28T00:00:00Z")));
+        carePlan.getPeriod().setStart(Date.from(Instant.parse("2021-10-28T00:00:00Z")));
+        carePlan.getPeriod().setEnd(Date.from(Instant.parse("2021-10-29T00:00:00Z")));
+        carePlan.addExtension(ExtensionMapper.mapCarePlanSatisfiedUntil(Instant.parse("2021-12-07T10:11:12.124Z")));
+        carePlan.addExtension(ExtensionMapper.mapOrganizationId(ORGANIZATION_ID_1));
+
+        var detail = new CarePlan.CarePlanActivityDetailComponent();
+        detail.setInstantiatesCanonical(List.of(new CanonicalType(questionnaireId)));
+        detail.setScheduled(buildTiming());
+        detail.addExtension(ExtensionMapper.mapActivitySatisfiedUntil(POINT_IN_TIME));
+
+        ThresholdModel threshold = new ThresholdModel();
+        threshold.setQuestionnaireItemLinkId("1");
+        threshold.setType(ThresholdType.NORMAL);
+        threshold.setValueBoolean(true);
+        detail.addExtension(ExtensionMapper.mapThreshold(threshold));
+
+        carePlan.addActivity().setDetail(detail);
+
+        return carePlan;
+    }
+
+    private CarePlanModel buildCarePlanModel() {
+        CarePlanModel carePlanModel = new CarePlanModel();
+
+        carePlanModel.setId(new QualifiedId(CAREPLAN_ID_1));
+        carePlanModel.setStatus(CarePlanStatus.ACTIVE);
+        carePlanModel.setCreated(Instant.parse("2021-12-07T10:11:12.124Z"));
+        carePlanModel.setPatient(buildPatientModel());
+        carePlanModel.setQuestionnaires(List.of(buildQuestionnaireWrapperModel()));
+        carePlanModel.setPlanDefinitions(List.of(buildPlanDefinitionModel()));
+        carePlanModel.setSatisfiedUntil(Instant.parse("2021-12-07T10:11:12.124Z"));
+
+        return carePlanModel;
+    }
+
+    private ContactDetailsModel buildContactDetailsModel() {
+        ContactDetailsModel contactDetailsModel = new ContactDetailsModel();
+
+        contactDetailsModel.setStreet("Fiskergade");
+
+        return contactDetailsModel;
+    }
+
+    private FrequencyModel buildFrequencyModel() {
+        FrequencyModel frequencyModel = new FrequencyModel();
+
+        frequencyModel.setWeekdays(List.of(Weekday.FRI));
+        frequencyModel.setTimeOfDay(LocalTime.parse("05:00"));
+
+        return frequencyModel;
+    }
+
+    private Organization buildOrganization(String organizationId) {
+        Organization organization = new Organization();
+
+        organization.setId(organizationId);
+        organization.setName("Infektionsmedicinsk Afdeling");
+
+        return organization;
+    }
+
     private Patient buildPatient(String patientId, String cpr) {
         Patient patient = new Patient();
 
@@ -150,7 +312,71 @@ public class FhirMapperTest {
         identifier.setValue(cpr);
         patient.setIdentifier(List.of(identifier));
 
+        var name = new HumanName();
+        name.setFamily("Dent");
+        name.addGiven("Arthur");
+        patient.addName(name);
+
+        var address = new Address();
+        address.setCity("Aarhus");
+        patient.addAddress(address);
+
+        var primaryTelecom = new ContactPoint();
+        primaryTelecom.setSystem(ContactPoint.ContactPointSystem.PHONE);
+        primaryTelecom.setValue("12345678");
+        primaryTelecom.setRank(1);
+        patient.addTelecom(primaryTelecom);
+
+        var secondaryTelecom = new ContactPoint();
+        secondaryTelecom.setSystem(ContactPoint.ContactPointSystem.PHONE);
+        secondaryTelecom.setValue("12345678");
+        secondaryTelecom.setRank(2);
+        patient.addTelecom(secondaryTelecom);
+
+        var contactComponent = new Patient.ContactComponent();
+        var contactName = new HumanName();
+        contactName.setText("Slartibartfast");
+        contactComponent.setName(contactName);
+        contactComponent.setRelationship(List.of(new CodeableConcept(new Coding(Systems.CONTACT_RELATIONSHIP, "Ven", "Ven"))));
+        contactComponent.addTelecom(primaryTelecom);
+        contactComponent.addTelecom(secondaryTelecom);
+        patient.addContact(contactComponent);
+
         return patient;
+    }
+
+    private PatientModel buildPatientModel() {
+        PatientModel patientModel = new PatientModel();
+
+        patientModel.setId(new QualifiedId(PATIENT_ID_1));
+        patientModel.setCpr("0101010101");
+        patientModel.setPatientContactDetails(buildContactDetailsModel());
+        patientModel.setPrimaryRelativeContactDetails(buildContactDetailsModel());
+        patientModel.setAdditionalRelativeContactDetails(List.of(buildContactDetailsModel()));
+
+        return patientModel;
+    }
+
+    private PlanDefinition buildPlanDefinition(String planDefinitionId) {
+        PlanDefinition planDefinition = new PlanDefinition();
+
+        planDefinition.setId(planDefinitionId);
+        planDefinition.addExtension(ExtensionMapper.mapOrganizationId(ORGANIZATION_ID_1));
+
+        return planDefinition;
+    }
+
+    private PlanDefinitionModel buildPlanDefinitionModel() {
+        PlanDefinitionModel planDefinitionModel = new PlanDefinitionModel();
+
+        planDefinitionModel.setId(new QualifiedId(PLANDEFINITION_ID_1));
+        planDefinitionModel.setQuestionnaires(List.of(buildQuestionnaireWrapperModel()));
+
+        return planDefinitionModel;
+    }
+
+    private Questionnaire buildQuestionnaire(String questionnaireId) {
+        return buildQuestionnaire(questionnaireId, List.of());
     }
 
     private Questionnaire buildQuestionnaire(String questionnaireId, List<Questionnaire.QuestionnaireItemComponent> questionItems) {
@@ -162,6 +388,25 @@ public class FhirMapperTest {
         questionnaire.addExtension(ExtensionMapper.mapOrganizationId(ORGANIZATION_ID_1));
 
         return questionnaire;
+    }
+
+    private QuestionnaireModel buildQuestionnaireModel() {
+        QuestionnaireModel questionnaireModel = new QuestionnaireModel();
+
+        questionnaireModel.setId(new QualifiedId(QUESTIONNAIRE_ID_1));
+        questionnaireModel.setQuestions(List.of(buildQuestionModel()));
+
+        return questionnaireModel;
+    }
+
+    private QuestionnaireWrapperModel buildQuestionnaireWrapperModel() {
+        QuestionnaireWrapperModel questionnaireWrapperModel = new QuestionnaireWrapperModel();
+
+        questionnaireWrapperModel.setQuestionnaire(buildQuestionnaireModel());
+        questionnaireWrapperModel.setFrequency(buildFrequencyModel());
+        questionnaireWrapperModel.setSatisfiedUntil(Instant.parse("2021-12-08T10:11:12.124Z"));
+
+        return questionnaireWrapperModel;
     }
 
     private QuestionnaireResponseModel buildQuestionnaireResponseModel() {
@@ -246,5 +491,17 @@ public class FhirMapperTest {
         item.setLinkId(linkId);
 
         return item;
+    }
+
+    private Timing buildTiming() {
+        Timing timing = new Timing();
+
+        var repeat = new Timing.TimingRepeatComponent();
+        repeat.setDayOfWeek(List.of(new Enumeration<>(new Timing.DayOfWeekEnumFactory(), Timing.DayOfWeek.FRI)));
+        repeat.setTimeOfDay(List.of(new TimeType("04:00")));
+
+        timing.setRepeat(repeat);
+
+        return timing;
     }
 }

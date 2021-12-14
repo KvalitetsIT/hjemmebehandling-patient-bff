@@ -12,6 +12,7 @@ public class CarePlanDto extends BaseDto {
     private PatientDto patientDto;
     private List<QuestionnaireWrapperDto> questionnaires;
     private List<PlanDefinitionDto> planDefinitions;
+    private String departmentName;
 
     public String getTitle() {
         return title;
@@ -75,5 +76,13 @@ public class CarePlanDto extends BaseDto {
 
     public void setPlanDefinitions(List<PlanDefinitionDto> planDefinitions) {
         this.planDefinitions = planDefinitions;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
     }
 }

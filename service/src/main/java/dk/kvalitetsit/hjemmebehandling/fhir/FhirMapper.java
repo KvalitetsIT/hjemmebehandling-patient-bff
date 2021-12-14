@@ -17,8 +17,97 @@ import java.util.stream.Collectors;
 
 @Component
 public class FhirMapper {
+    public CarePlan mapCarePlanModel(CarePlanModel carePlanModel) {
+        CarePlan carePlan = new CarePlan();
+
+        mapBaseAttributesToFhir(carePlan, carePlanModel);
+
+        carePlan.setTitle(carePlanModel.getTitle());
+        carePlan.setStatus(Enum.valueOf(CarePlan.CarePlanStatus.class, carePlanModel.getStatus().toString()));
+        carePlan.setCreated(Date.from(carePlanModel.getCreated()));
+        if(carePlanModel.getStartDate() != null) {
+            carePlan.setPeriod(new Period());
+            carePlan.getPeriod().setStart(Date.from(carePlanModel.getStartDate()));
+        }
+        carePlan.addExtension(ExtensionMapper.mapCarePlanSatisfiedUntil(carePlanModel.getSatisfiedUntil()));
+
+        // Set the subject
+        if(carePlanModel.getPatient().getId() != null) {
+            carePlan.setSubject(new Reference(carePlanModel.getPatient().getId().toString()));
+        }
+
+        // Map questionnaires to activities
+        if(carePlanModel.getQuestionnaires() != null) {
+            carePlan.setActivity(carePlanModel.getQuestionnaires()
+                    .stream()
+                    .map(q -> buildCarePlanActivity(q))
+                    .collect(Collectors.toList()));
+        }
+
+        if(carePlanModel.getPlanDefinitions() != null) {
+            // Add references to planDefinitions
+            carePlan.setInstantiatesCanonical(carePlanModel.getPlanDefinitions()
+                    .stream()
+                    .map(pd -> new CanonicalType(pd.getId().toString()))
+                    .collect(Collectors.toList()));
+        }
+
+        return carePlan;
+    }
+
     public CarePlanModel mapCarePlan(CarePlan carePlan, FhirLookupResult lookupResult) {
-        throw new UnsupportedOperationException();
+        CarePlanModel carePlanModel = new CarePlanModel();
+
+        mapBaseAttributesToModel(carePlanModel, carePlan);
+
+        carePlanModel.setTitle(carePlan.getTitle());
+        carePlanModel.setStatus(Enum.valueOf(CarePlanStatus.class, carePlan.getStatus().toString()));
+        carePlanModel.setCreated(carePlan.getCreated().toInstant());
+        carePlanModel.setStartDate(carePlan.getPeriod().getStart().toInstant());
+        if(carePlan.getPeriod().getEnd() != null) {
+            carePlanModel.setEndDate(carePlan.getPeriod().getEnd().toInstant());
+        }
+
+        String patientId = carePlan.getSubject().getReference();
+        Patient patient = lookupResult.getPatient(patientId).orElseThrow(() -> new IllegalStateException(String.format("Could not look up Patient for CarePlan %s!", carePlanModel.getId())));
+        carePlanModel.setPatient(mapPatient(patient));
+
+        carePlanModel.setQuestionnaires(new ArrayList<>());
+        for(var activity : carePlan.getActivity()) {
+            String questionnaireId = activity.getDetail().getInstantiatesCanonical().get(0).getValue();
+            var questionnaire = lookupResult
+                    .getQuestionnaire(questionnaireId)
+                    .orElseThrow(() -> new IllegalStateException(String.format("Could not look up Questionnaire for CarePlan %s!", carePlanModel.getId())));
+
+            var questionnaireModel = mapQuestionnaire(questionnaire);
+            var frequencyModel = mapTiming(activity.getDetail().getScheduledTiming());
+
+            var wrapper = new QuestionnaireWrapperModel();
+            wrapper.setQuestionnaire(questionnaireModel);
+            wrapper.setFrequency(frequencyModel);
+            List<ThresholdModel> thresholds = getThresholds(activity.getDetail());
+            wrapper.setThresholds(thresholds);
+            wrapper.setSatisfiedUntil(ExtensionMapper.extractActivitySatisfiedUntil(activity.getDetail().getExtension()));
+
+            carePlanModel.getQuestionnaires().add(wrapper);
+        }
+
+        carePlanModel.setPlanDefinitions(new ArrayList<>());
+        for(var ic : carePlan.getInstantiatesCanonical()) {
+            var planDefinition = lookupResult
+                    .getPlanDefinition(ic.getValue())
+                    .orElseThrow(() -> new IllegalStateException(String.format("Could not look up PlanDefinition for CarePlan %s!", carePlanModel.getId())));
+            carePlanModel.getPlanDefinitions().add(mapPlanDefinition(planDefinition, lookupResult));
+        }
+
+        carePlanModel.setSatisfiedUntil(ExtensionMapper.extractCarePlanSatisfiedUntil(carePlan.getExtension()));
+
+        String organizationId = ExtensionMapper.extractOrganizationId(carePlan.getExtension());
+        Organization organization = lookupResult.getOrganization(organizationId)
+                .orElseThrow(() -> new IllegalStateException(String.format("Organization with id %s was not present when trying to map careplan %s!", organizationId, carePlan.getId())));
+        carePlanModel.setDepartmentName(organization.getName());
+
+        return carePlanModel;
     }
 
     public PatientModel mapPatient(Patient patient) {
@@ -31,6 +120,32 @@ public class FhirMapper {
         patientModel.setPatientContactDetails(extractPatientContactDetails(patient));
 
         return patientModel;
+    }
+
+    public PlanDefinitionModel mapPlanDefinition(PlanDefinition planDefinition, FhirLookupResult lookupResult) {
+        PlanDefinitionModel planDefinitionModel = new PlanDefinitionModel();
+
+        mapBaseAttributesToModel(planDefinitionModel, planDefinition);
+
+        planDefinitionModel.setName(planDefinition.getName());
+        planDefinitionModel.setTitle(planDefinition.getTitle());
+
+        // Map actions to questionnaires, along with their frequencies and thresholds
+        planDefinitionModel.setQuestionnaires(planDefinition.getAction().stream().map(a -> mapPlanDefinitionAction(a, lookupResult)).collect(Collectors.toList()));
+
+        return planDefinitionModel;
+    }
+
+    public QuestionnaireModel mapQuestionnaire(Questionnaire questionnaire) {
+        QuestionnaireModel questionnaireModel = new QuestionnaireModel();
+
+        mapBaseAttributesToModel(questionnaireModel, questionnaire);
+
+        questionnaireModel.setTitle(questionnaire.getTitle());
+        questionnaireModel.setStatus(questionnaire.getStatus().getDisplay());
+        questionnaireModel.setQuestions(questionnaire.getItem().stream().map(item -> mapQuestionnaireItem(item)).collect(Collectors.toList()));
+
+        return questionnaireModel;
     }
 
     public QuestionnaireResponse mapQuestionnaireResponseModel(QuestionnaireResponseModel questionnaireResponseModel) {
@@ -101,6 +216,18 @@ public class FhirMapper {
         return questionnaireResponseModel;
     }
 
+    private FrequencyModel mapTiming(Timing timing) {
+        FrequencyModel frequencyModel = new FrequencyModel();
+
+        if(timing.getRepeat() != null) {
+            Timing.TimingRepeatComponent repeat = timing.getRepeat();
+            frequencyModel.setWeekdays(repeat.getDayOfWeek().stream().map(d -> Enum.valueOf(Weekday.class, d.getValue().toString())).collect(Collectors.toList()));
+            frequencyModel.setTimeOfDay(LocalTime.parse(repeat.getTimeOfDay().get(0).getValue()));
+        }
+
+        return frequencyModel;
+    }
+
     private void mapBaseAttributesToModel(BaseModel target, DomainResource source) {
         target.setId(extractId(source));
         target.setOrganizationId(ExtensionMapper.extractOrganizationId(source.getExtension()));
@@ -114,6 +241,10 @@ public class FhirMapper {
         if(source.getOrganizationId() != null) {
             target.addExtension(ExtensionMapper.mapOrganizationId(source.getOrganizationId()));
         }
+    }
+
+    private List<ThresholdModel> getThresholds(CarePlan.CarePlanActivityDetailComponent detail) {
+        return ExtensionMapper.extractThresholds(detail.getExtensionsByUrl(Systems.THRESHOLD));
     }
 
     private QualifiedId extractId(DomainResource resource) {
@@ -185,6 +316,19 @@ public class FhirMapper {
         return null;
     }
 
+    private Timing mapFrequencyModel(FrequencyModel frequencyModel) {
+        Timing timing = new Timing();
+
+        Timing.TimingRepeatComponent repeat = new Timing.TimingRepeatComponent();
+
+        EnumFactory<Timing.DayOfWeek> factory = new Timing.DayOfWeekEnumFactory();
+        repeat.setDayOfWeek(frequencyModel.getWeekdays().stream().map(w -> new Enumeration<>(factory, w.toString().toLowerCase())).collect(Collectors.toList()));
+        repeat.setTimeOfDay(List.of(new TimeType(frequencyModel.getTimeOfDay().toString())));
+        timing.setRepeat(repeat);
+
+        return timing;
+    }
+
     private QuestionModel mapQuestionnaireItem(Questionnaire.QuestionnaireItemComponent item) {
         QuestionModel question = new QuestionModel();
 
@@ -242,15 +386,54 @@ public class FhirMapper {
     }
 
     private AnswerType getAnswerType(QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent answerItem) {
-        String type = answerItem.getValue().getClass().getSimpleName();
-        switch(type) {
-            case "IntegerType":
-                return AnswerType.INTEGER;
-            case "StringType":
-                return AnswerType.STRING;
-            default:
-                throw new IllegalArgumentException(String.format("Unsupported AnswerItem of type: %s", type));
+        Type answerType = answerItem.getValue();
+        if (answerType instanceof StringType) {
+            return AnswerType.STRING;
         }
+        if (answerType instanceof BooleanType) {
+            return AnswerType.BOOLEAN;
+        }
+        else if (answerType instanceof Quantity) {
+            return AnswerType.QUANTITY;
+        }
+        else if (answerType instanceof IntegerType) {
+            return AnswerType.INTEGER;
+        }
+        else {
+            throw new IllegalArgumentException(String.format("Unsupported AnswerItem of type: %s", answerType));
+        }
+    }
+
+    private CarePlan.CarePlanActivityComponent buildCarePlanActivity(QuestionnaireWrapperModel questionnaireWrapperModel) {
+        CanonicalType instantiatesCanonical = new CanonicalType(questionnaireWrapperModel.getQuestionnaire().getId().toString());
+        Type timing = mapFrequencyModel(questionnaireWrapperModel.getFrequency());
+        Extension activitySatisfiedUntil = ExtensionMapper.mapActivitySatisfiedUntil(questionnaireWrapperModel.getSatisfiedUntil());
+        List<Extension> thresholds = ExtensionMapper.mapThresholds(questionnaireWrapperModel.getThresholds());
+
+        return buildActivity(instantiatesCanonical, timing, activitySatisfiedUntil, thresholds);
+    }
+
+    private CarePlan.CarePlanActivityComponent buildActivity(CanonicalType instantiatesCanonical, Type timing, Extension activitySatisfiedUntil, List<Extension> thresholds) {
+        CarePlan.CarePlanActivityComponent activity = new CarePlan.CarePlanActivityComponent();
+
+        activity.setDetail(buildDetail(instantiatesCanonical, timing, activitySatisfiedUntil, thresholds));
+
+        return activity;
+    }
+
+    private CarePlan.CarePlanActivityDetailComponent buildDetail(CanonicalType instantiatesCanonical, Type timing, Extension activitySatisfiedUntil, List<Extension> thresholds) {
+        CarePlan.CarePlanActivityDetailComponent detail = new CarePlan.CarePlanActivityDetailComponent();
+
+        detail.setInstantiatesCanonical(List.of(instantiatesCanonical));
+        detail.setStatus(CarePlan.CarePlanActivityStatus.NOTSTARTED);
+        detail.addExtension(activitySatisfiedUntil);
+        for(Extension threshold : thresholds) {
+            detail.addExtension(threshold);
+        }
+
+        detail.setScheduled(timing);
+
+        return detail;
     }
 
     private QuestionnaireResponse.QuestionnaireResponseItemComponent getQuestionnaireResponseItem(AnswerModel answer) {
@@ -279,9 +462,32 @@ public class FhirMapper {
             case STRING:
                 value = new StringType(answer.getValue());
                 break;
+            case QUANTITY:
+                value = new Quantity(Double.parseDouble(answer.getValue()));
+                break;
+            case BOOLEAN:
+                value = new BooleanType(answer.getValue());
+                break;
             default:
                 throw new IllegalArgumentException(String.format("Unknown AnswerType: %s", answer.getAnswerType()));
         }
         return value;
+    }
+
+    private QuestionnaireWrapperModel mapPlanDefinitionAction(PlanDefinition.PlanDefinitionActionComponent action, FhirLookupResult lookupResult) {
+        var wrapper = new QuestionnaireWrapperModel();
+
+        wrapper.setFrequency(mapTiming(action.getTimingTiming()));
+
+        String questionnaireId = action.getDefinitionCanonicalType().getValue();
+        Questionnaire questionnaire = lookupResult
+                .getQuestionnaire(questionnaireId)
+                .orElseThrow(() -> new IllegalStateException(String.format("Could not look up Questionnaire with id %s!", questionnaireId)));
+        wrapper.setQuestionnaire(mapQuestionnaire(questionnaire));
+
+        List<ThresholdModel> thresholds = ExtensionMapper.extractThresholds(action.getExtensionsByUrl(Systems.THRESHOLD));
+        wrapper.setThresholds(thresholds);
+
+        return wrapper;
     }
 }

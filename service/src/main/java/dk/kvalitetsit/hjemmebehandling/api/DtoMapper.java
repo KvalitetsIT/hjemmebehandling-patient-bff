@@ -1,5 +1,6 @@
 package dk.kvalitetsit.hjemmebehandling.api;
 
+import dk.kvalitetsit.hjemmebehandling.constants.CarePlanStatus;
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirUtils;
 import dk.kvalitetsit.hjemmebehandling.model.*;
 import dk.kvalitetsit.hjemmebehandling.model.AnswerModel;
@@ -19,7 +20,9 @@ public class DtoMapper {
         mapBaseAttributesToModel(carePlanModel, carePlanDto, ResourceType.CarePlan);
 
         carePlanModel.setTitle(carePlanDto.getTitle());
-        carePlanModel.setStatus(carePlanDto.getStatus());
+        if(carePlanDto.getStatus() != null) {
+            carePlanModel.setStatus(Enum.valueOf(CarePlanStatus.class, carePlanDto.getStatus()));
+        }
         carePlanModel.setCreated(carePlanDto.getCreated());
         carePlanModel.setStartDate(carePlanDto.getStartDate());
         carePlanModel.setEndDate(carePlanDto.getEndDate());
@@ -32,6 +35,7 @@ public class DtoMapper {
         if(carePlanDto.getPlanDefinitions() != null) {
             carePlanModel.setPlanDefinitions(carePlanDto.getPlanDefinitions().stream().map(pd -> mapPlanDefinitionDto(pd)).collect(Collectors.toList()));
         }
+        carePlanModel.setDepartmentName(carePlanDto.getDepartmentName());
 
         return carePlanModel;
     }
@@ -41,13 +45,14 @@ public class DtoMapper {
 
         carePlanDto.setId(carePlan.getId().toString());
         carePlanDto.setTitle(carePlan.getTitle());
-        carePlanDto.setStatus(carePlan.getStatus());
+        carePlanDto.setStatus(carePlan.getStatus().toString());
         carePlanDto.setCreated(carePlan.getCreated());
         carePlanDto.setStartDate(carePlan.getStartDate());
         carePlanDto.setEndDate(carePlan.getEndDate());
         carePlanDto.setPatientDto(mapPatientModel(carePlan.getPatient()));
         carePlanDto.setQuestionnaires(carePlan.getQuestionnaires().stream().map(qw -> mapQuestionnaireWrapperModel(qw)).collect(Collectors.toList()));
         carePlanDto.setPlanDefinitions(carePlan.getPlanDefinitions().stream().map(pd -> mapPlanDefinitionModel(pd)).collect(Collectors.toList()));
+        carePlanDto.setDepartmentName(carePlan.getDepartmentName());
 
         return carePlanDto;
     }

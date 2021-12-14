@@ -24,7 +24,6 @@ public class CarePlanIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Disabled
     public void getQuestionnaireResponsesByCarePlanId_success() throws Exception {
         // Arrange
 

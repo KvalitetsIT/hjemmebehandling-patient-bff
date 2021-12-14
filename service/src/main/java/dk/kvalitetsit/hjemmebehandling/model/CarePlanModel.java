@@ -1,17 +1,20 @@
 package dk.kvalitetsit.hjemmebehandling.model;
 
+import dk.kvalitetsit.hjemmebehandling.constants.CarePlanStatus;
+
 import java.time.Instant;
 import java.util.List;
 
 public class CarePlanModel extends BaseModel {
     private String title;
-    private String status;
+    private CarePlanStatus status;
     private Instant created;
     private Instant startDate;
     private Instant endDate;
     private PatientModel patient;
     private List<QuestionnaireWrapperModel> questionnaires;
     private List<PlanDefinitionModel> planDefinitions;
+    private String departmentName;
     private Instant satisfiedUntil;
 
     public String getTitle() {
@@ -22,11 +25,11 @@ public class CarePlanModel extends BaseModel {
         this.title = title;
     }
 
-    public String getStatus() {
+    public CarePlanStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(CarePlanStatus status) {
         this.status = status;
     }
 
@@ -76,6 +79,14 @@ public class CarePlanModel extends BaseModel {
 
     public void setPlanDefinitions(List<PlanDefinitionModel> planDefinitions) {
         this.planDefinitions = planDefinitions;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
     }
 
     public Instant getSatisfiedUntil() {
