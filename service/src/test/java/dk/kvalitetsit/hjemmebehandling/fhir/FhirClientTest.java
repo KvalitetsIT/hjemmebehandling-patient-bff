@@ -158,6 +158,7 @@ public class FhirClientTest {
         // Arrange
         QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
         CarePlan carePlan = new CarePlan();
+        carePlan.addExtension(ExtensionMapper.mapOrganizationId(ORGANIZATION_ID_2));
 
         Bundle responseBundle = buildResponseBundle("201", "QuestionnaireResponse/2", "200", "CarePlan/3");
         setupTransactionClient(responseBundle);
@@ -174,6 +175,7 @@ public class FhirClientTest {
         // Arrange
         QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
         CarePlan carePlan = new CarePlan();
+        carePlan.addExtension(ExtensionMapper.mapOrganizationId(ORGANIZATION_ID_2));
 
         Bundle responseBundle = buildResponseBundle("201", "Questionnaire/4", "200", "CarePlan/3");
         setupTransactionClient(responseBundle);
@@ -189,6 +191,7 @@ public class FhirClientTest {
         // Arrange
         QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
         CarePlan carePlan = new CarePlan();
+        carePlan.addExtension(ExtensionMapper.mapOrganizationId(ORGANIZATION_ID_2));
 
         Bundle responseBundle = buildResponseBundle("400", null, "400", null);
         setupTransactionClient(responseBundle);
@@ -200,11 +203,11 @@ public class FhirClientTest {
     }
 
     @Test
-    @Disabled("TODO - figure out how to handle tagging")
     public void saveQuestionnaireResponse_addsOrganizationTag() {
         // Arrange
         QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
         CarePlan carePlan = new CarePlan();
+        carePlan.addExtension(ExtensionMapper.mapOrganizationId(ORGANIZATION_ID_2));
 
         Bundle responseBundle = buildResponseBundle("201", "QuestionnaireResponse/2", "201", "CarePlan/3");
         setupTransactionClient(responseBundle, SOR_CODE_2, ORGANIZATION_ID_2);
@@ -318,10 +321,6 @@ public class FhirClientTest {
     }
 
     private void setupTransactionClient(Bundle responseBundle, String sorCode, String organizationId) {
-        // TODO - decide on how to handle tagging, and comment this in!
-        // setupUserContext(sorCode);
-        // setupOrganization(sorCode, organizationId);
-
         Mockito.when(client.transaction().withBundle(Mockito.any(Bundle.class)).execute()).thenReturn(responseBundle);
     }
 
