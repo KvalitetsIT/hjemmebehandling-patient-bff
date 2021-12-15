@@ -42,6 +42,7 @@ public class FhirClientTest {
     private static final String CAREPLAN_ID_1 = "CarePlan/careplan-1";
     private static final String ORGANIZATION_ID_1 = "Organization/organization-1";
     private static final String ORGANIZATION_ID_2 = "Organization/organization-2";
+    private static final String PLANDEFINITION_ID_1 = "PlanDefinition/plandefinition-1";
     private static final String QUESTIONNAIRE_RESPONSE_ID_1 = "questionnaireresponse-1";
     private static final String QUESTIONNAIRE_RESPONSE_ID_2 = "questionnaireresponse-2";
 
@@ -128,6 +129,28 @@ public class FhirClientTest {
         assertEquals(2, result.getQuestionnaireResponses().size());
         assertTrue(result.getQuestionnaireResponses().contains(questionnaireResponse1));
         assertTrue(result.getQuestionnaireResponses().contains(questionnaireResponse2));
+    }
+
+    @Test
+    public void lookupQuestionnaireResponses_includesPlanDefinition() {
+        // Arrange
+        String carePlanId = "careplan-1";
+
+        QuestionnaireResponse questionnaireResponse1 = new QuestionnaireResponse();
+        questionnaireResponse1.setId(QUESTIONNAIRE_RESPONSE_ID_1);
+        QuestionnaireResponse questionnaireResponse2 = new QuestionnaireResponse();
+        questionnaireResponse2.setId(QUESTIONNAIRE_RESPONSE_ID_2);
+        setupSearchQuestionnaireResponseClient(1, questionnaireResponse1, questionnaireResponse2);
+
+        setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
+
+        // Act
+        FhirLookupResult result = subject.lookupQuestionnaireResponses(carePlanId);
+
+        // Assert
+        assertEquals(2, result.getQuestionnaireResponses().size());
+        assertEquals(1, result.getPlanDefinitions().size());
+        assertTrue(result.getPlanDefinition(PLANDEFINITION_ID_1).isPresent());
     }
 
     @Test
@@ -223,6 +246,16 @@ public class FhirClientTest {
 
     private void setupSearchQuestionnaireResponseClient(int criteriaCount, QuestionnaireResponse... questionnaireResponses) {
         setupSearchClient(criteriaCount, 3, QuestionnaireResponse.class, questionnaireResponses);
+
+        if(questionnaireResponses.length > 0) {
+            PlanDefinition planDefinition = new PlanDefinition();
+            planDefinition.setId(PLANDEFINITION_ID_1);
+            setupSearchPlanDefinitionClient(planDefinition);
+        }
+    }
+
+    private void setupSearchPlanDefinitionClient(PlanDefinition... planDefinitions) {
+        setupSearchClient(1, 1, PlanDefinition.class, planDefinitions);
     }
 
     private void setupSearchClient(Class<? extends Resource> resourceClass, Resource... resources) {

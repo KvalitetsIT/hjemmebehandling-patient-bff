@@ -161,7 +161,7 @@ public class FhirMapper {
         questionnaireResponse.setAuthor(new Reference(questionnaireResponseModel.getAuthorId().toString()));
         questionnaireResponse.setSource(new Reference(questionnaireResponseModel.getSourceId().toString()));
         questionnaireResponse.setAuthored(Date.from(questionnaireResponseModel.getAnswered()));
-        questionnaireResponse.getExtension().add(ExtensionMapper.mapExaminationStatus(ExaminationStatus.NOT_EXAMINED));
+        questionnaireResponse.getExtension().add(ExtensionMapper.mapExaminationStatus(questionnaireResponseModel.getExaminationStatus()));
         questionnaireResponse.getExtension().add(ExtensionMapper.mapTriagingCategory(questionnaireResponseModel.getTriagingCategory()));
         questionnaireResponse.setSubject(new Reference(questionnaireResponseModel.getPatient().getId().toString()));
 
@@ -212,6 +212,14 @@ public class FhirMapper {
         Patient patient = lookupResult.getPatient(patientId)
                 .orElseThrow(() -> new IllegalStateException(String.format("No Patient found with id %s!", patientId)));
         questionnaireResponseModel.setPatient(mapPatient(patient));
+
+        String carePlanId = questionnaireResponse.getBasedOnFirstRep().getReference();
+        CarePlan carePlan = lookupResult.getCarePlan(carePlanId)
+                .orElseThrow(() -> new IllegalStateException(String.format("No CarePlan found with id %s!", carePlanId)));
+        String planDefinitionId = carePlan.getInstantiatesCanonical().get(0).getValue();
+        PlanDefinition planDefinition = lookupResult.getPlanDefinition(planDefinitionId)
+                .orElseThrow(() -> new IllegalStateException(String.format("No PlanDefinition found with id %s!", planDefinitionId)));
+        questionnaireResponseModel.setPlanDefinitionTitle(planDefinition.getTitle());
 
         return questionnaireResponseModel;
     }
@@ -372,7 +380,19 @@ public class FhirMapper {
 
         var answerItem = extractAnswerItem(item);
         answer.setLinkId(item.getLinkId());
-        answer.setValue(answerItem.getValue().primitiveValue());
+
+        if(answerItem.hasValueStringType()) {
+            answer.setValue(answerItem.getValue().primitiveValue());
+        }
+        else if(answerItem.hasValueIntegerType()) {
+            answer.setValue(answerItem.getValueIntegerType().primitiveValue());
+        }
+        else if(answerItem.hasValueQuantity()) {
+            answer.setValue(answerItem.getValueQuantity().getValueElement().primitiveValue());
+        }
+        else if(answerItem.hasValueBooleanType()) {
+            answer.setValue(answerItem.getValueBooleanType().primitiveValue());
+        }
         answer.setAnswerType(getAnswerType(answerItem));
 
         return answer;

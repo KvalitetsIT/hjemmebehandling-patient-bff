@@ -160,27 +160,31 @@ public class FhirMapperTest {
     @Test
     public void mapQuestionnaireResponse_canMapAnswers() {
         // Arrange
-        QuestionnaireResponse questionnaireResponse = buildQuestionnaireResponse(QUESTIONNAIRERESPONSE_ID_1, QUESTIONNAIRE_ID_1, PATIENT_ID_1, List.of(buildStringItem("hej", "1"), buildIntegerItem(2, "2")));
-        Questionnaire questionnaire = buildQuestionnaire(QUESTIONNAIRE_ID_1, List.of(buildQuestionItem("1"), buildQuestionItem("2")));
+        QuestionnaireResponse questionnaireResponse = buildQuestionnaireResponse(QUESTIONNAIRERESPONSE_ID_1, QUESTIONNAIRE_ID_1, PATIENT_ID_1, List.of(buildStringItem("hej", "1"), buildQuantityItem(2, "2")));
+        Questionnaire questionnaire = buildQuestionnaire(QUESTIONNAIRE_ID_1, List.of(buildQuestionItem("1", Questionnaire.QuestionnaireItemType.STRING), buildQuestionItem("2", Questionnaire.QuestionnaireItemType.QUANTITY)));
         Patient patient = buildPatient(PATIENT_ID_1, "0101010101");
+        CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1, PATIENT_ID_1, QUESTIONNAIRE_ID_1, PLANDEFINITION_ID_1);
+        PlanDefinition planDefinition = buildPlanDefinition(PLANDEFINITION_ID_1);
 
         // Act
-        QuestionnaireResponseModel result = subject.mapQuestionnaireResponse(questionnaireResponse, FhirLookupResult.fromResources(questionnaireResponse, questionnaire, patient));
+        QuestionnaireResponseModel result = subject.mapQuestionnaireResponse(questionnaireResponse, FhirLookupResult.fromResources(questionnaireResponse, questionnaire, patient, carePlan, planDefinition));
 
         // Assert
         assertEquals(2, result.getQuestionAnswerPairs().size());
         assertEquals(AnswerType.STRING, result.getQuestionAnswerPairs().get(0).getAnswer().getAnswerType());
-        assertEquals(AnswerType.INTEGER, result.getQuestionAnswerPairs().get(1).getAnswer().getAnswerType());
+        assertEquals(AnswerType.QUANTITY, result.getQuestionAnswerPairs().get(1).getAnswer().getAnswerType());
     }
 
     @Test
     public void mapQuestionnaireResponse_roundtrip_preservesExtensions() {
         // Arrange
         QuestionnaireResponse questionnaireResponse = buildQuestionnaireResponse(QUESTIONNAIRERESPONSE_ID_1, QUESTIONNAIRE_ID_1, PATIENT_ID_1, List.of(buildStringItem("hej", "1"), buildIntegerItem(2, "2")));
-        Questionnaire questionnaire = buildQuestionnaire(QUESTIONNAIRE_ID_1, List.of(buildQuestionItem("1"), buildQuestionItem("2")));
+        Questionnaire questionnaire = buildQuestionnaire(QUESTIONNAIRE_ID_1, List.of(buildQuestionItem("1", Questionnaire.QuestionnaireItemType.STRING), buildQuestionItem("2", Questionnaire.QuestionnaireItemType.INTEGER)));
         Patient patient = buildPatient(PATIENT_ID_1, "0101010101");
+        CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1, PATIENT_ID_1, QUESTIONNAIRE_ID_1, PLANDEFINITION_ID_1);
+        PlanDefinition planDefinition = buildPlanDefinition(PLANDEFINITION_ID_1);
 
-        FhirLookupResult lookupResult = FhirLookupResult.fromResources(patient, questionnaire);
+        FhirLookupResult lookupResult = FhirLookupResult.fromResources(patient, questionnaire, carePlan, planDefinition);
 
         // Act
         QuestionnaireResponse result = subject.mapQuestionnaireResponseModel(subject.mapQuestionnaireResponse(questionnaireResponse, lookupResult));
@@ -196,10 +200,12 @@ public class FhirMapperTest {
     public void mapQuestionnaireResponse_roundtrip_preservesReferences() {
         // Arrange
         QuestionnaireResponse questionnaireResponse = buildQuestionnaireResponse(QUESTIONNAIRERESPONSE_ID_1, QUESTIONNAIRE_ID_1, PATIENT_ID_1, List.of(buildStringItem("hej", "1"), buildIntegerItem(2, "2")));
-        Questionnaire questionnaire = buildQuestionnaire(QUESTIONNAIRE_ID_1, List.of(buildQuestionItem("1"), buildQuestionItem("2")));
+        Questionnaire questionnaire = buildQuestionnaire(QUESTIONNAIRE_ID_1, List.of(buildQuestionItem("1", Questionnaire.QuestionnaireItemType.STRING), buildQuestionItem("2", Questionnaire.QuestionnaireItemType.INTEGER)));
         Patient patient = buildPatient(PATIENT_ID_1, "0101010101");
+        CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1, PATIENT_ID_1, QUESTIONNAIRE_ID_1, PLANDEFINITION_ID_1);
+        PlanDefinition planDefinition = buildPlanDefinition(PLANDEFINITION_ID_1);
 
-        FhirLookupResult lookupResult = FhirLookupResult.fromResources(patient, questionnaire);
+        FhirLookupResult lookupResult = FhirLookupResult.fromResources(patient, questionnaire, carePlan, planDefinition);
 
         // Act
         QuestionnaireResponse result = subject.mapQuestionnaireResponseModel(subject.mapQuestionnaireResponse(questionnaireResponse, lookupResult));
@@ -217,19 +223,32 @@ public class FhirMapperTest {
     @Test
     public void mapQuestionnaireResponse_roundtrip_preservesLinks() {
         // Arrange
-        QuestionnaireResponse questionnaireResponse = buildQuestionnaireResponse(QUESTIONNAIRERESPONSE_ID_1, QUESTIONNAIRE_ID_1, PATIENT_ID_1, List.of(buildStringItem("hej", "1"), buildIntegerItem(2, "2")));
-        Questionnaire questionnaire = buildQuestionnaire(QUESTIONNAIRE_ID_1, List.of(buildQuestionItem("1"), buildQuestionItem("2")));
-        Patient patient = buildPatient(PATIENT_ID_1, "0101010101");
+        var stringItem = buildStringItem("hej", "1");
+        var integerItem = buildIntegerItem(2, "2");
+        var quantityItem = buildQuantityItem(3.1, "3");
 
-        FhirLookupResult lookupResult = FhirLookupResult.fromResources(patient, questionnaire);
+        QuestionnaireResponse questionnaireResponse = buildQuestionnaireResponse(QUESTIONNAIRERESPONSE_ID_1, QUESTIONNAIRE_ID_1, PATIENT_ID_1, List.of(stringItem, integerItem, quantityItem));
+        Questionnaire questionnaire = buildQuestionnaire(QUESTIONNAIRE_ID_1, List.of(buildQuestionItem("1", Questionnaire.QuestionnaireItemType.STRING), buildQuestionItem("2", Questionnaire.QuestionnaireItemType.INTEGER), buildQuestionItem("3", Questionnaire.QuestionnaireItemType.QUANTITY)));
+        Patient patient = buildPatient(PATIENT_ID_1, "0101010101");
+        CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1, PATIENT_ID_1, QUESTIONNAIRE_ID_1, PLANDEFINITION_ID_1);
+        PlanDefinition planDefinition = buildPlanDefinition(PLANDEFINITION_ID_1);
+
+        FhirLookupResult lookupResult = FhirLookupResult.fromResources(patient, questionnaire, carePlan, planDefinition);
 
         // Act
         QuestionnaireResponse result = subject.mapQuestionnaireResponseModel(subject.mapQuestionnaireResponse(questionnaireResponse, lookupResult));
 
         // Assert
         assertEquals(questionnaireResponse.getItem().size(), result.getItem().size());
-        assertTrue(result.getItem().stream().anyMatch(item -> item.getLinkId().equals("1")));
-        assertTrue(result.getItem().stream().anyMatch(item -> item.getLinkId().equals("2")));
+
+        assertEquals(stringItem.getLinkId(), result.getItem().get(0).getLinkId());
+        assertEquals(stringItem.getAnswerFirstRep().getValueStringType().getValue(), result.getItem().get(0).getAnswerFirstRep().getValueStringType().getValue());
+
+        assertEquals(integerItem.getLinkId(), result.getItem().get(1).getLinkId());
+        assertEquals(integerItem.getAnswerFirstRep().getValueIntegerType().getValue(), result.getItem().get(1).getAnswerFirstRep().getValueIntegerType().getValue());
+
+        assertEquals(quantityItem.getLinkId(), result.getItem().get(2).getLinkId());
+        assertEquals(quantityItem.getAnswerFirstRep().getValueQuantity().getValue(), result.getItem().get(2).getAnswerFirstRep().getValueQuantity().getValue());
     }
 
     private CarePlan buildCarePlan(String careplanId, String patientId, String questionnaireId, String planDefinitionId) {
@@ -429,6 +448,7 @@ public class FhirMapperTest {
 
         model.getQuestionAnswerPairs().add(new QuestionAnswerPairModel(question, answer));
 
+        model.setExaminationStatus(ExaminationStatus.NOT_EXAMINED);
         model.setTriagingCategory(TriagingCategory.GREEN);
 
         PatientModel patientModel = new PatientModel();
@@ -456,10 +476,10 @@ public class FhirMapperTest {
         return questionnaireResponse;
     }
 
-    private Questionnaire.QuestionnaireItemComponent buildQuestionItem(String linkId) {
+    private Questionnaire.QuestionnaireItemComponent buildQuestionItem(String linkId, Questionnaire.QuestionnaireItemType itemType) {
         var item = new Questionnaire.QuestionnaireItemComponent();
 
-        item.setType(Questionnaire.QuestionnaireItemType.INTEGER);
+        item.setType(itemType);
         item.setLinkId(linkId);
 
         return item;
@@ -479,6 +499,10 @@ public class FhirMapperTest {
 
     private QuestionnaireResponse.QuestionnaireResponseItemComponent buildIntegerItem(int value, String linkId) {
         return buildItem(new IntegerType(value), linkId);
+    }
+
+    private QuestionnaireResponse.QuestionnaireResponseItemComponent buildQuantityItem(double value, String linkId) {
+        return buildItem(new Quantity(value), linkId);
     }
 
     private QuestionnaireResponse.QuestionnaireResponseItemComponent buildItem(Type value, String linkId) {

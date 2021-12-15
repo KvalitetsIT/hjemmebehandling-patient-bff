@@ -81,6 +81,12 @@ public class FhirClient {
         return lookupByCriteria(Questionnaire.class, List.of(idCriterion));
     }
 
+    private FhirLookupResult lookupPlanDefinitions(Collection<String> planDefinitionIds) {
+        var idCriterion = PlanDefinition.RES_ID.exactly().codes(planDefinitionIds);
+
+        return lookupByCriteria(PlanDefinition.class, List.of(idCriterion), List.of(PlanDefinition.INCLUDE_DEFINITION));
+    }
+
     private FhirLookupResult lookupOrganizationsByCriteria(List<ICriterion<?>> criteria) {
         // Don't try to include Organization-resources when we are looking up organizations ...
         boolean withOrganizations = false;
@@ -88,13 +94,33 @@ public class FhirClient {
     }
 
     private FhirLookupResult lookupQuestionnaireResponseByCriteria(List<ICriterion<?>> criteria) {
-        return lookupByCriteria(QuestionnaireResponse.class, criteria, List.of(QuestionnaireResponse.INCLUDE_BASED_ON, QuestionnaireResponse.INCLUDE_QUESTIONNAIRE, QuestionnaireResponse.INCLUDE_SUBJECT));
+        var questionnaireResponseResult = lookupByCriteria(QuestionnaireResponse.class, criteria, List.of(QuestionnaireResponse.INCLUDE_BASED_ON, QuestionnaireResponse.INCLUDE_QUESTIONNAIRE, QuestionnaireResponse.INCLUDE_SUBJECT));
+
+        // We also need the planDefinitions, which are found by following the chain QuestionnaireResponse.based-on -> CarePlan.instantiates-canonical.
+        // This requires a separate lookup.
+        if(questionnaireResponseResult.getQuestionnaireResponses().isEmpty()) {
+            return questionnaireResponseResult;
+        }
+
+        // Get the related planDefinitions
+        List<String> planDefinitionIds = getPlanDefinitionIds(questionnaireResponseResult.getCarePlans());
+        FhirLookupResult planDefinitionResult = lookupPlanDefinitions(planDefinitionIds);
+
+        // Merge the results
+        return questionnaireResponseResult.merge(planDefinitionResult);
     }
 
     private List<String> getQuestionnaireIds(List<CarePlan> carePlans) {
         return carePlans
                 .stream()
                 .flatMap(cp -> cp.getActivity().stream().map(a -> getQuestionnaireId(a.getDetail())))
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getPlanDefinitionIds(List<CarePlan> carePlans) {
+        return carePlans
+                .stream()
+                .flatMap(cp -> cp.getInstantiatesCanonical().stream().map(ic -> ic.getValue()))
                 .collect(Collectors.toList());
     }
 

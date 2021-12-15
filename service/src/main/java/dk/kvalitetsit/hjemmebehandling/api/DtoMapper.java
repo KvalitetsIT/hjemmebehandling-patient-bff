@@ -300,6 +300,7 @@ public class DtoMapper {
     private AnswerModel mapAnswerDto(AnswerDto answerDto) {
         AnswerModel answerModel = new AnswerModel();
 
+        answerModel.setLinkId(answerDto.getLinkId());
         answerModel.setValue(answerDto.getValue());
         answerModel.setAnswerType(answerDto.getAnswerType());
 
@@ -309,6 +310,7 @@ public class DtoMapper {
     private AnswerDto mapAnswerModel(AnswerModel answerModel) {
         AnswerDto answerDto = new AnswerDto();
 
+        answerDto.setLinkId(answerModel.getLinkId());
         answerDto.setValue(answerModel.getValue());
         answerDto.setAnswerType(answerModel.getAnswerType());
 
