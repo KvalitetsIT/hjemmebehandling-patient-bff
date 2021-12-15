@@ -3,6 +3,8 @@ package dk.kvalitetsit.hjemmebehandling.controller;
 import dk.kvalitetsit.hjemmebehandling.api.CarePlanDto;
 import dk.kvalitetsit.hjemmebehandling.api.DtoMapper;
 import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
+import dk.kvalitetsit.hjemmebehandling.context.UserContext;
+import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.ForbiddenException;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.InternalServerErrorException;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.ResourceNotFoundException;
@@ -12,6 +14,7 @@ import dk.kvalitetsit.hjemmebehandling.service.CarePlanService;
 import dk.kvalitetsit.hjemmebehandling.service.exception.AccessValidationException;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ErrorKind;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ServiceException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,7 +42,17 @@ public class CarePlanControllerTest {
     @Mock
     private LocationHeaderBuilder locationHeaderBuilder;
 
+    @Mock
+    private UserContextProvider userContextProvider;
+
     private static final String REQUEST_URI = "http://localhost:8080";
+
+    @BeforeEach
+    public void setup() {
+        var userContext = new UserContext();
+        userContext.setCpr("0101010101");
+        Mockito.when(userContextProvider.getUserContext()).thenReturn(userContext);
+    }
 
     @Test
     public void getActiveCarePlan_carePlanPresent_200() throws Exception {

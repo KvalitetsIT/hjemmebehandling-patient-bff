@@ -4,6 +4,7 @@ import dk.kvalitetsit.hjemmebehandling.api.DtoMapper;
 import dk.kvalitetsit.hjemmebehandling.api.QuestionnaireResponseDto;
 import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
 import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
+import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.BadRequestException;
 import dk.kvalitetsit.hjemmebehandling.controller.http.LocationHeaderBuilder;
 import dk.kvalitetsit.hjemmebehandling.model.QuestionnaireResponseModel;
@@ -31,11 +32,13 @@ public class QuestionnaireResponseController extends BaseController {
     private QuestionnaireResponseService questionnaireResponseService;
     private DtoMapper dtoMapper;
     private LocationHeaderBuilder locationHeaderBuilder;
+    private UserContextProvider userContextProvider;
 
-    public QuestionnaireResponseController(QuestionnaireResponseService questionnaireResponseService, DtoMapper dtoMapper, LocationHeaderBuilder locationHeaderBuilder) {
+    public QuestionnaireResponseController(QuestionnaireResponseService questionnaireResponseService, DtoMapper dtoMapper, LocationHeaderBuilder locationHeaderBuilder, UserContextProvider userContextProvider) {
         this.questionnaireResponseService = questionnaireResponseService;
         this.dtoMapper = dtoMapper;
         this.locationHeaderBuilder = locationHeaderBuilder;
+        this.userContextProvider = userContextProvider;
     }
 
     @GetMapping(value = "/v1/questionnaireresponses/{carePlanId}")
@@ -64,8 +67,7 @@ public class QuestionnaireResponseController extends BaseController {
     public ResponseEntity<Void> submitQuestionnaireResponse(@RequestBody QuestionnaireResponseDto questionnaireResponseDto) {
         String questionnaireResponseId = null;
 
-        // TODO - get cpr from user context ...
-        String cpr = "0101010101";
+        String cpr = userContextProvider.getUserContext().getCpr();
         try {
             questionnaireResponseId = questionnaireResponseService.submitQuestionnaireResponse(dtoMapper.mapQuestionnaireResponseDto(questionnaireResponseDto), cpr);
         }

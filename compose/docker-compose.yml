@@ -9,6 +9,8 @@ services:
       - cpr_url=http://person-service:1081/Patient/
 
       - allowed_origins=http://localhost:3000
+      - user.context.handler=MOCK
+      - user.mock.context.cpr=0101010101
 
       - usercontext_header_name=X-Test-Auth
 

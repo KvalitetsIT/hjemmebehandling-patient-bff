@@ -1,27 +1,21 @@
 package dk.kvalitetsit.hjemmebehandling.context;
 
 public class UserContext {
-	private String orgId;
+	private String cpr;
 	private String firstName;
 	private String lastName;
 	private String fullName;
-	private String[] autorisationsids;
 	private String userId;
-	private String email;
 	private String[] entitlements;
 
     public UserContext() {}
 
-    public UserContext(String orgId) {
-        this.orgId = orgId;
+    public String getCpr() {
+        return cpr;
     }
 
-    public String getOrgId() {
-        return orgId;
-    }
-
-    public void setOrgId(String orgId) {
-        this.orgId = orgId;
+    public void setCpr(String cpr) {
+        this.cpr = cpr;
     }
 
 	public String getFirstName() {
@@ -48,28 +42,12 @@ public class UserContext {
 		this.fullName = fullName;
 	}
 
-	public String[] getAutorisationsids() {
-		return autorisationsids;
-	}
-
-	public void setAutorisationsids(String[] autorisationsids) {
-		this.autorisationsids = autorisationsids;
-	}
-
 	public String getUserId() {
 		return userId;
 	}
 
 	public void setUserId(String userId) {
 		this.userId = userId;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
 	}
 
 	public String[] getEntitlements() {

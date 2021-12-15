@@ -5,6 +5,8 @@ import dk.kvalitetsit.hjemmebehandling.api.DtoMapper;
 import dk.kvalitetsit.hjemmebehandling.api.QuestionnaireResponseDto;
 import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
 import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
+import dk.kvalitetsit.hjemmebehandling.context.UserContext;
+import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.BadRequestException;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.ForbiddenException;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.InternalServerErrorException;
@@ -16,6 +18,7 @@ import dk.kvalitetsit.hjemmebehandling.service.exception.AccessValidationExcepti
 import dk.kvalitetsit.hjemmebehandling.service.exception.ErrorKind;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ServiceException;
 import dk.kvalitetsit.hjemmebehandling.types.PageDetails;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,6 +48,9 @@ public class QuestionnaireResponseControllerTest {
 
     @Mock
     private LocationHeaderBuilder locationHeaderBuilder;
+
+    @Mock
+    private UserContextProvider userContextProvider;
 
     @Test
     public void getQuestionnaireResponses_cprParameterMissing_400() {
@@ -128,6 +134,8 @@ public class QuestionnaireResponseControllerTest {
         String location = "http://localhost:8080/api/v1/questionnaireresponse/questionnaireresponse-1";
         Mockito.when(locationHeaderBuilder.buildLocationHeader("questionnaireresponse-1")).thenReturn(URI.create(location));
 
+        setupUserContext(cpr);
+
         // Act
         ResponseEntity<Void> result = subject.submitQuestionnaireResponse(questionnaireResponseDto);
 
@@ -148,6 +156,8 @@ public class QuestionnaireResponseControllerTest {
 
         Mockito.when(questionnaireResponseService.submitQuestionnaireResponse(questionnaireResponseModel, cpr)).thenThrow(AccessValidationException.class);
 
+        setupUserContext(cpr);
+
         // Act
 
         // Assert
@@ -164,6 +174,8 @@ public class QuestionnaireResponseControllerTest {
         Mockito.when(dtoMapper.mapQuestionnaireResponseDto(questionnaireResponseDto)).thenReturn(questionnaireResponseModel);
 
         Mockito.when(questionnaireResponseService.submitQuestionnaireResponse(questionnaireResponseModel, cpr)).thenThrow(new ServiceException("error", ErrorKind.BAD_REQUEST, ErrorDetails. INCOMPLETE_RESPONSE));
+
+        setupUserContext(cpr);
 
         // Act
 
@@ -182,9 +194,17 @@ public class QuestionnaireResponseControllerTest {
 
         Mockito.when(questionnaireResponseService.submitQuestionnaireResponse(questionnaireResponseModel, cpr)).thenThrow(new ServiceException("error", ErrorKind.INTERNAL_SERVER_ERROR, ErrorDetails.INTERNAL_SERVER_ERROR));
 
+        setupUserContext(cpr);
+
         // Act
 
         // Assert
         assertThrows(InternalServerErrorException.class, () -> subject.submitQuestionnaireResponse(questionnaireResponseDto));
+    }
+
+    private void setupUserContext(String cpr) {
+        var userContext = new UserContext();
+        userContext.setCpr(cpr);
+        Mockito.when(userContextProvider.getUserContext()).thenReturn(userContext);
     }
 }

@@ -3,6 +3,7 @@ package dk.kvalitetsit.hjemmebehandling.controller;
 import dk.kvalitetsit.hjemmebehandling.api.CarePlanDto;
 import dk.kvalitetsit.hjemmebehandling.api.DtoMapper;
 import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
+import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.ResourceNotFoundException;
 import dk.kvalitetsit.hjemmebehandling.model.CarePlanModel;
 import dk.kvalitetsit.hjemmebehandling.service.CarePlanService;
@@ -23,16 +24,17 @@ public class CarePlanController extends BaseController {
 
     private CarePlanService carePlanService;
     private DtoMapper dtoMapper;
+    private UserContextProvider userContextProvider;
 
-    public CarePlanController(CarePlanService carePlanService, DtoMapper dtoMapper) {
+    public CarePlanController(CarePlanService carePlanService, DtoMapper dtoMapper, UserContextProvider userContextProvider) {
         this.carePlanService = carePlanService;
         this.dtoMapper = dtoMapper;
+        this.userContextProvider = userContextProvider;
     }
 
     @GetMapping(value = "/v1/careplan/active")
     public ResponseEntity<CarePlanDto> getActiveCarePlan() {
-        // Should get cpr from user context and use that.
-        String cpr = "0101010101";
+        String cpr = userContextProvider.getUserContext().getCpr();
 
         Optional<CarePlanModel> carePlan = Optional.empty();
 

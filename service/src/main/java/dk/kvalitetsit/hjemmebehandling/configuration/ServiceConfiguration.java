@@ -1,7 +1,6 @@
 package dk.kvalitetsit.hjemmebehandling.configuration;
 
-import dk.kvalitetsit.hjemmebehandling.context.UserContextInterceptor;
-import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
+import dk.kvalitetsit.hjemmebehandling.context.*;
 import dk.kvalitetsit.hjemmebehandling.service.access.AccessValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,9 +17,8 @@ import dk.kvalitetsit.hjemmebehandling.service.QuestionnaireResponseService;
 
 @Configuration
 public class ServiceConfiguration {
-	
-	@Value("${user.context.handler}")
-	private String userContextHandler;
+    @Value("${user.mock.context.cpr}")
+    private String mockContextCpr;
 	
 	@Value("${fhir.server.url}")
 	private String fhirServerUrl;
@@ -32,7 +30,7 @@ public class ServiceConfiguration {
     }
 
     @Bean
-    public WebMvcConfigurer getWebMvcConfigurer(@Value("${allowed_origins}") String allowedOrigins, @Autowired UserContextProvider userContextProvider) {
+    public WebMvcConfigurer getWebMvcConfigurer(@Autowired FhirClient client, @Value("${allowed_origins}") String allowedOrigins, @Autowired UserContextProvider userContextProvider, @Autowired IUserContextHandler userContextHandler) {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
@@ -41,8 +39,20 @@ public class ServiceConfiguration {
 
             @Override
             public void addInterceptors(InterceptorRegistry registry) {
-                registry.addInterceptor(new UserContextInterceptor(userContextProvider,userContextHandler));
+                registry.addInterceptor(new UserContextInterceptor(client, userContextProvider, userContextHandler));
             }
         };
+    }
+
+    @Bean
+    public IUserContextHandler userContextHandler(@Value("${user.context.handler}") String userContextHandler) {
+        switch(userContextHandler) {
+            case "DIAS":
+                return new DIASUserContextHandler();
+            case "MOCK":
+                return new MockContextHandler(mockContextCpr);
+            default:
+                throw new IllegalArgumentException(String.format("Unknown userContextHandler value: %s", userContextHandler));
+        }
     }
 }
