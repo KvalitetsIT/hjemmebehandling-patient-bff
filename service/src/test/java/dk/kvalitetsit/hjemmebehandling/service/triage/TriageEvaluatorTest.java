@@ -152,40 +152,37 @@ public class TriageEvaluatorTest {
     }
 
     private AnswerModel buildBooleanAnswer(String linkId, boolean value) {
-        AnswerModel answer = new AnswerModel();
-
-        answer.setAnswerType(AnswerType.BOOLEAN);
-        answer.setLinkId(linkId);
-        answer.setValue(Boolean.toString(value));
-
-        return answer;
+        return buildAnswer(linkId, AnswerType.BOOLEAN, Boolean.toString(value));
     }
 
     private AnswerModel buildQuantityAnswer(String linkId, double value) {
+        return buildAnswer(linkId, AnswerType.QUANTITY, Double.toString(value));
+    }
+
+    private AnswerModel buildAnswer(String linkId, AnswerType answerType, String value) {
         AnswerModel answer = new AnswerModel();
 
-        answer.setAnswerType(AnswerType.QUANTITY);
         answer.setLinkId(linkId);
-        answer.setValue(Double.toString(value));
+        answer.setAnswerType(answerType);
+        answer.setValue(value);
 
         return answer;
     }
 
-    private ThresholdModel buildBooleanThreshold(String linkId, ThresholdType thresholdType, boolean value) {
-        ThresholdModel threshold = new ThresholdModel();
-
-        threshold.setQuestionnaireItemLinkId(linkId);
-        threshold.setType(thresholdType);
-        threshold.setValueBoolean(value);
-
-        return threshold;
+    private ThresholdModel buildBooleanThreshold(String linkId, ThresholdType thresholdType, boolean valueBoolean) {
+        return buildThreshold(linkId, thresholdType, valueBoolean, null, null);
     }
 
     private ThresholdModel buildQuantityThreshold(String linkId, ThresholdType thresholdType, Double low, Double high) {
+        return buildThreshold(linkId, thresholdType, null, low, high);
+    }
+
+    private ThresholdModel buildThreshold(String linkId, ThresholdType thresholdType, Boolean valueBoolean, Double low, Double high) {
         ThresholdModel threshold = new ThresholdModel();
 
         threshold.setQuestionnaireItemLinkId(linkId);
         threshold.setType(thresholdType);
+        threshold.setValueBoolean(valueBoolean);
         threshold.setValueQuantityLow(low);
         threshold.setValueQuantityHigh(high);
 
