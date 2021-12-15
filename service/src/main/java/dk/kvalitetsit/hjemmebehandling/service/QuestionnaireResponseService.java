@@ -3,13 +3,12 @@ package dk.kvalitetsit.hjemmebehandling.service;
 import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
 import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
 import dk.kvalitetsit.hjemmebehandling.fhir.*;
-import dk.kvalitetsit.hjemmebehandling.model.CarePlanModel;
-import dk.kvalitetsit.hjemmebehandling.model.PatientModel;
-import dk.kvalitetsit.hjemmebehandling.model.QuestionnaireResponseModel;
+import dk.kvalitetsit.hjemmebehandling.model.*;
 import dk.kvalitetsit.hjemmebehandling.service.access.AccessValidator;
 import dk.kvalitetsit.hjemmebehandling.service.exception.AccessValidationException;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ErrorKind;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ServiceException;
+import dk.kvalitetsit.hjemmebehandling.service.frequency.FrequencyEnumerator;
 import dk.kvalitetsit.hjemmebehandling.service.triage.TriageEvaluator;
 import dk.kvalitetsit.hjemmebehandling.util.DateProvider;
 import org.hl7.fhir.r4.model.*;
@@ -17,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -70,12 +70,36 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         var carePlanModel = fhirMapper.mapCarePlan(carePlanResult.getCarePlans().get(0), carePlanResult);
 
         // Update the frequency timestamps on the careplan (the specific activity and the careplan itself)
+        refreshFrequencyTimestamps(carePlanModel, questionnaireResponseModel.getQuestionnaireId());
+
 
         // Extract thresholds from the careplan, and compute the triaging category for the response
         initializeQuestionnaireResponseAttributes(questionnaireResponseModel, carePlanModel);
 
         // Save the response, along with the updated careplan, and return the generated QuestionnaireResponse id.
         return fhirClient.saveQuestionnaireResponse(fhirMapper.mapQuestionnaireResponseModel(questionnaireResponseModel), fhirMapper.mapCarePlanModel(carePlanModel));
+    }
+
+    private void refreshFrequencyTimestamps(CarePlanModel carePlanModel, QualifiedId questionnaireId) {
+        // Get the wrapper object that we wish to update
+        var questionnaireWrapper = getMatchingQuestionnaireWrapper(carePlanModel, questionnaireId);
+
+        // Compute the new deadline from the current point in time. Invoke 'next' once to get the current deadline, then
+        // invoke 'next' again to get the new deadline. This works regardless of whether the current submission is overdue or not.
+        var nextDeadline = new FrequencyEnumerator(dateProvider.now(), questionnaireWrapper.getFrequency()).next().next().getPointInTime();
+        questionnaireWrapper.setSatisfiedUntil(nextDeadline);
+
+        // Now that the timestamp is updated for the questionnaire, recompute the timestamp for the careplan as well.
+        refreshFrequencyTimestampForCarePlan(carePlanModel);
+    }
+
+    private void refreshFrequencyTimestampForCarePlan(CarePlanModel carePlanModel) {
+        var carePlanSatisfiedUntil = carePlanModel.getQuestionnaires()
+                .stream()
+                .map(qw -> qw.getSatisfiedUntil())
+                .min(Comparator.naturalOrder())
+                .orElse(Instant.MAX);
+        carePlanModel.setSatisfiedUntil(carePlanSatisfiedUntil);
     }
 
     private void initializeQuestionnaireResponseAttributes(QuestionnaireResponseModel questionnaireResponseModel, CarePlanModel carePlanModel) {
@@ -89,18 +113,30 @@ public class QuestionnaireResponseService extends AccessValidatingService {
     }
 
     private void initializeTriagingCategory(QuestionnaireResponseModel questionnaireResponseModel, CarePlanModel carePlanModel) {
-        var answers = questionnaireResponseModel.getQuestionAnswerPairs()
+        var answers = getAnswers(questionnaireResponseModel);
+
+        var thresholds = getThresholds(carePlanModel, questionnaireResponseModel.getQuestionnaireId());
+
+        questionnaireResponseModel.setTriagingCategory(triageEvaluator.determineTriagingCategory(answers, thresholds));
+    }
+
+    private List<AnswerModel> getAnswers(QuestionnaireResponseModel questionnaireResponseModel) {
+        return questionnaireResponseModel.getQuestionAnswerPairs()
                 .stream()
                 .map(qa -> qa.getAnswer())
                 .collect(Collectors.toList());
+    }
 
-        var thresholds = carePlanModel.getQuestionnaires()
+    private List<ThresholdModel> getThresholds(CarePlanModel carePlanModel, QualifiedId questionnaireId) {
+        var questionnaireWrapper = getMatchingQuestionnaireWrapper(carePlanModel, questionnaireId);
+        return questionnaireWrapper.getThresholds();
+    }
+
+    private QuestionnaireWrapperModel getMatchingQuestionnaireWrapper(CarePlanModel carePlanModel, QualifiedId questionnaireId) {
+        return carePlanModel.getQuestionnaires()
                 .stream()
-                .filter(q -> q.getQuestionnaire().getId().equals(questionnaireResponseModel.getQuestionnaireId()))
+                .filter(q -> q.getQuestionnaire().getId().equals(questionnaireId))
                 .findFirst()
-                .get()
-                .getThresholds();
-
-        questionnaireResponseModel.setTriagingCategory(triageEvaluator.determineTriagingCategory(answers, thresholds));
+                .get();
     }
 }
