@@ -22,7 +22,7 @@ if [ -d $SRC_FOLDER ]; then
   # Start the bff service
 
   docker rm patient-bff
-  docker run -d --network rim --name patient-bff -p 8080:8080 --volumes-from maven-builder kvalitetsit/hjemmebehandling-patient-bff:latest
+  docker run -d --network rim --name patient-bff -e user.context.handler=MOCK -e user.mock.context.cpr=0101010101 -p 8080:8080 --volumes-from maven-builder kvalitetsit/hjemmebehandling-patient-bff:latest
 
   # Wait for it to be ready
   echo 'waiting for bff to be ready ...'
