@@ -58,6 +58,22 @@ public class QuestionnaireResponseService extends AccessValidatingService {
                 .collect(Collectors.toList());
     }
 
+    public Optional<QuestionnaireResponseModel> getQuestionnaireResponseById(QualifiedId id) throws ServiceException, AccessValidationException {
+        FhirLookupResult lookupResult = fhirClient.lookupQuestionnaireResponseById(id.toString());
+
+        Optional<QuestionnaireResponse> questionnaireResponse = lookupResult.getQuestionnaireResponse(id.toString());
+        if(!questionnaireResponse.isPresent()) {
+            return Optional.empty();
+        }
+
+        // Validate that the user is allowed to access the response.
+        validateAccess(questionnaireResponse.get());
+
+        // Map the resource
+        QuestionnaireResponseModel mappedQuestionnaireResponse = fhirMapper.mapQuestionnaireResponse(questionnaireResponse.get(), lookupResult);
+        return Optional.of(mappedQuestionnaireResponse);
+    }
+
     public String submitQuestionnaireResponse(QuestionnaireResponseModel questionnaireResponseModel, String cpr) throws ServiceException, AccessValidationException {
         // Look up the careplan indicated in the response. Check that this is the user's active careplan.
         var carePlanResult = fhirClient.lookupActiveCarePlan(cpr);
@@ -76,7 +92,6 @@ public class QuestionnaireResponseService extends AccessValidatingService {
 
         // Update the frequency timestamps on the careplan (the specific activity and the careplan itself)
         refreshFrequencyTimestamps(carePlanModel, questionnaireResponseModel.getQuestionnaireId());
-
 
         // Extract thresholds from the careplan, and compute the triaging category for the response
         initializeQuestionnaireResponseAttributes(questionnaireResponseModel, carePlanModel);

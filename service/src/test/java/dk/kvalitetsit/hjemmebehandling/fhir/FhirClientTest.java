@@ -154,6 +154,40 @@ public class FhirClientTest {
     }
 
     @Test
+    public void lookupQuestionnaireResponseById_responsePresent_success() {
+        // Arrange
+        String questionnaireResponseId = QUESTIONNAIRE_RESPONSE_ID_1;
+        QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+        questionnaireResponse.setId(questionnaireResponseId);
+
+        setupSearchQuestionnaireResponseClient(1, questionnaireResponse);
+        setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
+
+        // Act
+        FhirLookupResult result = subject.lookupQuestionnaireResponseById(questionnaireResponseId);
+
+        // Assert
+        assertTrue(result.getQuestionnaireResponse(questionnaireResponseId).isPresent());
+        assertEquals(questionnaireResponse, result.getQuestionnaireResponse(questionnaireResponseId).get());
+    }
+
+    @Test
+    public void lookupQuestionnaireResponseById_responseMissing_empty() {
+        // Arrange
+        String questionnaireResponseId = QUESTIONNAIRE_RESPONSE_ID_1;
+        QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+
+        setupSearchQuestionnaireResponseClient(1, questionnaireResponse);
+        setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
+
+        // Act
+        FhirLookupResult result = subject.lookupQuestionnaireResponseById(questionnaireResponseId);
+
+        // Assert
+        assertFalse(result.getQuestionnaireResponse(questionnaireResponseId).isPresent());
+    }
+
+    @Test
     public void saveQuestionnaireResponse_returnsQuestionnaireResponseId() {
         // Arrange
         QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();

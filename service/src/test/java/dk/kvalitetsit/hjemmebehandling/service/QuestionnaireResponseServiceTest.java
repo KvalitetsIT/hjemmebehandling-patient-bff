@@ -26,6 +26,7 @@ import java.time.LocalTime;
 import java.time.Period;
 import java.time.temporal.TemporalAmount;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -109,6 +110,55 @@ public class QuestionnaireResponseServiceTest {
 
         // Assert
         assertThrows(AccessValidationException.class, () -> subject.getQuestionnaireResponses(carePlanId));
+    }
+
+    @Test
+    public void getQuestionnaireResponseById_responsePresent_returnsQuestionnaireResponse() throws Exception {
+        // Arrange
+        String questionnaireResponseId = QUESTIONNAIRE_RESPONSE_ID_1;
+
+        QuestionnaireResponse questionnaireResponse = buildQuestionnaireResponse(QUESTIONNAIRE_RESPONSE_ID_1, QUESTIONNAIRE_ID_1, PATIENT_ID);
+        FhirLookupResult lookupResult = FhirLookupResult.fromResources(questionnaireResponse);
+        Mockito.when(fhirClient.lookupQuestionnaireResponseById(questionnaireResponseId)).thenReturn(lookupResult);
+
+        QuestionnaireResponseModel questionnaireResponseModel = buildQuestionnaireResponseModel();
+        Mockito.when(fhirMapper.mapQuestionnaireResponse(questionnaireResponse, lookupResult)).thenReturn(questionnaireResponseModel);
+
+        // Act
+        Optional<QuestionnaireResponseModel> result = subject.getQuestionnaireResponseById(new QualifiedId(questionnaireResponseId));
+
+        // Assert
+        assertEquals(questionnaireResponseModel, result.get());
+    }
+
+    @Test
+    public void getQuestionnaireResponseById_responseForDifferentPatient_throwsException() throws Exception {
+        // Arrange
+        String questionnaireResponseId = QUESTIONNAIRE_RESPONSE_ID_1;
+
+        QuestionnaireResponse questionnaireResponse = buildQuestionnaireResponse(QUESTIONNAIRE_RESPONSE_ID_1, QUESTIONNAIRE_ID_1, PATIENT_ID);
+        Mockito.when(fhirClient.lookupQuestionnaireResponseById(questionnaireResponseId)).thenReturn(FhirLookupResult.fromResources(questionnaireResponse));
+
+        Mockito.doThrow(AccessValidationException.class).when(accessValidator).validateAccess(questionnaireResponse);
+
+        // Act
+
+        // Assert
+        assertThrows(AccessValidationException.class, () -> subject.getQuestionnaireResponseById(new QualifiedId(questionnaireResponseId)));
+    }
+
+    @Test
+    public void getQuestionnaireResponseById_responseMissing_returnsEmpty() throws Exception {
+        // Arrange
+        String questionnaireResponseId = QUESTIONNAIRE_RESPONSE_ID_1;
+
+        Mockito.when(fhirClient.lookupQuestionnaireResponseById(questionnaireResponseId)).thenReturn(FhirLookupResult.fromResources());
+
+        // Act
+        Optional<QuestionnaireResponseModel> result = subject.getQuestionnaireResponseById(new QualifiedId(questionnaireResponseId));
+
+        // Assert
+        assertFalse(result.isPresent());
     }
 
     @Test

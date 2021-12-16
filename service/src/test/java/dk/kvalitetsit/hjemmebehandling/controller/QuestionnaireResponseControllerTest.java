@@ -10,14 +10,17 @@ import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.BadRequestException;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.ForbiddenException;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.InternalServerErrorException;
+import dk.kvalitetsit.hjemmebehandling.controller.exception.ResourceNotFoundException;
 import dk.kvalitetsit.hjemmebehandling.controller.http.LocationHeaderBuilder;
 import dk.kvalitetsit.hjemmebehandling.model.CarePlanModel;
+import dk.kvalitetsit.hjemmebehandling.model.QualifiedId;
 import dk.kvalitetsit.hjemmebehandling.model.QuestionnaireResponseModel;
 import dk.kvalitetsit.hjemmebehandling.service.QuestionnaireResponseService;
 import dk.kvalitetsit.hjemmebehandling.service.exception.AccessValidationException;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ErrorKind;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ServiceException;
 import dk.kvalitetsit.hjemmebehandling.types.PageDetails;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -119,6 +122,64 @@ public class QuestionnaireResponseControllerTest {
 
         // Assert
         assertThrows(InternalServerErrorException.class, () -> subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize));
+    }
+
+    @Test
+    public void getQuestionnaireResponseById_responsePresent_200() throws Exception {
+        // Arrange
+        String questionnaireResponseId = "questionnaireresponse-1";
+
+        QuestionnaireResponseModel questionnaireResponseModel = new QuestionnaireResponseModel();
+        QuestionnaireResponseDto questionnaireResponseDto = new QuestionnaireResponseDto();
+        Mockito.when(questionnaireResponseService.getQuestionnaireResponseById(new QualifiedId(questionnaireResponseId, ResourceType.QuestionnaireResponse))).thenReturn(Optional.of(questionnaireResponseModel));
+        Mockito.when(dtoMapper.mapQuestionnaireResponseModel(questionnaireResponseModel)).thenReturn(questionnaireResponseDto);
+
+        // Act
+        ResponseEntity<QuestionnaireResponseDto> result = subject.getQuestionnaireResponseById(questionnaireResponseId);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(questionnaireResponseDto, result.getBody());
+    }
+
+    @Test
+    public void getQuestionnaireResponseById_responseMissing_404() throws Exception {
+        // Arrange
+        String questionnaireResponseId = "questionnaireresponse-1";
+
+        Mockito.when(questionnaireResponseService.getQuestionnaireResponseById(new QualifiedId(questionnaireResponseId, ResourceType.QuestionnaireResponse))).thenReturn(Optional.empty());
+
+        // Act
+
+        // Assert
+        assertThrows(ResourceNotFoundException.class, () -> subject.getQuestionnaireResponseById(questionnaireResponseId));
+    }
+
+    @Test
+    public void getQuestionnaireResponseById_accessViolation_403() throws Exception {
+        // Arrange
+        String questionnaireResponseId = "questionnaireresponse-1";
+
+        Mockito.doThrow(AccessValidationException.class).when(questionnaireResponseService).getQuestionnaireResponseById(new QualifiedId(questionnaireResponseId, ResourceType.QuestionnaireResponse));
+
+        // Act
+
+        // Assert
+        assertThrows(ForbiddenException.class, () -> subject.getQuestionnaireResponseById(questionnaireResponseId));
+    }
+
+    @Test
+    public void getQuestionnaireResponseById_failure_500() throws Exception {
+        // Arrange
+        String questionnaireResponseId = "questionnaireresponse-1";
+
+        Mockito.doThrow(new ServiceException("error", ErrorKind.INTERNAL_SERVER_ERROR, ErrorDetails.INTERNAL_SERVER_ERROR))
+                .when(questionnaireResponseService).getQuestionnaireResponseById(new QualifiedId(questionnaireResponseId, ResourceType.QuestionnaireResponse));
+
+        // Act
+
+        // Assert
+        assertThrows(InternalServerErrorException.class, () -> subject.getQuestionnaireResponseById(questionnaireResponseId));
     }
 
     @Test

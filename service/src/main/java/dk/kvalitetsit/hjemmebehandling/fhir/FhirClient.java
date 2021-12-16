@@ -2,26 +2,14 @@ package dk.kvalitetsit.hjemmebehandling.fhir;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.ICriterion;
-import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
-import ca.uhn.fhir.rest.gclient.TokenClientParam;
-import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
-import dk.kvalitetsit.hjemmebehandling.constants.SearchParameters;
 import dk.kvalitetsit.hjemmebehandling.constants.Systems;
-import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
-import org.checkerframework.checker.nullness.Opt;
 import org.hl7.fhir.r4.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.text.html.Option;
-import java.sql.Date;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +36,13 @@ public class FhirClient {
     public FhirLookupResult lookupQuestionnaireResponses(String carePlanId) {
         var basedOnCriterion = QuestionnaireResponse.BASED_ON.hasId(carePlanId);
 
-        return lookupQuestionnaireResponseByCriteria(List.of(basedOnCriterion));
+        return lookupQuestionnaireResponsesByCriteria(List.of(basedOnCriterion));
+    }
+
+    public FhirLookupResult lookupQuestionnaireResponseById(String questionnaireResponseId) {
+        var idCriterion = QuestionnaireResponse.RES_ID.exactly().code(questionnaireResponseId);
+
+        return lookupQuestionnaireResponsesByCriteria(List.of(idCriterion));
     }
 
     public String saveQuestionnaireResponse(QuestionnaireResponse questionnaireResponse, CarePlan carePlan) {
@@ -95,7 +89,7 @@ public class FhirClient {
         return lookupByCriteria(Organization.class, criteria, List.of(), withOrganizations, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
-    private FhirLookupResult lookupQuestionnaireResponseByCriteria(List<ICriterion<?>> criteria) {
+    private FhirLookupResult lookupQuestionnaireResponsesByCriteria(List<ICriterion<?>> criteria) {
         var questionnaireResponseResult = lookupByCriteria(QuestionnaireResponse.class, criteria, List.of(QuestionnaireResponse.INCLUDE_BASED_ON, QuestionnaireResponse.INCLUDE_QUESTIONNAIRE, QuestionnaireResponse.INCLUDE_SUBJECT));
 
         // We also need the planDefinitions, which are found by following the chain QuestionnaireResponse.based-on -> CarePlan.instantiates-canonical.

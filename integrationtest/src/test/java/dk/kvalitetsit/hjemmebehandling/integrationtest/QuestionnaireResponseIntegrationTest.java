@@ -38,6 +38,18 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
     }
 
     @Test
+    public void getQuestionnaireResponseById_success() throws Exception {
+        // Arrange
+        String questionnaireResponseId = "questionnaireresponse-1";
+
+        // Act
+        ApiResponse<QuestionnaireResponseDto> response = subject.getQuestionnaireResponseByIdWithHttpInfo(questionnaireResponseId);
+
+        // Assert
+        assertEquals(200, response.getStatusCode());
+    }
+
+    @Test
     public void submitQuestionnaireResponse_success() throws Exception {
         // Arrange
         QuestionnaireResponseDto questionnaireResponseDto = new QuestionnaireResponseDto();

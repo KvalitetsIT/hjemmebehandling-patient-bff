@@ -6,13 +6,17 @@ import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
 import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
 import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.BadRequestException;
+import dk.kvalitetsit.hjemmebehandling.controller.exception.ResourceNotFoundException;
 import dk.kvalitetsit.hjemmebehandling.controller.http.LocationHeaderBuilder;
+import dk.kvalitetsit.hjemmebehandling.model.CarePlanModel;
+import dk.kvalitetsit.hjemmebehandling.model.QualifiedId;
 import dk.kvalitetsit.hjemmebehandling.model.QuestionnaireResponseModel;
 import dk.kvalitetsit.hjemmebehandling.service.QuestionnaireResponseService;
 import dk.kvalitetsit.hjemmebehandling.service.exception.AccessValidationException;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ServiceException;
 import dk.kvalitetsit.hjemmebehandling.types.PageDetails;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -60,7 +64,21 @@ public class QuestionnaireResponseController extends BaseController {
 
     @GetMapping(value = "/v1/questionnaireresponse/{id}")
     public ResponseEntity<QuestionnaireResponseDto> getQuestionnaireResponseById(@PathVariable("id") String id) {
-        throw new UnsupportedOperationException();
+        // Look up the QuestionnaireResponse
+        Optional<QuestionnaireResponseModel> questionnaireResponse = Optional.empty();
+
+        try {
+            questionnaireResponse = questionnaireResponseService.getQuestionnaireResponseById(new QualifiedId(id, ResourceType.QuestionnaireResponse));
+        }
+        catch(AccessValidationException | ServiceException e) {
+            logger.error("Could not retrieve QuestionnaireResponse", e);
+            throw toStatusCodeException(e);
+        }
+
+        if(!questionnaireResponse.isPresent()) {
+            throw new ResourceNotFoundException(String.format("QuestionnaireResponse with id %s not found.", id), ErrorDetails.QUESTIONNAIRE_RESPONSE_DOES_NOT_EXIST);
+        }
+        return ResponseEntity.ok(dtoMapper.mapQuestionnaireResponseModel(questionnaireResponse.get()));
     }
 
     @PostMapping(value = "/v1/questionnaireresponse")
