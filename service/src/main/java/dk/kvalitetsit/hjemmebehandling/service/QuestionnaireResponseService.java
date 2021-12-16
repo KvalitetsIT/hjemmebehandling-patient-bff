@@ -69,6 +69,11 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         }
         var carePlanModel = fhirMapper.mapCarePlan(carePlanResult.getCarePlans().get(0), carePlanResult);
 
+        // Check that the carePlan indicated by the client is that of the patient's active careplan
+        if(!questionnaireResponseModel.getCarePlanId().equals(carePlanModel.getId())) {
+            throw new ServiceException("The provided CarePlan id does not identify the patient's current active careplan.", ErrorKind.BAD_REQUEST, ErrorDetails.WRONG_CAREPLAN_ID);
+        }
+
         // Update the frequency timestamps on the careplan (the specific activity and the careplan itself)
         refreshFrequencyTimestamps(carePlanModel, questionnaireResponseModel.getQuestionnaireId());
 

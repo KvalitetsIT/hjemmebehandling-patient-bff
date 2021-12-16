@@ -3,6 +3,7 @@ package dk.kvalitetsit.hjemmebehandling.constants.errors;
 public enum ErrorDetails {
     NO_ACTIVE_CAREPLAN_EXISTS("Den nuværende bruger har ingen aktiv behandlingsplan.", 10),
     INCOMPLETE_RESPONSE("Den indsendte besvarelse er ikke korrekt udfyldt.", 11),
+    WRONG_CAREPLAN_ID("Den angivne behandlingsplan svarer ikke til patientens aktive behandlingsplan.", 12),
     ACCESS_VIOLATION("Du har ikke rettigheder til at tilgå de forespurgte data.", 16),
     PARAMETERS_INCOMPLETE("Parametre er mangelfuldt udfyldt.", 17),
     INTERNAL_SERVER_ERROR("Der opstod en intern fejl i systemet.", 99);

@@ -140,6 +140,26 @@ public class QuestionnaireResponseServiceTest {
     }
 
     @Test
+    public void submitQuestionnaireResponse_wrongCarePlanId_throwsException() {
+        // Arrange
+        var carePlanId = new QualifiedId(CAREPLAN_ID_1);
+        QuestionnaireResponseModel questionnaireResponseModel = buildQuestionnaireResponseModel(carePlanId);
+        String cpr = "0101010101";
+
+        CarePlan carePlan = buildCarePlan(CAREPLAN_ID_2);
+        FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan);
+        Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
+
+        CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_2, PATIENT_ID);
+        Mockito.when(fhirMapper.mapCarePlan(carePlan, lookupResult)).thenReturn(carePlanModel);
+
+        // Act
+
+        // Assert
+        assertThrows(ServiceException.class, () -> subject.submitQuestionnaireResponse(questionnaireResponseModel, cpr));
+    }
+
+    @Test
     public void submitQuestionnaireResponse_success_returnsGeneratedId() throws Exception {
         // Arrange
         QuestionnaireResponseModel questionnaireResponseModel = buildQuestionnaireResponseModel();
@@ -368,10 +388,15 @@ public class QuestionnaireResponseServiceTest {
     }
 
     private QuestionnaireResponseModel buildQuestionnaireResponseModel() {
+        return buildQuestionnaireResponseModel(new QualifiedId(CAREPLAN_ID_1));
+    }
+
+    private QuestionnaireResponseModel buildQuestionnaireResponseModel(QualifiedId carePlanId) {
         QuestionnaireResponseModel questionnaireResponseModel = new QuestionnaireResponseModel();
 
         questionnaireResponseModel.setQuestionAnswerPairs(List.of(new QuestionAnswerPairModel()));
         questionnaireResponseModel.setQuestionnaireId(new QualifiedId(QUESTIONNAIRE_ID_1));
+        questionnaireResponseModel.setCarePlanId(carePlanId);
 
         return questionnaireResponseModel;
     }
