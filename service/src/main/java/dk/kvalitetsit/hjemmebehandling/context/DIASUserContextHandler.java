@@ -17,8 +17,13 @@ public class DIASUserContextHandler implements IUserContextHandler {
 
 	
 	public UserContext mapTokenToUser(FhirClient client, DecodedJWT jwt) {
-        throw new UnsupportedOperationException();
+        var context = new UserContext();
 
+        context.setCpr("0101010101");
+
+        return context;
+
+        // TODO - Implement this properly!
 //		var context = new UserContext();
 //		if(jwt==null) {
 //			return context;
