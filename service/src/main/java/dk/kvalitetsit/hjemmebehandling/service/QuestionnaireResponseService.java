@@ -48,8 +48,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
             return List.of();
         }
 
-        // Validate that the user is allowed to retrieve the QuestionnaireResponses.
-        validateAccess(responses);
+        validateCorrectSubject(lookupResult);
 
         // Map and return the responses
         return responses
@@ -66,11 +65,11 @@ public class QuestionnaireResponseService extends AccessValidatingService {
             return Optional.empty();
         }
 
-        // Validate that the user is allowed to access the response.
-        validateAccess(questionnaireResponse.get());
-
         // Map the resource
         QuestionnaireResponseModel mappedQuestionnaireResponse = fhirMapper.mapQuestionnaireResponse(questionnaireResponse.get(), lookupResult);
+
+        validateCorrectSubject(lookupResult);
+
         return Optional.of(mappedQuestionnaireResponse);
     }
 

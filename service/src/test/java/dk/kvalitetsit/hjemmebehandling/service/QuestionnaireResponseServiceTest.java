@@ -67,7 +67,8 @@ public class QuestionnaireResponseServiceTest {
         String carePlanId = CAREPLAN_ID_1;
 
         QuestionnaireResponse response = buildQuestionnaireResponse(QUESTIONNAIRE_RESPONSE_ID_1, QUESTIONNAIRE_ID_1, PATIENT_ID);
-        FhirLookupResult lookupResult = FhirLookupResult.fromResource(response);
+        Patient patient = buildPatient(PATIENT_ID);
+        FhirLookupResult lookupResult = FhirLookupResult.fromResources(response, patient);
         Mockito.when(fhirClient.lookupQuestionnaireResponses(carePlanId)).thenReturn(lookupResult);
 
         QuestionnaireResponseModel responseModel = new QuestionnaireResponseModel();
@@ -100,11 +101,12 @@ public class QuestionnaireResponseServiceTest {
         // Arrange
         String carePlanId = CAREPLAN_ID_1;
 
-        QuestionnaireResponse response = new QuestionnaireResponse();
-        FhirLookupResult lookupResult = FhirLookupResult.fromResource(response);
+        QuestionnaireResponse response = buildQuestionnaireResponse(QUESTIONNAIRE_RESPONSE_ID_1, QUESTIONNAIRE_ID_1, PATIENT_ID);
+        Patient patient = buildPatient(PATIENT_ID);
+        FhirLookupResult lookupResult = FhirLookupResult.fromResources(response, patient);
         Mockito.when(fhirClient.lookupQuestionnaireResponses(carePlanId)).thenReturn(lookupResult);
 
-        Mockito.doThrow(AccessValidationException.class).when(accessValidator).validateAccess(List.of(response));
+        Mockito.doThrow(AccessValidationException.class).when(accessValidator).validateAccess(patient);
 
         // Act
 
@@ -118,7 +120,8 @@ public class QuestionnaireResponseServiceTest {
         String questionnaireResponseId = QUESTIONNAIRE_RESPONSE_ID_1;
 
         QuestionnaireResponse questionnaireResponse = buildQuestionnaireResponse(QUESTIONNAIRE_RESPONSE_ID_1, QUESTIONNAIRE_ID_1, PATIENT_ID);
-        FhirLookupResult lookupResult = FhirLookupResult.fromResources(questionnaireResponse);
+        Patient patient = buildPatient(PATIENT_ID);
+        FhirLookupResult lookupResult = FhirLookupResult.fromResources(questionnaireResponse, patient);
         Mockito.when(fhirClient.lookupQuestionnaireResponseById(questionnaireResponseId)).thenReturn(lookupResult);
 
         QuestionnaireResponseModel questionnaireResponseModel = buildQuestionnaireResponseModel();
@@ -136,10 +139,12 @@ public class QuestionnaireResponseServiceTest {
         // Arrange
         String questionnaireResponseId = QUESTIONNAIRE_RESPONSE_ID_1;
 
-        QuestionnaireResponse questionnaireResponse = buildQuestionnaireResponse(QUESTIONNAIRE_RESPONSE_ID_1, QUESTIONNAIRE_ID_1, PATIENT_ID);
-        Mockito.when(fhirClient.lookupQuestionnaireResponseById(questionnaireResponseId)).thenReturn(FhirLookupResult.fromResources(questionnaireResponse));
+        QuestionnaireResponse response = buildQuestionnaireResponse(QUESTIONNAIRE_RESPONSE_ID_1, QUESTIONNAIRE_ID_1, PATIENT_ID);
+        Patient patient = buildPatient(PATIENT_ID);
+        FhirLookupResult lookupResult = FhirLookupResult.fromResources(response, patient);
+        Mockito.when(fhirClient.lookupQuestionnaireResponseById(questionnaireResponseId)).thenReturn(lookupResult);
 
-        Mockito.doThrow(AccessValidationException.class).when(accessValidator).validateAccess(questionnaireResponse);
+        Mockito.doThrow(AccessValidationException.class).when(accessValidator).validateAccess(patient);
 
         // Act
 
@@ -399,6 +404,14 @@ public class QuestionnaireResponseServiceTest {
         carePlanModel.setQuestionnaires(questionnaires);
 
         return carePlanModel;
+    }
+
+    private Patient buildPatient(String patientId) {
+        Patient patient = new Patient();
+
+        patient.setId(patientId);
+
+        return patient;
     }
 
     private QuestionnaireWrapperModel buildQuestionnaireWrapperModel(String questionnaireId, Instant satisfiedUntil) {

@@ -5,10 +5,8 @@ import dk.kvalitetsit.hjemmebehandling.fhir.FhirClient;
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirLookupResult;
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirMapper;
 import dk.kvalitetsit.hjemmebehandling.model.CarePlanModel;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Timing;
+import dk.kvalitetsit.hjemmebehandling.service.access.AccessValidator;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,6 +31,9 @@ public class CarePlanServiceTest {
     @Mock
     private FhirMapper fhirMapper;
 
+    @Mock
+    private AccessValidator accessValidator;
+
     private static final String CPR_1 = "0101010101";
 
     private static final String CAREPLAN_ID_1 = "CarePlan/careplan-1";
@@ -47,8 +48,9 @@ public class CarePlanServiceTest {
         String cpr = CPR_1;
 
         CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1, PATIENT_ID_1);
+        Patient patient = buildPatient(PATIENT_ID_1);
 
-        FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan);
+        FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan, patient);
         Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
 
         CarePlanModel carePlanModel = new CarePlanModel();
@@ -111,5 +113,13 @@ public class CarePlanServiceTest {
         }
 
         return carePlan;
+    }
+
+    private Patient buildPatient(String patientId) {
+        Patient patient = new Patient();
+
+        patient.setId(patientId);
+
+        return patient;
     }
 }

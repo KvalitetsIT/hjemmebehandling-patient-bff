@@ -28,7 +28,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
     @Test
     public void getQuestionnaireResponsesByCarePlanId_success() throws Exception {
         // Arrange
-        String carePlanId = "careplan-1";
+        String carePlanId = "careplan-infektionsmedicinsk-1";
 
         // Act
         ApiResponse<List<QuestionnaireResponseDto>> response = subject.getQuestionnaireResponsesByCarePlanIdWithHttpInfo(carePlanId, 1, 10);
@@ -40,7 +40,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
     @Test
     public void getQuestionnaireResponseById_success() throws Exception {
         // Arrange
-        String questionnaireResponseId = "questionnaireresponse-1";
+        String questionnaireResponseId = "questionnaireresponse-infektionsmedicinsk-1";
 
         // Act
         ApiResponse<QuestionnaireResponseDto> response = subject.getQuestionnaireResponseByIdWithHttpInfo(questionnaireResponseId);
