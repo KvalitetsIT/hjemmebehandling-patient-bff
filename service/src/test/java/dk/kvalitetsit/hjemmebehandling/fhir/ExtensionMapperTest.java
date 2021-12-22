@@ -2,12 +2,15 @@ package dk.kvalitetsit.hjemmebehandling.fhir;
 
 import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
 import dk.kvalitetsit.hjemmebehandling.constants.Systems;
+import dk.kvalitetsit.hjemmebehandling.model.PhoneHourModel;
 import dk.kvalitetsit.hjemmebehandling.model.ThresholdModel;
 import dk.kvalitetsit.hjemmebehandling.types.ThresholdType;
+import dk.kvalitetsit.hjemmebehandling.types.Weekday;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -54,6 +57,26 @@ public class ExtensionMapperTest {
         assertEquals(Systems.ORGANIZATION, result.getUrl());
         assertEquals(Reference.class, result.getValue().getClass());
         assertEquals(organizationId, ((Reference) result.getValue()).getReference());
+    }
+
+    @Test
+    public void mapPhoneHours_success() {
+        // Arrange
+        PhoneHourModel phoneHours = new PhoneHourModel();
+        phoneHours.setWeekdays(List.of(Weekday.MON, Weekday.FRI));
+        phoneHours.setFrom(LocalTime.parse("08:00"));
+        phoneHours.setTo(LocalTime.parse("12:00"));
+
+        // Act
+        Extension result = ExtensionMapper.mapPhoneHours(phoneHours);
+
+        // Assert
+        assertEquals(Systems.PHONE_HOURS, result.getUrl());
+        assertEquals(2, result.getExtensionsByUrl(Systems.PHONE_HOURS_WEEKDAY).size());
+        assertEquals(Weekday.MON.toString(), result.getExtensionsByUrl(Systems.PHONE_HOURS_WEEKDAY).get(0).getValue().toString());
+
+        assertEquals(new TimeType("08:00").primitiveValue(), result.getExtensionByUrl(Systems.PHONE_HOURS_FROM).getValue().primitiveValue());
+        assertEquals(new TimeType("12:00").primitiveValue(), result.getExtensionByUrl(Systems.PHONE_HOURS_TO).getValue().primitiveValue());
     }
 
     @Test
@@ -114,6 +137,28 @@ public class ExtensionMapperTest {
 
         // Assert
         assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void extractPhoneHours_success() {
+        // Arrange
+        Extension extension = new Extension(Systems.PHONE_HOURS);
+
+        extension.addExtension().setUrl(Systems.PHONE_HOURS_WEEKDAY).setValue(new StringType(Weekday.MON.toString()));
+        extension.addExtension().setUrl(Systems.PHONE_HOURS_WEEKDAY).setValue(new StringType(Weekday.FRI.toString()));
+
+        extension.addExtension().setUrl(Systems.PHONE_HOURS_FROM).setValue(new TimeType("08:00"));
+        extension.addExtension().setUrl(Systems.PHONE_HOURS_TO).setValue(new TimeType("12:00"));
+
+        // Act
+        PhoneHourModel result = ExtensionMapper.extractPhoneHours(extension);
+
+        // Assert
+        assertEquals(2, result.getWeekdays().size());
+        assertTrue(result.getWeekdays().contains(Weekday.MON));
+        assertTrue(result.getWeekdays().contains(Weekday.FRI));
+        assertEquals(LocalTime.parse("08:00"), result.getFrom());
+        assertEquals(LocalTime.parse("12:00"), result.getTo());
     }
 
     @Test

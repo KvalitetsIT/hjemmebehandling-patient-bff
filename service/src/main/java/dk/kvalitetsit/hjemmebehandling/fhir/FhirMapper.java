@@ -110,6 +110,29 @@ public class FhirMapper {
         return carePlanModel;
     }
 
+    public OrganizationModel mapOrganization(Organization organization) {
+        OrganizationModel organizationModel = new OrganizationModel();
+
+        organizationModel.setId(extractId(organization));
+        organizationModel.setName(organization.getName());
+
+        var address = organization.getAddressFirstRep();
+        if(address != null) {
+            organizationModel.setStreet(String.join("\n", address.getLine().stream().map(l -> l.getValue()).collect(Collectors.toList())));
+            organizationModel.setPostalCode(address.getPostalCode());
+            organizationModel.setCity(address.getCity());
+            organizationModel.setCountry(address.getCountry());
+        }
+
+        var telecom = organization.getTelecomFirstRep();
+        if(telecom != null) {
+            organizationModel.setPhone(telecom.getValue());
+            organizationModel.setPhoneHours(ExtensionMapper.extractPhoneHours(telecom.getExtensionsByUrl(Systems.PHONE_HOURS)));
+        }
+
+        return organizationModel;
+    }
+
     public PatientModel mapPatient(Patient patient) {
         PatientModel patientModel = new PatientModel();
 

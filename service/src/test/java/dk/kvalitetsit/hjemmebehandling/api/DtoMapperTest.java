@@ -48,6 +48,32 @@ public class DtoMapperTest {
     }
 
     @Test
+    public void mapOrganizationDto_success() {
+        // Arrange
+        OrganizationDto organizationDto = buildOrganizationDto();
+
+        // Act
+        OrganizationModel result = subject.mapOrganizationDto(organizationDto);
+
+        // Assert
+        assertEquals(organizationDto.getCity(), result.getCity());
+        assertEquals(organizationDto.getPostalCode(), result.getPostalCode());
+    }
+
+    @Test
+    public void mapOrganizationModel_success() {
+        // Arrange
+        OrganizationModel organizationModel = buildOrganizationModel();
+
+        // Act
+        OrganizationDto result = subject.mapOrganizationModel(organizationModel);
+
+        // Assert
+        assertEquals(organizationModel.getCity(), result.getCity());
+        assertEquals(organizationModel.getPostalCode(), result.getPostalCode());
+    }
+
+    @Test
     public void mapPatientDto_success() {
         // Arrange
         PatientDto patientDto = buildPatientDto();
@@ -148,6 +174,44 @@ public class DtoMapperTest {
         frequencyModel.setTimeOfDay(LocalTime.parse("04:00"));
 
         return frequencyModel;
+    }
+
+    private OrganizationDto buildOrganizationDto() {
+        OrganizationDto organizationDto = new OrganizationDto();
+
+        organizationDto.setName("Infektionsmedicinsk afdeling");
+        organizationDto.setStreet("Fiskergade 66");
+        organizationDto.setPostalCode("8000");
+        organizationDto.setCity("Aarhus");
+        organizationDto.setCountry("Danmark");
+        organizationDto.setPhone("22334455");
+
+        PhoneHourDto phoneHourDto = new PhoneHourDto();
+        phoneHourDto.setWeekdays(List.of(Weekday.MON, Weekday.FRI));
+        phoneHourDto.setFrom("07:00");
+        phoneHourDto.setTo("11:00");
+        organizationDto.setPhoneHours(List.of(phoneHourDto));
+
+        return organizationDto;
+    }
+
+    private OrganizationModel buildOrganizationModel() {
+        OrganizationModel organizationModel = new OrganizationModel();
+
+        organizationModel.setName("Infektionsmedicinsk afdeling");
+        organizationModel.setStreet("Fiskergade 66");
+        organizationModel.setPostalCode("8000");
+        organizationModel.setCity("Aarhus");
+        organizationModel.setCountry("Danmark");
+        organizationModel.setPhone("22334455");
+
+        PhoneHourModel phoneHourModel = new PhoneHourModel();
+        phoneHourModel.setWeekdays(List.of(Weekday.MON, Weekday.FRI));
+        phoneHourModel.setFrom(LocalTime.parse("07:00"));
+        phoneHourModel.setTo(LocalTime.parse("11:00"));
+        organizationModel.setPhoneHours(List.of(phoneHourModel));
+
+        return organizationModel;
     }
 
     private PatientDto buildPatientDto() {

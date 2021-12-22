@@ -75,6 +75,56 @@ public class DtoMapper {
         return frequencyDto;
     }
 
+    public OrganizationModel mapOrganizationDto(OrganizationDto organizationDto) {
+        OrganizationModel organizationModel = new OrganizationModel();
+
+        organizationModel.setName(organizationDto.getName());
+        organizationModel.setStreet(organizationDto.getStreet());
+        organizationModel.setPostalCode(organizationDto.getPostalCode());
+        organizationModel.setCity(organizationDto.getCity());
+        organizationModel.setCountry(organizationDto.getCountry());
+        organizationModel.setPhone(organizationDto.getPhone());
+        if(organizationDto.getPhoneHours() != null) {
+            organizationModel.setPhoneHours(organizationDto.getPhoneHours()
+                    .stream()
+                    .map(ph -> {
+                        var hours = new PhoneHourModel();
+                        hours.setWeekdays(ph.getWeekdays());
+                        hours.setFrom(LocalTime.parse(ph.getFrom()));
+                        hours.setTo(LocalTime.parse(ph.getTo()));
+                        return hours;
+                    })
+                    .collect(Collectors.toList()));
+        }
+
+        return organizationModel;
+    }
+
+    public OrganizationDto mapOrganizationModel(OrganizationModel organizationModel) {
+        OrganizationDto organizationDto = new OrganizationDto();
+
+        organizationDto.setName(organizationModel.getName());
+        organizationDto.setStreet(organizationModel.getStreet());
+        organizationDto.setPostalCode(organizationModel.getPostalCode());
+        organizationDto.setCity(organizationModel.getCity());
+        organizationDto.setCountry(organizationModel.getCountry());
+        organizationDto.setPhone(organizationModel.getPhone());
+        if(organizationModel.getPhoneHours() != null) {
+            organizationDto.setPhoneHours(organizationModel.getPhoneHours()
+                    .stream()
+                    .map(ph -> {
+                        var hours = new PhoneHourDto();
+                        hours.setWeekdays(ph.getWeekdays());
+                        hours.setFrom(ph.getFrom().toString());
+                        hours.setTo(ph.getTo().toString());
+                        return hours;
+                    })
+                    .collect(Collectors.toList()));
+        }
+
+        return organizationDto;
+    }
+
     public PatientModel mapPatientDto(PatientDto patient) {
         PatientModel patientModel = new PatientModel();
 

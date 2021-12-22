@@ -5,12 +5,10 @@ import dk.kvalitetsit.hjemmebehandling.constants.*;
 import dk.kvalitetsit.hjemmebehandling.model.*;
 import dk.kvalitetsit.hjemmebehandling.types.ThresholdType;
 import dk.kvalitetsit.hjemmebehandling.types.Weekday;
-import dk.kvalitetsit.hjemmebehandling.util.DateProvider;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
@@ -128,6 +126,21 @@ public class FhirMapperTest {
         assertEquals(1, result.getQuestionnaires().size());
 
         assertEquals(QUESTIONNAIRE_ID_1, result.getQuestionnaires().get(0).getQuestionnaire().getId().toString());
+    }
+
+    @Test
+    public void mapOrganization_mapsAttributes() {
+        // Arrange
+        Organization organization = buildOrganization(ORGANIZATION_ID_1);
+
+        // Act
+        OrganizationModel result = subject.mapOrganization(organization);
+
+        // Assert
+        assertEquals(ORGANIZATION_ID_1, result.getId().toString());
+        assertEquals(organization.getName(), result.getName());
+        assertEquals(organization.getTelecomFirstRep().getValue(), result.getPhone());
+        assertNotNull(organization.getTelecomFirstRep().getExtensionByUrl(Systems.PHONE_HOURS));
     }
 
     @Test
@@ -317,6 +330,23 @@ public class FhirMapperTest {
 
         organization.setId(organizationId);
         organization.setName("Infektionsmedicinsk Afdeling");
+
+        organization.addAddress()
+                .setLine(List.of(new StringType("Fiskergade 66")))
+                .setPostalCode("8000")
+                .setCity("Aarhus")
+                .setCountry("Danmark");
+
+        organization.addTelecom()
+                .setSystem(ContactPoint.ContactPointSystem.PHONE)
+                .setValue("22334455")
+                .setRank(1);
+
+        PhoneHourModel phoneHourModel = new PhoneHourModel();
+        phoneHourModel.setWeekdays(List.of(Weekday.MON, Weekday.FRI));
+        phoneHourModel.setFrom(LocalTime.parse("07:00"));
+        phoneHourModel.setTo(LocalTime.parse("11:00"));
+        organization.getTelecomFirstRep().addExtension(ExtensionMapper.mapPhoneHours(phoneHourModel));
 
         return organization;
     }

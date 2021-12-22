@@ -1,15 +1,15 @@
-package dk.kvalitetsit.hjemmebehandling.api;
+package dk.kvalitetsit.hjemmebehandling.model;
 
 import java.util.List;
 
-public class OrganizationDto extends BaseDto {
+public class OrganizationModel extends BaseModel {
     private String name;
     private String street;
     private String postalCode;
     private String city;
     private String country;
     private String phone;
-    private List<PhoneHourDto> phoneHours;
+    private List<PhoneHourModel> phoneHours;
 
     public String getName() {
         return name;
@@ -59,11 +59,11 @@ public class OrganizationDto extends BaseDto {
         this.phone = phone;
     }
 
-    public List<PhoneHourDto> getPhoneHours() {
+    public List<PhoneHourModel> getPhoneHours() {
         return phoneHours;
     }
 
-    public void setPhoneHours(List<PhoneHourDto> phoneHours) {
+    public void setPhoneHours(List<PhoneHourModel> phoneHours) {
         this.phoneHours = phoneHours;
     }
 }

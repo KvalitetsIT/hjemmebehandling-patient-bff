@@ -16,5 +16,10 @@ public class Systems {
     public static final String THRESHOLD_VALUE_RANGE = "http://hjemmebehandling.rm.dk/threshold-value-range";
     public static final String THRESHOLD_VALUE_BOOLEAN = "http://hjemmebehandling.rm.dk/threshold-value-boolean";
 
+    public static final String PHONE_HOURS = "http://hjemmebehandling.rm.dk/phone-hours";
+    public static final String PHONE_HOURS_WEEKDAY = "http://hjemmebehandling.rm.dk/phone-hours-weekday";
+    public static final String PHONE_HOURS_FROM = "http://hjemmebehandling.rm.dk/phone-hours-from";
+    public static final String PHONE_HOURS_TO = "http://hjemmebehandling.rm.dk/phone-hours-to";
+
     public static final String CONTACT_RELATIONSHIP = "http://hjemmebehandling.rm.dk/contact-relationship";
 }

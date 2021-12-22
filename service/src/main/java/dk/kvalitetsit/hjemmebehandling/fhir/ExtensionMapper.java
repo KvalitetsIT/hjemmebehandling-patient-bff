@@ -4,12 +4,15 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
 import dk.kvalitetsit.hjemmebehandling.constants.Systems;
 import dk.kvalitetsit.hjemmebehandling.constants.TriagingCategory;
+import dk.kvalitetsit.hjemmebehandling.model.PhoneHourModel;
 import dk.kvalitetsit.hjemmebehandling.model.ThresholdModel;
 import dk.kvalitetsit.hjemmebehandling.types.ThresholdType;
+import dk.kvalitetsit.hjemmebehandling.types.Weekday;
 import org.hl7.fhir.r4.model.*;
 
 import java.sql.Date;
 import java.time.Instant;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +35,18 @@ public class ExtensionMapper {
 
     public static Extension mapOrganizationId(String organizationId) {
         return buildReferenceExtension(Systems.ORGANIZATION, organizationId);
+    }
+
+    public static Extension mapPhoneHours(PhoneHourModel phoneHours) {
+        List<Extension> extensions = new ArrayList<>();
+
+        for(var day : phoneHours.getWeekdays()) {
+            extensions.add(buildStringExtension(Systems.PHONE_HOURS_WEEKDAY, day.toString()));
+        }
+        extensions.add(buildTimeExtension(Systems.PHONE_HOURS_FROM, phoneHours.getFrom()));
+        extensions.add(buildTimeExtension(Systems.PHONE_HOURS_TO, phoneHours.getTo()));
+
+        return buildCompositeExtension(Systems.PHONE_HOURS, extensions);
     }
 
     public static List<Extension> mapThresholds(List<ThresholdModel> thresholds) {
@@ -74,6 +89,24 @@ public class ExtensionMapper {
 
     public static Optional<String> tryExtractOrganizationId(List<Extension> extensions) {
         return tryExtractReferenceFromExtensions(extensions, Systems.ORGANIZATION);
+    }
+
+    public static List<PhoneHourModel> extractPhoneHours(List<Extension> extensions) {
+        return extensions.stream().map(e -> extractPhoneHours(e)).collect(Collectors.toList());
+    }
+
+    public static PhoneHourModel extractPhoneHours(Extension extension) {
+        PhoneHourModel phoneHourModel = new PhoneHourModel();
+
+        phoneHourModel.setWeekdays(extension.getExtensionsByUrl(Systems.PHONE_HOURS_WEEKDAY)
+                .stream()
+                .map(e -> Enum.valueOf(Weekday.class, e.getValue().toString()))
+                .collect(Collectors.toList()));
+
+        phoneHourModel.setFrom(LocalTime.parse(extension.getExtensionByUrl(Systems.PHONE_HOURS_FROM).getValue().primitiveValue()));
+        phoneHourModel.setTo(LocalTime.parse(extension.getExtensionByUrl(Systems.PHONE_HOURS_TO).getValue().primitiveValue()));
+
+        return phoneHourModel;
     }
 
     public static List<ThresholdModel> extractThresholds(List<Extension> extensions) {
@@ -143,6 +176,10 @@ public class ExtensionMapper {
 
     private static Extension buildStringExtension(String url, String value) {
         return new Extension(url, new StringType(value));
+    }
+
+    private static Extension buildTimeExtension(String url, LocalTime value) {
+        return new Extension(url, new TimeType(value.toString()));
     }
 
     private static <T extends Enum<T>> T extractEnumFromExtensions(List<Extension> extensions, String url, Class<T> type) {

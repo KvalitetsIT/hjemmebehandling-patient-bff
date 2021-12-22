@@ -5,6 +5,7 @@ public enum ErrorDetails {
     INCOMPLETE_RESPONSE("Den indsendte besvarelse er ikke korrekt udfyldt.", 11),
     WRONG_CAREPLAN_ID("Den angivne behandlingsplan svarer ikke til patientens aktive behandlingsplan.", 12),
     QUESTIONNAIRE_RESPONSE_DOES_NOT_EXIST("Den angivne spørgeskemabesvarelse eksisterer ikke.", 13),
+    ORGANIZATION_DOES_NOT_EXIST("Den angivne organisation eksisterer ikke.", 14),
     ACCESS_VIOLATION("Du har ikke rettigheder til at tilgå de forespurgte data.", 16),
     PARAMETERS_INCOMPLETE("Parametre er mangelfuldt udfyldt.", 17),
     INTERNAL_SERVER_ERROR("Der opstod en intern fejl i systemet.", 99);

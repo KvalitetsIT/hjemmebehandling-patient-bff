@@ -110,6 +110,38 @@ public class FhirClientTest {
     }
 
     @Test
+    public void lookupOrganizationById_organizationPresent_success() {
+        // Arrange
+        String organizationId = ORGANIZATION_ID_1;
+
+        Organization organization = new Organization();
+        organization.setId(organizationId);
+
+        setupSearchOrganizationClient(organization);
+
+        // Act
+        FhirLookupResult result = subject.lookupOrganizationById(organizationId);
+
+        // Assert
+        assertTrue(result.getOrganization(organizationId).isPresent());
+        assertEquals(organization, result.getOrganization(organizationId).get());
+    }
+
+    @Test
+    public void lookupOrganizationById_organizationMissing_returnsEmptyResult() {
+        // Arrange
+        String organizationId = ORGANIZATION_ID_1;
+
+        setupSearchOrganizationClient();
+
+        // Act
+        FhirLookupResult result = subject.lookupOrganizationById(organizationId);
+
+        // Assert
+        assertFalse(result.getOrganization(organizationId).isPresent());
+    }
+
+    @Test
     public void lookupQuestionnaireResponses_carePlanAndQuestionnairesPresent_success() {
         // Arrange
         String carePlanId = "careplan-1";

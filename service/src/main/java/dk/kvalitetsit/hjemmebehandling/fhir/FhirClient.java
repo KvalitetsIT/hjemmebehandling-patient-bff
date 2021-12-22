@@ -33,6 +33,12 @@ public class FhirClient {
         return lookupCarePlansByCriteria(List.of(statusCriterion, cprCriterion));
     }
 
+    public FhirLookupResult lookupOrganizationById(String organizationId) {
+        var idCriterion = Organization.RES_ID.exactly().code(organizationId);
+
+        return lookupOrganizationsByCriteria(List.of(idCriterion));
+    }
+
     public FhirLookupResult lookupQuestionnaireResponses(String carePlanId) {
         var basedOnCriterion = QuestionnaireResponse.BASED_ON.hasId(carePlanId);
 
