@@ -104,6 +104,7 @@ public class DtoMapper {
     public OrganizationDto mapOrganizationModel(OrganizationModel organizationModel) {
         OrganizationDto organizationDto = new OrganizationDto();
 
+        organizationDto.setId(organizationModel.getId().toString());
         organizationDto.setName(organizationModel.getName());
         organizationDto.setStreet(organizationModel.getStreet());
         organizationDto.setPostalCode(organizationModel.getPostalCode());

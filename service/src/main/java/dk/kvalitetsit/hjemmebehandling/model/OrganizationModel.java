@@ -2,7 +2,8 @@ package dk.kvalitetsit.hjemmebehandling.model;
 
 import java.util.List;
 
-public class OrganizationModel extends BaseModel {
+public class OrganizationModel {
+    private QualifiedId id;
     private String name;
     private String street;
     private String postalCode;
@@ -10,6 +11,14 @@ public class OrganizationModel extends BaseModel {
     private String country;
     private String phone;
     private List<PhoneHourModel> phoneHours;
+
+    public QualifiedId getId() {
+        return id;
+    }
+
+    public void setId(QualifiedId id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

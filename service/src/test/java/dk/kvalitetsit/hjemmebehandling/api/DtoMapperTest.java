@@ -198,6 +198,7 @@ public class DtoMapperTest {
     private OrganizationModel buildOrganizationModel() {
         OrganizationModel organizationModel = new OrganizationModel();
 
+        organizationModel.setId(new QualifiedId(ORGANIZATION_ID_1));
         organizationModel.setName("Infektionsmedicinsk afdeling");
         organizationModel.setStreet("Fiskergade 66");
         organizationModel.setPostalCode("8000");
