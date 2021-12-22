@@ -44,6 +44,7 @@ public class DtoMapper {
         CarePlanDto carePlanDto = new CarePlanDto();
 
         carePlanDto.setId(carePlan.getId().toString());
+        carePlanDto.setOrganizationId(carePlan.getOrganizationId());
         carePlanDto.setTitle(carePlan.getTitle());
         carePlanDto.setStatus(carePlan.getStatus().toString());
         carePlanDto.setCreated(carePlan.getCreated());
