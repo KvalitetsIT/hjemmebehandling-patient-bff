@@ -43,8 +43,8 @@ public class DtoMapper {
     public CarePlanDto mapCarePlanModel(CarePlanModel carePlan) {
         CarePlanDto carePlanDto = new CarePlanDto();
 
-        carePlanDto.setId(carePlan.getId().toString());
-        carePlanDto.setOrganizationId(carePlan.getOrganizationId());
+        mapBaseAttributesToDto(carePlanDto, carePlan);
+
         carePlanDto.setTitle(carePlan.getTitle());
         carePlanDto.setStatus(carePlan.getStatus().toString());
         carePlanDto.setCreated(carePlan.getCreated());
@@ -174,7 +174,8 @@ public class DtoMapper {
     public PlanDefinitionDto mapPlanDefinitionModel(PlanDefinitionModel planDefinitionModel) {
         PlanDefinitionDto planDefinitionDto = new PlanDefinitionDto();
 
-        planDefinitionDto.setId(planDefinitionModel.getId().toString());
+        mapBaseAttributesToDto(planDefinitionDto, planDefinitionModel);
+
         planDefinitionDto.setName(planDefinitionModel.getName());
         planDefinitionDto.setTitle(planDefinitionModel.getTitle());
         // TODO - planDefinitionModel.getQuestionnaires() should never return null - but it can for now.
@@ -226,7 +227,8 @@ public class DtoMapper {
     public QuestionnaireDto mapQuestionnaireModel(QuestionnaireModel questionnaireModel) {
         QuestionnaireDto questionnaireDto = new QuestionnaireDto();
 
-        questionnaireDto.setId(questionnaireModel.getId().toString());
+        mapBaseAttributesToDto(questionnaireDto, questionnaireModel);
+
         questionnaireDto.setTitle(questionnaireModel.getTitle());
         questionnaireDto.setStatus(questionnaireModel.getStatus());
         if(questionnaireModel.getQuestions() != null) {
@@ -251,7 +253,8 @@ public class DtoMapper {
     public QuestionnaireResponseDto mapQuestionnaireResponseModel(QuestionnaireResponseModel questionnaireResponseModel) {
         QuestionnaireResponseDto questionnaireResponseDto = new QuestionnaireResponseDto();
 
-        questionnaireResponseDto.setId(questionnaireResponseModel.getId().toString());
+        mapBaseAttributesToDto(questionnaireResponseDto, questionnaireResponseModel);
+
         questionnaireResponseDto.setQuestionnaireId(questionnaireResponseModel.getQuestionnaireId().toString());
         questionnaireResponseDto.setCarePlanId(questionnaireResponseModel.getCarePlanId().toString());
         questionnaireResponseDto.setQuestionnaireName(questionnaireResponseModel.getQuestionnaireName());
@@ -283,6 +286,11 @@ public class DtoMapper {
         else {
             throw new IllegalArgumentException(String.format("Illegal id provided for resource of type %s: %s!", resourceType.toString(), id));
         }
+    }
+
+    private void mapBaseAttributesToDto(BaseDto target, BaseModel source) {
+        target.setId(source.getId().toString());
+        target.setOrganizationId(source.getOrganizationId());
     }
 
     private ContactDetailsModel mapContactDetailsDto(ContactDetailsDto contactDetails) {

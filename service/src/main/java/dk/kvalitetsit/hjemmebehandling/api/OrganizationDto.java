@@ -1,8 +1,11 @@
 package dk.kvalitetsit.hjemmebehandling.api;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 
-public class OrganizationDto extends BaseDto {
+public class OrganizationDto {
+    private String id;
     private String name;
     private String street;
     private String postalCode;
@@ -10,6 +13,15 @@ public class OrganizationDto extends BaseDto {
     private String country;
     private String phone;
     private List<PhoneHourDto> phoneHours;
+
+    @Schema(required = true, description = "Id of the resource", example = "CarePlan/10")
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
