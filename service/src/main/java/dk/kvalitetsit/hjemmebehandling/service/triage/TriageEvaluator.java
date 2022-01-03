@@ -20,8 +20,8 @@ public class TriageEvaluator {
     );
 
     public TriagingCategory determineTriagingCategory(List<AnswerModel> answers, List<ThresholdModel> thresholds) {
-        if(answers == null || answers.isEmpty() || thresholds == null || thresholds.isEmpty()) {
-            throw new IllegalArgumentException("Arguments must be non-null and non-empty!");
+        if(answers == null || answers.isEmpty() || thresholds == null) {
+            throw new IllegalArgumentException("Arguments must be non-null!");
         }
 
         // Group the thresholds by linkId
@@ -32,9 +32,12 @@ public class TriageEvaluator {
         // Evaluate each answer against its thresholds.
         var result = TriagingCategory.GREEN;
         for(var answer : answers) {
-            if(!thresholdsByLinkId.containsKey(answer.getLinkId())) {
-                throw new IllegalStateException(String.format("Trying to evaluate thresholds for answer with linkId %s, but no thresholds were found!", answer.getLinkId()));
+            boolean thresholdsWereFound = thresholdsByLinkId.containsKey(answer.getLinkId());
+
+            if(!thresholdsWereFound) {
+               return TriagingCategory.RED;
             }
+
             var thresholdsForAnswer = thresholdsByLinkId.get(answer.getLinkId());
 
             // We ASSUME that the thresholds are consistent in the sense that every possible answer can be mapped to exactly one ThresholdType,
@@ -76,7 +79,7 @@ public class TriageEvaluator {
             }
         }
         if(!result.isPresent()) {
-            throw new IllegalStateException(String.format("Could not evaluate boolean answer for linkId %s: No Threshold found for value %s", answer.getLinkId(), answer.getValue()));
+                return TriagingCategory.RED;
         }
         return result.get();
     }

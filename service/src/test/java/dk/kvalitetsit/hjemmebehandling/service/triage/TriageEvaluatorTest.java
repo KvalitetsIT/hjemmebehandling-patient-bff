@@ -7,6 +7,7 @@ import dk.kvalitetsit.hjemmebehandling.model.ThresholdModel;
 import dk.kvalitetsit.hjemmebehandling.types.ThresholdType;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -132,6 +133,54 @@ public class TriageEvaluatorTest {
 
         // Assert
         assertEquals(TriagingCategory.GREEN, result);
+    }
+
+    @Test
+    public void determineTriagingCategory_redTriagingCategory_WhenNoThresholds() {
+        // Arrange
+        var answers = List.of(buildQuantityAnswer("1", 6.0));
+        var thresholds = new ArrayList<ThresholdModel>();
+
+        // Act
+        var result = subject.determineTriagingCategory(answers, thresholds);
+
+        // Assert
+        assertEquals(TriagingCategory.RED, result);
+    }
+
+    @Test
+    public void determineTriagingCategory_redTriagingCategory_WhenNoThresholdMatchesAnswer_lowerEnd() {
+        // Arrange
+        var answers = List.of(buildQuantityAnswer("1", 1.0));
+        var thresholds = List.of(
+                buildQuantityThreshold("1", ThresholdType.ABNORMAL, 2.0, 5.0),
+                buildQuantityThreshold("1", ThresholdType.CRITICAL, 5.0, 6.0),
+                buildQuantityThreshold("1", ThresholdType.NORMAL, 6.0, null)
+        );
+
+        // Act
+        var result = subject.determineTriagingCategory(answers, thresholds);
+
+        // Assert
+        assertEquals(TriagingCategory.RED, result);
+    }
+
+
+    @Test
+    public void determineTriagingCategory_redTriagingCategory_WhenNoThresholdMatchesAnswer_higherEnd() {
+        // Arrange
+        var answers = List.of(buildQuantityAnswer("1", 8.0));
+        var thresholds = List.of(
+                buildQuantityThreshold("1", ThresholdType.ABNORMAL, null, 5.0),
+                buildQuantityThreshold("1", ThresholdType.CRITICAL, 5.0, 6.0),
+                buildQuantityThreshold("1", ThresholdType.NORMAL, 6.0, 7.0)
+        );
+
+        // Act
+        var result = subject.determineTriagingCategory(answers, thresholds);
+
+        // Assert
+        assertEquals(TriagingCategory.RED, result);
     }
 
     @Test
