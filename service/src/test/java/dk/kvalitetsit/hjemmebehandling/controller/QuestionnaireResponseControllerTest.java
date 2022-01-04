@@ -59,8 +59,8 @@ public class QuestionnaireResponseControllerTest {
     public void getQuestionnaireResponses_cprParameterMissing_400() {
         // Arrange
         String carePlanId = null;
-        Optional<Integer> pageNumber = Optional.of(1);
-        Optional<Integer> pageSize = Optional.of(10);
+        int pageNumber = 1;
+        int pageSize = 10;
 
         // Act
 
@@ -72,15 +72,16 @@ public class QuestionnaireResponseControllerTest {
     public void getQuestionnaireResponses_responsesPresent_200() throws Exception {
         // Arrange
         String carePlanId = "careplan-1";
-        Optional<Integer> pageNumber = Optional.of(1);
-        Optional<Integer> pageSize = Optional.of(10);
+        Integer pageNumber = 1;
+        Integer pageSize = 10;
 
         QuestionnaireResponseModel responseModel1 = new QuestionnaireResponseModel();
         QuestionnaireResponseModel responseModel2 = new QuestionnaireResponseModel();
         QuestionnaireResponseDto responseDto1 = new QuestionnaireResponseDto();
         QuestionnaireResponseDto responseDto2 = new QuestionnaireResponseDto();
 
-        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId)).thenReturn(List.of(responseModel1, responseModel2));
+        PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
+        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId,pageDetails)).thenReturn(List.of(responseModel1, responseModel2));
         Mockito.when(dtoMapper.mapQuestionnaireResponseModel(responseModel1)).thenReturn(responseDto1);
         Mockito.when(dtoMapper.mapQuestionnaireResponseModel(responseModel2)).thenReturn(responseDto2);
 
@@ -98,10 +99,10 @@ public class QuestionnaireResponseControllerTest {
     public void getQuestionnaireResponses_accessViolation_403() throws Exception {
         // Arrange
         String carePlanId = "careplan-1";
-        Optional<Integer> pageNumber = Optional.of(1);
-        Optional<Integer> pageSize = Optional.of(10);
-
-        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId)).thenThrow(AccessValidationException.class);
+        int pageNumber =1;
+        int pageSize =10;
+        PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
+        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId,pageDetails)).thenThrow(AccessValidationException.class);
 
         // Act
 
@@ -113,10 +114,11 @@ public class QuestionnaireResponseControllerTest {
     public void getQuestionnaireResponses_failureToFetch_500() throws Exception {
         // Arrange
         String carePlanId = "careplan-1";
-        Optional<Integer> pageNumber = Optional.of(1);
-        Optional<Integer> pageSize = Optional.of(10);
+        int pageNumber = 1;
+        int pageSize = 10;
 
-        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId)).thenThrow(new ServiceException("error", ErrorKind.INTERNAL_SERVER_ERROR, ErrorDetails.INTERNAL_SERVER_ERROR));
+        PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
+        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId,pageDetails)).thenThrow(new ServiceException("error", ErrorKind.INTERNAL_SERVER_ERROR, ErrorDetails.INTERNAL_SERVER_ERROR));
 
         // Act
 

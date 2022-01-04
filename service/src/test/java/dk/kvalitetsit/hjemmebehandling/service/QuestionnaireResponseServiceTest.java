@@ -10,6 +10,7 @@ import dk.kvalitetsit.hjemmebehandling.service.exception.AccessValidationExcepti
 import dk.kvalitetsit.hjemmebehandling.service.exception.ServiceException;
 import dk.kvalitetsit.hjemmebehandling.service.frequency.FrequencyEnumerator;
 import dk.kvalitetsit.hjemmebehandling.service.triage.TriageEvaluator;
+import dk.kvalitetsit.hjemmebehandling.types.PageDetails;
 import dk.kvalitetsit.hjemmebehandling.types.Weekday;
 import dk.kvalitetsit.hjemmebehandling.util.DateProvider;
 import org.hl7.fhir.r4.model.*;
@@ -25,6 +26,8 @@ import java.time.Instant;
 import java.time.LocalTime;
 import java.time.Period;
 import java.time.temporal.TemporalAmount;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -75,7 +78,10 @@ public class QuestionnaireResponseServiceTest {
         Mockito.when(fhirMapper.mapQuestionnaireResponse(response, lookupResult)).thenReturn(responseModel);
 
         // Act
-        List<QuestionnaireResponseModel> result = subject.getQuestionnaireResponses(carePlanId);
+        int pageNumber = 1;
+        int pageSize = 10;
+        PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
+        List<QuestionnaireResponseModel> result = subject.getQuestionnaireResponses(carePlanId,pageDetails);
 
         // Assert
         assertEquals(1, result.size());
@@ -90,9 +96,131 @@ public class QuestionnaireResponseServiceTest {
         Mockito.when(fhirClient.lookupQuestionnaireResponses(carePlanId)).thenReturn(FhirLookupResult.fromResources());
 
         // Act
-        List<QuestionnaireResponseModel> result = subject.getQuestionnaireResponses(carePlanId);
+        int pageNumber = 1;
+        int pageSize = 10;
+        PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
+        List<QuestionnaireResponseModel> result = subject.getQuestionnaireResponses(carePlanId,pageDetails);
 
         // Assert
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void getQuestionnaireResponses_ReturnOneItem_WhenPagesizeIsOne() throws Exception {
+        //Arrange
+        QuestionnaireResponseService qrservice = new QuestionnaireResponseService(fhirClient, fhirMapper, null,triageEvaluator, accessValidator);
+
+
+        QuestionnaireResponse response = new QuestionnaireResponse();
+        Patient patient = new Patient();
+        FhirLookupResult questionnaireResponseResult = FhirLookupResult.fromResource(response);
+        FhirLookupResult patientResult = FhirLookupResult.fromResource(patient);
+        FhirLookupResult lookupResult = questionnaireResponseResult.merge(patientResult);
+
+        Mockito.when(fhirClient.lookupQuestionnaireResponses(null)).thenReturn(lookupResult);
+
+
+
+        PageDetails pageDetails = new PageDetails(1,1);
+        List<QuestionnaireResponseModel> result = qrservice.getQuestionnaireResponses(null, pageDetails);
+
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    public void getQuestionnaireResponses_ReturnSortedPages_WhenTwoPages() throws Exception {
+        //Arrange
+        QuestionnaireResponseService qrservice = new QuestionnaireResponseService(fhirClient, fhirMapper, null, triageEvaluator,accessValidator);
+
+        QuestionnaireResponse response1 = new QuestionnaireResponse();
+        response1.setAuthored(new Date(1,Calendar.JANUARY,1));
+        response1.setId("1");
+
+        QuestionnaireResponse response2 = new QuestionnaireResponse();
+        response2.setAuthored(new Date(2, Calendar.FEBRUARY,2));
+        response2.setId("2");
+
+        QuestionnaireResponse response3 = new QuestionnaireResponse();
+        response3.setAuthored(new Date(3,Calendar.MARCH,3));
+        response3.setId("3");
+
+        QuestionnaireResponse response4 = new QuestionnaireResponse();
+        response4.setAuthored(new Date(4,Calendar.APRIL,4));
+        response4.setId("4");
+
+        FhirLookupResult questionnaireResponseResult = FhirLookupResult.fromResources(response1,response3, response4, response2);
+        Patient patient = new Patient();
+        FhirLookupResult patientResult = FhirLookupResult.fromResource(patient);
+        FhirLookupResult lookupResult1 = questionnaireResponseResult.merge(patientResult);
+
+        Mockito.when(fhirClient.lookupQuestionnaireResponses(null)).thenReturn(lookupResult1);
+        Mockito.when(fhirMapper.mapQuestionnaireResponse(response1,lookupResult1)).thenReturn(questionnaireResponseToQuestionnaireResponseModel(response1));
+        Mockito.when(fhirMapper.mapQuestionnaireResponse(response2,lookupResult1)).thenReturn(questionnaireResponseToQuestionnaireResponseModel(response2));
+        Mockito.when(fhirMapper.mapQuestionnaireResponse(response3,lookupResult1)).thenReturn(questionnaireResponseToQuestionnaireResponseModel(response3));
+        Mockito.when(fhirMapper.mapQuestionnaireResponse(response4,lookupResult1)).thenReturn(questionnaireResponseToQuestionnaireResponseModel(response4));
+
+        //ACTION
+        PageDetails pageDetails1 = new PageDetails(1,2);
+        List<QuestionnaireResponseModel> result1 = qrservice.getQuestionnaireResponses(null,pageDetails1);
+
+        PageDetails pageDetails2 = new PageDetails(2,2);
+        List<QuestionnaireResponseModel> result2 = qrservice.getQuestionnaireResponses(null,pageDetails2);
+
+        //ASSERT
+        assertEquals(2, result1.size());
+        assertEquals(2, result2.size());
+
+        assertEquals("4",result1.get(0).getId().getId());
+        assertEquals("3",result1.get(1).getId().getId());
+        assertEquals("2",result2.get(0).getId().getId());
+        assertEquals("1",result2.get(1).getId().getId());
+    }
+    QuestionnaireResponseModel questionnaireResponseToQuestionnaireResponseModel(QuestionnaireResponse questionnaireResponse){
+        QuestionnaireResponseModel responseModel1 = new QuestionnaireResponseModel();
+        responseModel1.setId(new QualifiedId("QuestionnaireResponse/"+questionnaireResponse.getId()));
+        return responseModel1;
+    }
+
+    @Test
+    public void getQuestionnaireResponses_ReturnZeroItem_WhenPagesizeIsZero() throws Exception {
+        //Arrange
+        QuestionnaireResponseService qrservice = new QuestionnaireResponseService(fhirClient, fhirMapper, null, triageEvaluator,accessValidator);
+
+
+        QuestionnaireResponse response = new QuestionnaireResponse();
+        FhirLookupResult questionnaireResponseResult = FhirLookupResult.fromResources(response);
+        Patient patient = new Patient();
+        FhirLookupResult patientResult = FhirLookupResult.fromResource(patient);
+        FhirLookupResult lookupResult = questionnaireResponseResult.merge(patientResult);
+
+        Mockito.when(fhirClient.lookupQuestionnaireResponses(null)).thenReturn(lookupResult);
+
+
+
+        PageDetails pageDetails = new PageDetails(1,0);
+        List<QuestionnaireResponseModel> result = qrservice.getQuestionnaireResponses(null, pageDetails);
+
+
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void getQuestionnaireResponses_ReturnZeroItem_WhenOnSecondPage() throws Exception {
+        //Arrange
+        QuestionnaireResponseService qrservice = new QuestionnaireResponseService(fhirClient, fhirMapper, null,triageEvaluator, accessValidator);
+
+
+        QuestionnaireResponse response = new QuestionnaireResponse();
+        FhirLookupResult questionnaireResponseResult = FhirLookupResult.fromResources(response);
+        Patient patient = new Patient();
+        FhirLookupResult patientResult = FhirLookupResult.fromResource(patient);
+        FhirLookupResult lookupResult = questionnaireResponseResult.merge(patientResult);
+        Mockito.when(fhirClient.lookupQuestionnaireResponses(null)).thenReturn(lookupResult);
+
+        PageDetails pageDetails = new PageDetails(2,1);
+        List<QuestionnaireResponseModel> result = qrservice.getQuestionnaireResponses(null, pageDetails);
+
         assertEquals(0, result.size());
     }
 
@@ -111,7 +239,7 @@ public class QuestionnaireResponseServiceTest {
         // Act
 
         // Assert
-        assertThrows(AccessValidationException.class, () -> subject.getQuestionnaireResponses(carePlanId));
+        assertThrows(AccessValidationException.class, () -> subject.getQuestionnaireResponses(carePlanId, new PageDetails(1,10)));
     }
 
     @Test

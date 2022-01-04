@@ -10,6 +10,7 @@ import dk.kvalitetsit.hjemmebehandling.service.exception.ErrorKind;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ServiceException;
 import dk.kvalitetsit.hjemmebehandling.service.frequency.FrequencyEnumerator;
 import dk.kvalitetsit.hjemmebehandling.service.triage.TriageEvaluator;
+import dk.kvalitetsit.hjemmebehandling.types.PageDetails;
 import dk.kvalitetsit.hjemmebehandling.util.DateProvider;
 import org.hl7.fhir.r4.model.*;
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         this.triageEvaluator = triageEvaluator;
     }
 
-    public List<QuestionnaireResponseModel> getQuestionnaireResponses(String carePlanId) throws ServiceException, AccessValidationException {
+    public List<QuestionnaireResponseModel> getQuestionnaireResponses(String carePlanId, PageDetails pageDetails) throws ServiceException, AccessValidationException {
         FhirLookupResult lookupResult = fhirClient.lookupQuestionnaireResponses(carePlanId);
         List<QuestionnaireResponse> responses = lookupResult.getQuestionnaireResponses();
         if(responses.isEmpty()) {
@@ -50,6 +51,13 @@ public class QuestionnaireResponseService extends AccessValidatingService {
 
         validateCorrectSubject(lookupResult);
 
+        // Sort the responses by priority.
+        responses = sortResponsesByDate(responses);
+
+        // Perform paging if required.
+        if(pageDetails != null) {
+            responses = pageResponses(responses, pageDetails);
+        }
         // Map and return the responses
         return responses
                 .stream()
@@ -146,9 +154,24 @@ public class QuestionnaireResponseService extends AccessValidatingService {
                 .collect(Collectors.toList());
     }
 
+    private List<QuestionnaireResponse> sortResponsesByDate(List<QuestionnaireResponse> responses) {
+        return responses
+                .stream()
+                .sorted( (a,b) -> b.getAuthored().compareTo(a.getAuthored()) )
+                .collect(Collectors.toList());
+    }
+
     private List<ThresholdModel> getThresholds(CarePlanModel carePlanModel, QualifiedId questionnaireId) {
         var questionnaireWrapper = getMatchingQuestionnaireWrapper(carePlanModel, questionnaireId);
         return questionnaireWrapper.getThresholds();
+    }
+
+    private List<QuestionnaireResponse> pageResponses(List<QuestionnaireResponse> responses, PageDetails pageDetails) {
+        return responses
+                .stream()
+                .skip((pageDetails.getPageNumber() - 1) * pageDetails.getPageSize())
+                .limit(pageDetails.getPageSize())
+                .collect(Collectors.toList());
     }
 
     private QuestionnaireWrapperModel getMatchingQuestionnaireWrapper(CarePlanModel carePlanModel, QualifiedId questionnaireId) {

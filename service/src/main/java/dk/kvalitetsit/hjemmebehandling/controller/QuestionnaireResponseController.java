@@ -46,13 +46,14 @@ public class QuestionnaireResponseController extends BaseController {
     }
 
     @GetMapping(value = "/v1/questionnaireresponses/{carePlanId}")
-    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnaireResponsesByCarePlanId(@PathVariable("carePlanId") String carePlanId, @RequestParam("page_number") Optional<Integer> pageNumber, @RequestParam("page_size") Optional<Integer> pageSize) {
+    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnaireResponsesByCarePlanId(@PathVariable("carePlanId") String carePlanId, @RequestParam("page_number") Integer pageNumber, @RequestParam("page_size") Integer pageSize) {
         if(carePlanId == null) {
             throw new BadRequestException(ErrorDetails.PARAMETERS_INCOMPLETE);
         }
 
         try {
-            List<QuestionnaireResponseModel> questionnaireResponses = questionnaireResponseService.getQuestionnaireResponses(carePlanId);
+            PageDetails pageDetails = new PageDetails(pageNumber,pageSize);
+            List<QuestionnaireResponseModel> questionnaireResponses = questionnaireResponseService.getQuestionnaireResponses(carePlanId,pageDetails);
 
             return ResponseEntity.ok(questionnaireResponses.stream().map(qr -> dtoMapper.mapQuestionnaireResponseModel(qr)).collect(Collectors.toList()));
         }
