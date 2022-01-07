@@ -83,6 +83,11 @@ public class DtoMapperTest {
 
         // Assert
         assertEquals(patientDto.getCpr(), result.getCpr());
+        assertEquals(patientDto.getPatientContactDetails().getStreet(), result.getPatientContactDetails().getStreet());
+        assertEquals(patientDto.getPatientContactDetails().getCountry(), result.getPatientContactDetails().getCountry());
+        assertEquals(patientDto.getPatientContactDetails().getPostalCode(), result.getPatientContactDetails().getPostalCode());
+        assertEquals(patientDto.getPatientContactDetails().getPrimaryPhone(), result.getPatientContactDetails().getPrimaryPhone());
+        assertEquals(patientDto.getPatientContactDetails().getSecondaryPhone(), result.getPatientContactDetails().getSecondaryPhone());
     }
 
     @Test
@@ -95,7 +100,15 @@ public class DtoMapperTest {
 
         // Assert
         assertEquals(patientModel.getCpr(), result.getCpr());
+        assertEquals(patientModel.getPatientContactDetails().getStreet(), result.getPatientContactDetails().getStreet());
+        assertEquals(patientModel.getPatientContactDetails().getCountry(), result.getPatientContactDetails().getCountry());
+        assertEquals(patientModel.getPatientContactDetails().getPostalCode(), result.getPatientContactDetails().getPostalCode());
+        assertEquals(patientModel.getPatientContactDetails().getPrimaryPhone(), result.getPatientContactDetails().getPrimaryPhone());
+        assertEquals(patientModel.getPatientContactDetails().getSecondaryPhone(), result.getPatientContactDetails().getSecondaryPhone());
+
     }
+
+
 
     @Test
     public void mapQuestionnaireResponseModel_success() {
