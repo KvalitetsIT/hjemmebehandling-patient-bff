@@ -35,7 +35,7 @@ public class TriageEvaluator {
             boolean thresholdsWereFound = thresholdsByLinkId.containsKey(answer.getLinkId());
 
             if(!thresholdsWereFound) {
-               return TriagingCategory.RED;
+               return TriagingCategory.GREEN;
             }
 
             var thresholdsForAnswer = thresholdsByLinkId.get(answer.getLinkId());

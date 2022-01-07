@@ -136,6 +136,16 @@ public class TriageEvaluatorTest {
     }
 
     @Test
+    public void determineTriagingCategory_redTriagingCategory_WhenNullThresholds() {
+        // Arrange
+        var answers = List.of(buildQuantityAnswer("1", 6.0));
+        ArrayList<ThresholdModel> thresholds = null;
+
+        // Act
+        assertThrows(IllegalArgumentException.class,() -> subject.determineTriagingCategory(answers, thresholds));
+    }
+
+    @Test
     public void determineTriagingCategory_redTriagingCategory_WhenNoThresholds() {
         // Arrange
         var answers = List.of(buildQuantityAnswer("1", 6.0));
@@ -145,7 +155,7 @@ public class TriageEvaluatorTest {
         var result = subject.determineTriagingCategory(answers, thresholds);
 
         // Assert
-        assertEquals(TriagingCategory.RED, result);
+        assertEquals(TriagingCategory.GREEN, result);
     }
 
     @Test
