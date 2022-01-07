@@ -3,6 +3,7 @@ package dk.kvalitetsit.hjemmebehandling.model;
 public class ContactDetailsModel {
     private String street;
     private String postalCode;
+    private String city;
     private String country;
     private String primaryPhone;
     private String secondaryPhone;
@@ -12,6 +13,14 @@ public class ContactDetailsModel {
 
     public void setStreet(String street) {
         this.street = street;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 
     public String getPostalCode() {

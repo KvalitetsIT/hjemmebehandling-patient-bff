@@ -8,6 +8,8 @@ public class PatientModel {
     private String familyName;
     private String cpr;
     private ContactDetailsModel patientContactDetails;
+    private String primaryRelativeName;
+    private String primaryRelativeAffiliation;
     private ContactDetailsModel primaryRelativeContactDetails;
     private List<ContactDetailsModel> additionalRelativeContactDetails;
 
@@ -49,6 +51,22 @@ public class PatientModel {
 
     public void setPatientContactDetails(ContactDetailsModel patientContactDetails) {
         this.patientContactDetails = patientContactDetails;
+    }
+
+    public String getPrimaryRelativeName() {
+        return primaryRelativeName;
+    }
+
+    public void setPrimaryRelativeName(String primaryRelativeName) {
+        this.primaryRelativeName = primaryRelativeName;
+    }
+
+    public String getPrimaryRelativeAffiliation() {
+        return primaryRelativeAffiliation;
+    }
+
+    public void setPrimaryRelativeAffiliation(String primaryRelativeAffiliation) {
+        this.primaryRelativeAffiliation = primaryRelativeAffiliation;
     }
 
     public ContactDetailsModel getPrimaryRelativeContactDetails() {
