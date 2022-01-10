@@ -210,6 +210,27 @@ public class TriageEvaluatorTest {
         assertEquals(TriagingCategory.RED, result);
     }
 
+    @Test
+    public void determineTriagingCategory_OneIsGreenWithNoThresholds_OneIsYellowWithThresholds_ReturnsYellow() {
+        // Arrange
+        var answers = List.of(
+                buildQuantityAnswer("1", 40),
+                buildQuantityAnswer("2", 40)
+
+        );
+        var thresholds = List.of(
+                buildQuantityThreshold("2", ThresholdType.NORMAL, null, 24.9),
+                buildQuantityThreshold("2", ThresholdType.ABNORMAL, 25.0, 49.9),
+                buildQuantityThreshold("2", ThresholdType.CRITICAL, 50.0, null)
+        );
+
+        // Act
+        var result = subject.determineTriagingCategory(answers, thresholds);
+
+        // Assert
+        assertEquals(TriagingCategory.YELLOW, result);
+    }
+
     private AnswerModel buildBooleanAnswer(String linkId, boolean value) {
         return buildAnswer(linkId, AnswerType.BOOLEAN, Boolean.toString(value));
     }

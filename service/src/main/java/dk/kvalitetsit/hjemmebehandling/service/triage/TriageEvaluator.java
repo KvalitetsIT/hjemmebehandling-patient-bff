@@ -32,11 +32,6 @@ public class TriageEvaluator {
         // Evaluate each answer against its thresholds.
         var result = TriagingCategory.GREEN;
         for(var answer : answers) {
-            boolean thresholdsWereFound = thresholdsByLinkId.containsKey(answer.getLinkId());
-
-            if(!thresholdsWereFound) {
-               return TriagingCategory.GREEN;
-            }
 
             var thresholdsForAnswer = thresholdsByLinkId.get(answer.getLinkId());
 
@@ -45,7 +40,11 @@ public class TriageEvaluator {
             // It is the responsibility of the PlanDefinition provider (ie. the administration module) to ensure that this condition holds.
 
             // Compute the category and determine whether it is more critical than the ones we've already computed.
-            var categoryForAnswer = evaluateAnswer(answer, thresholdsForAnswer);
+
+            var categoryForAnswer = TriagingCategory.GREEN;
+            boolean thresholdsWereFound = thresholdsByLinkId.containsKey(answer.getLinkId());
+            if(thresholdsWereFound)
+                categoryForAnswer = evaluateAnswer(answer, thresholdsForAnswer);
             result = mostCriticalCategory(result, categoryForAnswer);
         }
         return result;
@@ -78,9 +77,11 @@ public class TriageEvaluator {
                 result = Optional.of(mapThresholdType(threshold.getType()));
             }
         }
+
         if(!result.isPresent()) {
                 return TriagingCategory.RED;
         }
+
         return result.get();
     }
 
