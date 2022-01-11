@@ -20,7 +20,7 @@ public class TriageEvaluator {
     );
 
     public TriagingCategory determineTriagingCategory(List<AnswerModel> answers, List<ThresholdModel> thresholds) {
-        if(answers == null || answers.isEmpty() || thresholds == null) {
+        if (answers == null || answers.isEmpty() || thresholds == null) {
             throw new IllegalArgumentException("Arguments must be non-null!");
         }
 
@@ -31,7 +31,7 @@ public class TriageEvaluator {
 
         // Evaluate each answer against its thresholds.
         var result = TriagingCategory.GREEN;
-        for(var answer : answers) {
+        for (var answer : answers) {
 
             var thresholdsForAnswer = thresholdsByLinkId.get(answer.getLinkId());
 
@@ -43,7 +43,7 @@ public class TriageEvaluator {
 
             var categoryForAnswer = TriagingCategory.GREEN;
             boolean thresholdsWereFound = thresholdsByLinkId.containsKey(answer.getLinkId());
-            if(thresholdsWereFound)
+            if (thresholdsWereFound)
                 categoryForAnswer = evaluateAnswer(answer, thresholdsForAnswer);
             result = mostCriticalCategory(result, categoryForAnswer);
         }
@@ -51,19 +51,18 @@ public class TriageEvaluator {
     }
 
     private TriagingCategory mostCriticalCategory(TriagingCategory a, TriagingCategory b) {
-        if(ranks.get(a) < ranks.get(b)) {
+        if (ranks.get(a) < ranks.get(b)) {
             return b;
-        }
-        else {
+        } else {
             return a;
         }
     }
 
     private TriagingCategory evaluateAnswer(AnswerModel answer, List<ThresholdModel> thresholdsForAnswer) {
         Optional<TriagingCategory> result = Optional.empty();
-        for(ThresholdModel threshold : thresholdsForAnswer) {
+        for (ThresholdModel threshold : thresholdsForAnswer) {
             boolean answerCoveredByThreshold = false;
-            switch(answer.getAnswerType()) {
+            switch (answer.getAnswerType()) {
                 case BOOLEAN:
                     answerCoveredByThreshold = evaluateBooleanAnswer(answer, threshold);
                     break;
@@ -73,25 +72,25 @@ public class TriageEvaluator {
                 default:
                     throw new IllegalArgumentException(String.format("Don't know how to handle AnswerType %s!", answer.getAnswerType().toString()));
             }
-            if(answerCoveredByThreshold) {
+            if (answerCoveredByThreshold) {
                 result = Optional.of(mapThresholdType(threshold.getType()));
             }
         }
 
-        if(!result.isPresent()) {
-                return TriagingCategory.RED;
+        if (!result.isPresent()) {
+            return TriagingCategory.RED;
         }
 
         return result.get();
     }
 
     private boolean evaluateBooleanAnswer(AnswerModel answer, ThresholdModel threshold) {
-        if(!List.of("true", "false").contains(answer.getValue())) {
+        if (!List.of("true", "false").contains(answer.getValue())) {
             throw new IllegalArgumentException(String.format("Could not evaluate boolean answer for linkId %s: Value %s is not a boolean.", answer.getLinkId(), answer.getValue()));
         }
         boolean value = Boolean.valueOf(answer.getValue());
 
-        if(threshold.getValueBoolean() == null) {
+        if (threshold.getValueBoolean() == null) {
             throw new IllegalStateException(String.format("Could not evaluate boolean answer for linkId %s: Threshold did not contain a boolean value.", answer.getLinkId()));
         }
 
@@ -102,30 +101,29 @@ public class TriageEvaluator {
         double value = 0.0;
         try {
             value = Double.valueOf(answer.getValue());
-        }
-        catch(NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new IllegalArgumentException(String.format("Could not evaluate quantity answer for linkId %s: Value %s is not a double.", answer.getLinkId(), answer.getValue()));
         }
 
         // Check whether the value is contained in the provided interval (null-values correspond to infinity in wither direction).
         boolean contained = false;
-        if(threshold.getValueQuantityLow() == null && threshold.getValueQuantityHigh() == null) {
+        if (threshold.getValueQuantityLow() == null && threshold.getValueQuantityHigh() == null) {
             contained = true;
         }
-        if(threshold.getValueQuantityLow() != null && threshold.getValueQuantityHigh() == null) {
+        if (threshold.getValueQuantityLow() != null && threshold.getValueQuantityHigh() == null) {
             contained = threshold.getValueQuantityLow() <= value;
         }
-        if(threshold.getValueQuantityLow() == null && threshold.getValueQuantityHigh() != null) {
+        if (threshold.getValueQuantityLow() == null && threshold.getValueQuantityHigh() != null) {
             contained = threshold.getValueQuantityHigh() >= value;
         }
-        if(threshold.getValueQuantityLow() != null && threshold.getValueQuantityHigh() != null) {
+        if (threshold.getValueQuantityLow() != null && threshold.getValueQuantityHigh() != null) {
             contained = threshold.getValueQuantityLow() <= value && value <= threshold.getValueQuantityHigh();
         }
         return contained;
     }
 
     private TriagingCategory mapThresholdType(ThresholdType type) {
-        switch(type) {
+        switch (type) {
             case NORMAL:
                 return TriagingCategory.GREEN;
             case ABNORMAL:
