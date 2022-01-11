@@ -132,7 +132,7 @@ public class TriageEvaluatorTest {
         var result = subject.determineTriagingCategory(answers, thresholds);
 
         // Assert
-        assertEquals(TriagingCategory.GREEN, result);
+        assertEquals(TriagingCategory.RED, result);
     }
 
     @Test

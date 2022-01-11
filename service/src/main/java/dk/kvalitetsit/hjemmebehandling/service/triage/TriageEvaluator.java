@@ -116,10 +116,10 @@ public class TriageEvaluator {
             contained = threshold.getValueQuantityLow() <= value;
         }
         if(threshold.getValueQuantityLow() == null && threshold.getValueQuantityHigh() != null) {
-            contained = threshold.getValueQuantityHigh() > value;
+            contained = threshold.getValueQuantityHigh() >= value;
         }
         if(threshold.getValueQuantityLow() != null && threshold.getValueQuantityHigh() != null) {
-            contained = threshold.getValueQuantityLow() <= value && value < threshold.getValueQuantityHigh();
+            contained = threshold.getValueQuantityLow() <= value && value <= threshold.getValueQuantityHigh();
         }
         return contained;
     }
