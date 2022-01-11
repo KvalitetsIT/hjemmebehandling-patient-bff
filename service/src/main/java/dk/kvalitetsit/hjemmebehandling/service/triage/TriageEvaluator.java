@@ -59,6 +59,8 @@ public class TriageEvaluator {
     }
 
     private TriagingCategory evaluateAnswer(AnswerModel answer, List<ThresholdModel> thresholdsForAnswer) {
+        thresholdsForAnswer.sort((a, b) -> b.getType().compareTo(a.getType())); //We sort so that the first threshold is the most critical - And then the first threshold that contains the answer will be returned
+
         Optional<TriagingCategory> result = Optional.empty();
         for (ThresholdModel threshold : thresholdsForAnswer) {
             boolean answerCoveredByThreshold = false;
@@ -72,16 +74,12 @@ public class TriageEvaluator {
                 default:
                     throw new IllegalArgumentException(String.format("Don't know how to handle AnswerType %s!", answer.getAnswerType().toString()));
             }
+
             if (answerCoveredByThreshold) {
-                result = Optional.of(mapThresholdType(threshold.getType()));
+                return mapThresholdType(threshold.getType()); //Since we sorted the threshold by category, we can just return the first one that matches
             }
         }
-
-        if (!result.isPresent()) {
-            return TriagingCategory.RED;
-        }
-
-        return result.get();
+        return TriagingCategory.RED;
     }
 
     private boolean evaluateBooleanAnswer(AnswerModel answer, ThresholdModel threshold) {
