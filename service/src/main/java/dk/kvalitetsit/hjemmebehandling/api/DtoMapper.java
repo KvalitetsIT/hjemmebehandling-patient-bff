@@ -262,6 +262,7 @@ public class DtoMapper {
         questionnaireResponseDto.setQuestionAnswerPairs(questionnaireResponseModel.getQuestionAnswerPairs().stream().map(qa -> mapQuestionAnswerPairModel(qa)).collect(Collectors.toList()));
         questionnaireResponseDto.setAnswered(questionnaireResponseModel.getAnswered());
         questionnaireResponseDto.setExaminationStatus(questionnaireResponseModel.getExaminationStatus());
+        questionnaireResponseDto.setExamined(questionnaireResponseModel.getExamined());
         questionnaireResponseDto.setTriagingCategory(questionnaireResponseModel.getTriagingCategory());
         questionnaireResponseDto.setPatient(mapPatientModel(questionnaireResponseModel.getPatient()));
 

@@ -13,6 +13,7 @@ public class QuestionnaireResponseDto extends BaseDto {
     private List<QuestionAnswerPairDto> questionAnswerPairs;
     private Instant answered;
     private ExaminationStatus examinationStatus;
+    private Instant examined;
     private TriagingCategory triagingCategory;
     private PatientDto patient;
 
@@ -62,6 +63,14 @@ public class QuestionnaireResponseDto extends BaseDto {
 
     public void setExaminationStatus(ExaminationStatus examinationStatus) {
         this.examinationStatus = examinationStatus;
+    }
+
+    public Instant getExamined() {
+        return examined;
+    }
+
+    public void setExamined(Instant examined) {
+        this.examined = examined;
     }
 
     public TriagingCategory getTriagingCategory() {
