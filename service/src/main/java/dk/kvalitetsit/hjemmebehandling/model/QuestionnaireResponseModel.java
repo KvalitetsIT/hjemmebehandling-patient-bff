@@ -15,6 +15,7 @@ public class QuestionnaireResponseModel extends BaseModel {
     private List<QuestionAnswerPairModel> questionAnswerPairs;
     private Instant answered;
     private ExaminationStatus examinationStatus;
+    private Instant examined;
     private TriagingCategory triagingCategory;
     private PatientModel patient;
     private String planDefinitionTitle;
@@ -81,6 +82,14 @@ public class QuestionnaireResponseModel extends BaseModel {
 
     public void setExaminationStatus(ExaminationStatus examinationStatus) {
         this.examinationStatus = examinationStatus;
+    }
+
+    public Instant getExamined() {
+        return examined;
+    }
+
+    public void setExamined(Instant examined) {
+        this.examined = examined;
     }
 
     public TriagingCategory getTriagingCategory() {

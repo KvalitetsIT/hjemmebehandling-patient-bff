@@ -500,6 +500,7 @@ public class FhirMapperTest {
         questionnaireResponse.getItem().addAll(answerItems);
         questionnaireResponse.setAuthored(Date.from(Instant.parse("2021-10-28T00:00:00Z")));
         questionnaireResponse.getExtension().add(new Extension(Systems.EXAMINATION_STATUS, new StringType(ExaminationStatus.EXAMINED.toString())));
+        questionnaireResponse.getMeta().setLastUpdated(Date.from(Instant.parse("2021-10-29T00:00:00Z")));
         questionnaireResponse.getExtension().add(new Extension(Systems.TRIAGING_CATEGORY, new StringType(TriagingCategory.GREEN.toString())));
         questionnaireResponse.addExtension(ExtensionMapper.mapOrganizationId(ORGANIZATION_ID_1));
 

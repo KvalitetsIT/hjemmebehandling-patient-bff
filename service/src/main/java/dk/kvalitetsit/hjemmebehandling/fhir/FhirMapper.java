@@ -229,6 +229,9 @@ public class FhirMapper {
         questionnaireResponseModel.setQuestionAnswerPairs(answers);
         questionnaireResponseModel.setAnswered(questionnaireResponse.getAuthored().toInstant());
         questionnaireResponseModel.setExaminationStatus(ExtensionMapper.extractExaminationStatus(questionnaireResponse.getExtension()));
+        if (questionnaireResponseModel.getExaminationStatus().equals(ExaminationStatus.EXAMINED)) {
+            questionnaireResponseModel.setExamined(questionnaireResponse.getMeta().getLastUpdated().toInstant());
+        }
         questionnaireResponseModel.setTriagingCategory(ExtensionMapper.extractTriagingCategoory(questionnaireResponse.getExtension()));
 
         String patientId = questionnaireResponse.getSubject().getReference();
