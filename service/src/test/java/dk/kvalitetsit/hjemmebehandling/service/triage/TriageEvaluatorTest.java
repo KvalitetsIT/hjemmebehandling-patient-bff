@@ -136,6 +136,37 @@ public class TriageEvaluatorTest {
     }
 
     @Test
+    public void determineTriagingCategory_MoreAnswerDifferentTypes_ManyThresholds() {
+        // Arrange
+        var answers = List.of(
+                buildQuantityAnswer("1", 12.0), //Indtast din morgen temperatur?
+                buildQuantityAnswer("2", 12.0), //Indtast den målte CRP værdi
+                buildBooleanAnswer("3", false), //Har du fået alt den ordinerede antibiotika det sidste døgn?
+                buildBooleanAnswer("4", true), //Er din helbredstilstand værre idag sammenlignet med igår?
+                buildBooleanAnswer("5", false), //Er der kommet nye symptomer i det sidste døgn?
+                buildBooleanAnswer("6", true), //Har du udslæt?
+                buildBooleanAnswer("7", false) //Er dit udslæt værre idag end i går?
+        );
+        var thresholds = List.of(
+                buildQuantityThreshold("1", ThresholdType.NORMAL, null, 37.4),
+                buildQuantityThreshold("1", ThresholdType.ABNORMAL, 37.5, 37.9),
+                buildQuantityThreshold("1", ThresholdType.CRITICAL, 38.0, null),
+
+                buildQuantityThreshold("2", ThresholdType.NORMAL, null, 24.9),
+                buildQuantityThreshold("2", ThresholdType.ABNORMAL, 25.0, 49.9),
+                buildQuantityThreshold("2", ThresholdType.CRITICAL, 50.0, null),
+
+                buildBooleanThreshold("4",ThresholdType.CRITICAL,true),
+                buildBooleanThreshold("4",ThresholdType.NORMAL,false)
+        );
+
+        // Act
+        var result = subject.determineTriagingCategory(answers, thresholds);
+
+        // Assert
+        assertEquals(TriagingCategory.RED, result);
+    }
+    @Test
     public void determineTriagingCategory_redTriagingCategory_WhenNullThresholds() {
         // Arrange
         var answers = List.of(buildQuantityAnswer("1", 6.0));
