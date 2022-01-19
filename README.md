@@ -46,7 +46,7 @@ The service uses Logback for logging. At runtime Logback log levels can be confi
 
 On http the service exposes a health endpoint on the path /info. This will return 200 ok if the service is basically in a healthy state, meaning that the web service is up and running.
 
-On http the service exposes Prometheus metrics on the path /metrics. 
+On http the service exposes Prometheus metrics on the path /prometheus. 
 
 ## Testing
 Automated unit- and integrationtest are used.
@@ -88,7 +88,7 @@ The application API documentation(Json): `http://localhost:8080/api/v3/api-docs`
 |----------------------|-------------|---------- |
 | fhir.server.url | URL - fhir server | Yes|
 | user.context.handler | Handler for user context. Values MOCK or DIAS | Yes |
-| user.mock.context.cpr | The cprnumber used when running MOCK (only used if user.context.handler==MOCK) | NO |
+| user.mock.context.cpr | The cprnumber used when running MOCK (only used if user.context.handler==MOCK) | No |
 | LOG_LEVEL | Log Level for applikation  log. Defaults to INFO. | No |
 | LOG_LEVEL_FRAMEWORK | Log level for framework. Defaults to INFO. | No |
 | CORRELATION_ID | HTTP header to take correlation id from. Used to correlate log messages. Defaults to "x-request-id". | No|
