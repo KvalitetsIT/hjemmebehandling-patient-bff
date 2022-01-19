@@ -88,7 +88,7 @@ The application API documentation(Json): `http://localhost:8080/api/v3/api-docs`
 |----------------------|-------------|---------- |
 | fhir.server.url | URL - fhir server | Yes|
 | user.context.handler | Handler for user context. Values MOCK or DIAS | Yes |
-| user.mock.context.cpr | The cprnumber used when running MOCK (only used if user.context.handler==MOCK) | NO |
+| user.mock.context.cpr | The cprnumber used when running MOCK (only used if user.context.handler==MOCK) | No |
 | LOG_LEVEL | Log Level for applikation  log. Defaults to INFO. | No |
 | LOG_LEVEL_FRAMEWORK | Log level for framework. Defaults to INFO. | No |
 | CORRELATION_ID | HTTP header to take correlation id from. Used to correlate log messages. Defaults to "x-request-id". | No|
