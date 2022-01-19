@@ -6,8 +6,6 @@ services:
       - 8080:8080
       - 5005:5005
     environment:
-      - cpr_url=http://person-service:1081/Patient/
-
       - allowed_origins=http://localhost:3000
       - user.context.handler=MOCK
       - user.mock.context.cpr=0101010101
@@ -25,7 +23,6 @@ services:
       - JVM_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     networks:
       - hjemmebehandling_patient
-
 
   hapi-server:
     image: kvalitetsit/hjemmebehandling-hapi-fhir-server:614d9b959a48d054aa353b7ab975456f3a3b555e

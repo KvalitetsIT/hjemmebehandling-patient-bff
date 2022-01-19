@@ -1,47 +1,122 @@
 ![Build Status](https://github.com/KvalitetsIT/hjemmebehandling-patient-bff/workflows/CICD/badge.svg) ![Test Coverage](.github/badges/jacoco.svg)
-# hjemmebehandling-patient-bff
+# Patient-bff
 
-Template repository showing how to be a good Java Spring Boot citizen in a k8s cluster.
+The patient-bff is a Backend For Frontend (BFF) for the employee application. In short the BFF layer consists of multiple backends developed to address the needs of respective frontend frameworks, like desktop, browser, and native-mobile apps. This service is backend for the employees and administrators using a browser.  
 
-## A good citizen
+The service is a Java Spring Boot application with the following properties
 
-Below is a set of recommendations for being a good service. The recommendations are not tied to a specific language or 
-framework.
+1. Exposes REST interfaces 
+2. Interfaces are documented using OpenApi (see url below). 
+3. Is a FHIR client to FHIR server backend
+4. Exposes metrics url for prometheus to scrape
 
-1. Configuration through environment variables.
-2. Expose readiness endpoint
-3. Expose endpoint that Prometheus can scrape
-4. Be stateless
-5. Support multiple instances
-6. Always be in a releasable state
-7. Automate build and deployment.
+## Prerequesites
+To build the project you need:
 
-Some of above recommendations are heavily inspired by [https://12factor.net/](https://12factor.net/). It is recommended 
-read [https://12factor.net/](https://12factor.net/) for more inspiration and further details. Some points go 
-further than just being a good service and also touches areas like operations.
+ * OpenJDK 11+
+ * Maven 3.1.1+
+ * Docker 20+
+ * Docker-compose 1.29+
 
-## Getting started
+## Building the service
 
-Run `./setup.sh GIT_REPOSITORY_NAME`.
+The simplest way to build the service is to use maven:
 
-Above does a search/replace in relevant files. 
+```
+mvn clean install
+```
+
+This will build the service as a JAR used by spring boot.
+
+## Running the service
+Use the local docker-compose setup
+
+```
+cd compose/
+docker-compose up
+```
+This will start the hapi server and the bff.
+
+## Logging
+
+The service uses Logback for logging. At runtime Logback log levels can be configured via environment variable.
+
+
+## Monitoring
+
+On http the service exposes a health endpoint on the path /info. This will return 200 ok if the service is basically in a healthy state, meaning that the web service is up and running.
+
+On http the service exposes Prometheus metrics on the path /metrics. 
+
+## Testing
+Automated unit- and integrationtest are used.
+
+### Running the unit test
+The CICD pipeline runs the unittest for each commit the complete test report can be found under Actions. The total coverage is available on the top of this page.
+
+Unit tests can run local by running
+
+```
+mvn clean install
+```
+
+### Running the integrationtest
+The CICD pipeline runs the Integrationtest for each commit.
+
+Integration tests can run locally by running
+
+```
+mvn clean install
+cd compose 
+docker-compose up --build
+mvn verify -Pintegration-test
+```
 
 ## Endpoints
 
 The service is listening for connections on port 8080.
 
-Spring boot actuator is listening for connections on port 8081. This is used as prometheus scrape endpoint and health monitoring. 
+Spring boot actuator is listening for connections on port 9090. This is used as prometheus scrape endpoint and health monitoring. 
 
-Prometheus scrape endpoint: `http://localhost:8081/actuator/prometheus`  
-Health URL that can be used for readiness probe: `http://localhost:8081/actuator/health`
+Prometheus scrape endpoint: `http://localhost:9090/actuator/prometheus`  
+Health URL that can be used for readiness probe: `http://localhost:9090/actuator/health`
+The application API documentation(Json): `http://localhost:8080/api/v3/api-docs`
 
 ## Configuration
 
 | Environment variable | Description | Required |
 |----------------------|-------------|---------- |
-| JDBC_URL | JDBC connection URL | Yes |
-| JDBC_USER | JDBC user          | Yes |
-| JDBC_PASS | JDBC password      | Yes |
+| fhir.server.url | URL - fhir server | Yes|
+| user.context.handler | Handler for user context. Values MOCK or DIAS | Yes |
+| user.mock.context.cpr | The cprnumber used when running MOCK (only used if user.context.handler==MOCK) | NO |
 | LOG_LEVEL | Log Level for applikation  log. Defaults to INFO. | No |
 | LOG_LEVEL_FRAMEWORK | Log level for framework. Defaults to INFO. | No |
-| CORRELATION_ID | HTTP header to take correlation id from. Used to correlate log messages. Defaults to "x-request-id". | No
+| CORRELATION_ID | HTTP header to take correlation id from. Used to correlate log messages. Defaults to "x-request-id". | No|
+
+## Generate for frontend (bff.json)
+Start bff on port 8080. After that run the following command;
+
+```
+curl http://localhost:8080/api/v3/api-docs > resources/bff.json
+```
+
+The Web application uses the OpenApi specification to generate DTOs (Data Transfer Objects) on the client side.
+
+## Openapitools
+Openapi tools can be used to generate docs
+
+Install openapitools:
+
+```shell
+mkdir -p ~/bin/openapitools
+curl https://raw.githubusercontent.com/OpenAPITools/openapi-generator/master/bin/utils/openapi-generator-cli.sh > ~/bin/openapitools/openapi-generator-cli
+chmod u+x ~/bin/openapitools/openapi-generator-cli
+export PATH=$PATH:~/bin/openapitools/
+openapi-generator-cli version
+```
+
+Generate html
+
+```
+openapi-generator-cli generate -i bff.json -g html
+```
