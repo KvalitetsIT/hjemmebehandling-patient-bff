@@ -137,10 +137,39 @@ public class FhirMapper {
         PatientModel patientModel = new PatientModel();
 
         patientModel.setId(extractId(patient));
-        patientModel.setCpr(extractCpr(patient));
-        patientModel.setFamilyName(extractFamilyName(patient));
+        //patientModel.setCustomUserId(ExtensionMapper.extractCustomUserId(patient.getExtension()));
+        //patientModel.setCustomUserName(ExtensionMapper.extractCustomUserName(patient.getExtension()));
         patientModel.setGivenName(extractGivenNames(patient));
+        patientModel.setFamilyName(extractFamilyName(patient));
+        patientModel.setCpr(extractCpr(patient));
         patientModel.setPatientContactDetails(extractPatientContactDetails(patient));
+
+        if(patient.getContact() != null && !patient.getContact().isEmpty()) {
+            var contact = patient.getContactFirstRep();
+
+            patientModel.setPrimaryRelativeName(contact.getName().getText());
+            for(var coding : contact.getRelationshipFirstRep().getCoding()) {
+                if(coding.getSystem().equals(Systems.CONTACT_RELATIONSHIP)) {
+                    patientModel.setPrimaryRelativeAffiliation(coding.getCode());
+                }
+            }
+
+            // Extract phone numbers
+            if(contact.getTelecom() != null && !contact.getTelecom().isEmpty()) {
+                var primaryRelativeContactDetails = new ContactDetailsModel();
+
+                for(var telecom : contact.getTelecom()) {
+                    if(telecom.getRank() == 1) {
+                        primaryRelativeContactDetails.setPrimaryPhone(telecom.getValue());
+                    }
+                    if(telecom.getRank() == 2) {
+                        primaryRelativeContactDetails.setSecondaryPhone(telecom.getValue());
+                    }
+                }
+
+                patientModel.setPrimaryRelativeContactDetails(primaryRelativeContactDetails);
+            }
+        }
 
         return patientModel;
     }
@@ -315,17 +344,39 @@ public class FhirMapper {
     private ContactDetailsModel extractPatientContactDetails(Patient patient) {
         ContactDetailsModel contactDetails = new ContactDetailsModel();
 
-        contactDetails.setPrimaryPhone(extractPrimaryPhone(patient));
+        var lines = patient.getAddressFirstRep().getLine();
+        if(lines != null && !lines.isEmpty()) {
+            contactDetails.setStreet(String.join(", ", lines.stream().map(l -> l.getValue()).collect(Collectors.toList())));
+        }
+        contactDetails.setCity(patient.getAddressFirstRep().getCity());
+        contactDetails.setPostalCode(patient.getAddressFirstRep().getPostalCode());
+        contactDetails.setPrimaryPhone(extractPrimaryPhone(patient.getTelecom()));
+        contactDetails.setSecondaryPhone(extractSecondaryPhone(patient.getTelecom()));
+        contactDetails.setCountry(extractCountry(patient));
 
         return contactDetails;
     }
-
-    private String extractPrimaryPhone(Patient patient) {
-        if(patient.getTelecom() == null || patient.getTelecom().isEmpty()) {
+    private String extractCountry(Patient patient) {
+        var country = patient.getAddressFirstRep().getCountry();
+        if(patient.getTelecom() == null || country.isEmpty()) {
             return null;
         }
-        for(ContactPoint cp : patient.getTelecom()) {
-            if(!cp.getValue().contains("@")) {
+        return country;
+    }
+    private String extractPrimaryPhone(List<ContactPoint> contactPoints) {
+        return extractPhone(contactPoints, 1);
+    }
+
+    private String extractSecondaryPhone(List<ContactPoint> contactPoints) {
+        return extractPhone(contactPoints, 2);
+    }
+
+    private String extractPhone(List<ContactPoint> contactPoints, int rank) {
+        if(contactPoints == null || contactPoints.isEmpty()) {
+            return null;
+        }
+        for(ContactPoint cp : contactPoints) {
+            if(cp.getSystem().equals(ContactPoint.ContactPointSystem.PHONE) && cp.getRank() == rank) {
                 return cp.getValue();
             }
         }
