@@ -3,6 +3,7 @@ package dk.kvalitetsit.hjemmebehandling.integrationtest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.openapitools.client.ApiException;
 import org.openapitools.client.ApiResponse;
 import org.openapitools.client.api.QuestionnaireResponseApi;
 import org.openapitools.client.model.AnswerDto;
@@ -12,8 +13,7 @@ import org.openapitools.client.model.QuestionnaireResponseDto;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTest {
     private QuestionnaireResponseApi subject;
@@ -35,6 +35,20 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 
         // Assert
         assertEquals(200, response.getStatusCode());
+    }
+
+    @Test
+    public void connectionTest() throws Exception {
+        // Arrange
+        String questionnaireResponseId = "questionnaireresponse-infektionsmedicinsk-1";
+
+        // Act
+        try{
+            ApiResponse<QuestionnaireResponseDto> response = subject.getQuestionnaireResponseByIdWithHttpInfo(questionnaireResponseId);
+        } catch (ApiException exception){
+            fail(exception.getCode() + ": " + exception.getMessage() + " => " + exception.getResponseBody(),exception);
+        }
+
     }
 
     @Test
