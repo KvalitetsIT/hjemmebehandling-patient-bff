@@ -26,7 +26,7 @@ The simplest way to build the service is to use maven:
 mvn clean install
 ```
 
-This will build the service as a JAR used by spring boot.
+This will build the service as a JAR that are used by spring boot.
 
 ## Running the service
 Use the local docker-compose setup
