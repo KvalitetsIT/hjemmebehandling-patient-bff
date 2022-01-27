@@ -358,7 +358,7 @@ public class FhirMapper {
     }
     private String extractCountry(Patient patient) {
         var country = patient.getAddressFirstRep().getCountry();
-        if(patient.getTelecom() == null || country.isEmpty()) {
+        if(country == null || country.isEmpty()) {
             return null;
         }
         return country;
