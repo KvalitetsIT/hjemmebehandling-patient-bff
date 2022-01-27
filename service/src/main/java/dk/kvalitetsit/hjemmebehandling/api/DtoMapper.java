@@ -152,7 +152,18 @@ public class DtoMapper {
         patientDto.setCpr(patient.getCpr());
         patientDto.setFamilyName(patient.getFamilyName());
         patientDto.setGivenName(patient.getGivenName());
-        patientDto.setPatientContactDetails(mapContactDetailsModel(patient.getPatientContactDetails()));
+//        patientDto.setCustomUserName(patient.getCustomUserName());
+        if(patient.getPatientContactDetails() != null) {
+            patientDto.setPatientContactDetails(mapContactDetailsModel(patient.getPatientContactDetails()));
+        }
+        patientDto.setPrimaryRelativeName(patient.getPrimaryRelativeName());
+        patientDto.setPrimaryRelativeAffiliation(patient.getPrimaryRelativeAffiliation());
+        if(patient.getPrimaryRelativeContactDetails() != null) {
+            patientDto.setPrimaryRelativeContactDetails(mapContactDetailsModel(patient.getPrimaryRelativeContactDetails()));
+        }
+        if(patient.getAdditionalRelativeContactDetails() != null) {
+            patientDto.setAdditionalRelativeContactDetails(patient.getAdditionalRelativeContactDetails().stream().map(cd -> mapContactDetailsModel(cd)).collect(Collectors.toList()));
+        }
 
         return patientDto;
     }
@@ -307,10 +318,11 @@ public class DtoMapper {
         return contactDetailsModel;
     }
 
-    private ContactDetailsDto mapContactDetailsModel(ContactDetailsModel contactDetails) {
+    public ContactDetailsDto mapContactDetailsModel(ContactDetailsModel contactDetails) {
         ContactDetailsDto contactDetailsDto = new ContactDetailsDto();
 
         contactDetailsDto.setCountry(contactDetails.getCountry());
+        contactDetailsDto.setCity(contactDetails.getCity());
         contactDetailsDto.setPrimaryPhone(contactDetails.getPrimaryPhone());
         contactDetailsDto.setSecondaryPhone(contactDetails.getSecondaryPhone());
         contactDetailsDto.setPostalCode(contactDetails.getPostalCode());
