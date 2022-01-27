@@ -43,6 +43,42 @@ public class FhirMapperTest {
 
         // Assert
         assertEquals(result.getSubject().getReference(), carePlanModel.getPatient().getId().toString());
+        assertEquals(result.getSubject().getReference(), carePlanModel.getPatient().getId().toString());
+    }
+
+    @Test
+    public void mapPatientModel_mapsSubject() {
+        // Arrange
+        Patient patientModel = buildPatient(PATIENT_ID_1, "1234567890");
+
+        // Act
+        PatientModel result = subject.mapPatient(patientModel);
+
+        // Assert
+
+        ContactDetailsModel contactDetails = result.getPatientContactDetails();
+
+        //=== Address
+        assertEquals(patientModel.getAddressFirstRep().getCountry(), contactDetails.getCountry());
+        assertEquals(patientModel.getAddressFirstRep().getCity(), contactDetails.getCity());
+        assertEquals(patientModel.getAddressFirstRep().getPostalCode(), contactDetails.getPostalCode());
+
+        //=== Patient contact information
+        var phoneNumbers = patientModel.getTelecom();
+        assertNotEquals(contactDetails.getSecondaryPhone(), contactDetails.getPrimaryPhone(),"For testing purposes theese should not be the same");
+        assertEquals(phoneNumbers.get(0).getValue(), contactDetails.getPrimaryPhone());
+        assertEquals(phoneNumbers.get(1).getValue(), contactDetails.getSecondaryPhone());
+        assertEquals(patientModel.getName(),patientModel.getName());
+
+        //== Primarycontact
+        var primaryContactDetails = result.getPrimaryRelativeContactDetails();
+        var primaryContactNumbers = patientModel.getTelecom();
+        assertEquals(primaryContactNumbers.get(0).getValue(),primaryContactDetails.getPrimaryPhone());
+        assertEquals(primaryContactNumbers.get(1).getValue(),primaryContactDetails.getSecondaryPhone());
+        assertEquals(patientModel.getContactFirstRep().getAddress().getCountry(),primaryContactDetails.getCountry());
+        assertEquals(patientModel.getContactFirstRep().getAddress().getPostalCode(),primaryContactDetails.getPostalCode());
+        assertEquals(patientModel.getContactFirstRep().getAddress().getCity(),primaryContactDetails.getCity());
+        assertEquals(patientModel.getContactFirstRep().getRelationshipFirstRep().getCodingFirstRep().getCode(),result.getPrimaryRelativeAffiliation());
     }
 
     @Test
@@ -368,6 +404,8 @@ public class FhirMapperTest {
 
         var address = new Address();
         address.setCity("Aarhus");
+        address.setCountry("MockedLand");
+        address.setPostalCode("MockedPostal");
         patient.addAddress(address);
 
         var primaryTelecom = new ContactPoint();
@@ -378,7 +416,7 @@ public class FhirMapperTest {
 
         var secondaryTelecom = new ContactPoint();
         secondaryTelecom.setSystem(ContactPoint.ContactPointSystem.PHONE);
-        secondaryTelecom.setValue("12345678");
+        secondaryTelecom.setValue("87654321");
         secondaryTelecom.setRank(2);
         patient.addTelecom(secondaryTelecom);
 
