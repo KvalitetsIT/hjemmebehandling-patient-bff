@@ -419,6 +419,7 @@ public class FhirMapper {
 
         question.setLinkId(item.getLinkId());
         question.setText(item.getText());
+        question.setHelperText(item.getText());
         question.setRequired(item.getRequired());
         if(item.getAnswerOption() != null) {
             question.setOptions(mapOptions(item.getAnswerOption()));

@@ -10,6 +10,7 @@ public class QuestionDto {
     private boolean required;
     private QuestionType questionType;
     private List<String> options;
+    private String helperText;
 
     public String getLinkId() {
         return linkId;
@@ -53,5 +54,13 @@ public class QuestionDto {
 
     public void setOptions(List<String> options) {
         this.options = options;
+    }
+
+    public void setHelperText(String helperText) {
+        this.helperText = helperText;
+    }
+
+    public String getHelperText() {
+        return helperText;
     }
 }

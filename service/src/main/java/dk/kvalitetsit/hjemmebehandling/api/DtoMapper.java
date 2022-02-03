@@ -365,6 +365,7 @@ public class DtoMapper {
 
         questionDto.setLinkId(questionModel.getLinkId());
         questionDto.setText(questionModel.getText());
+        questionDto.setHelperText(questionModel.getHelperText());
         questionDto.setRequired(questionModel.isRequired());
         questionDto.setOptions(questionModel.getOptions());
         questionDto.setQuestionType(questionModel.getQuestionType());
