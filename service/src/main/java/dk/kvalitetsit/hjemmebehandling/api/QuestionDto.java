@@ -1,6 +1,7 @@
 package dk.kvalitetsit.hjemmebehandling.api;
 
 import dk.kvalitetsit.hjemmebehandling.constants.QuestionType;
+import dk.kvalitetsit.hjemmebehandling.model.QuestionModel;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ public class QuestionDto {
     private QuestionType questionType;
     private List<String> options;
     private String helperText;
+    private List<QuestionModel.EnableWhen> enableWhens;
 
     public String getLinkId() {
         return linkId;
@@ -62,5 +64,13 @@ public class QuestionDto {
 
     public String getHelperText() {
         return helperText;
+    }
+
+    public List<QuestionModel.EnableWhen> getEnableWhens() {
+        return enableWhens;
+    }
+
+    public void setEnableWhens(List<QuestionModel.EnableWhen> enableWhens) {
+        this.enableWhens = enableWhens;
     }
 }
