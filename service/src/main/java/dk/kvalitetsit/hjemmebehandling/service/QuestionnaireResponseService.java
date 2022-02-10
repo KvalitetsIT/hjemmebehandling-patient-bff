@@ -107,6 +107,37 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         return fhirClient.saveQuestionnaireResponse(fhirMapper.mapQuestionnaireResponseModel(questionnaireResponseModel), fhirMapper.mapCarePlanModel(carePlanModel));
     }
 
+    public List<String> getCallToActions(QuestionnaireResponseModel questionnaireResponseModel) throws ServiceException {
+        String questionnaireId = questionnaireResponseModel.getQuestionnaireId().toString();
+        var questionnaireResult = fhirClient.lookupQuestionnaires( List.of(questionnaireId) );
+        if (questionnaireResult.getQuestionnaires().isEmpty()) {
+            throw new ServiceException(String.format("No Questionnaire found for id %s", questionnaireId), ErrorKind.BAD_REQUEST, ErrorDetails.QUESTIONNAIRE_DOES_NOT_EXIST);
+        }
+
+        Questionnaire questionnaire = questionnaireResult.getQuestionnaire(questionnaireId).get();
+        QuestionnaireModel questionnaireModel = fhirMapper.mapQuestionnaire(questionnaire);
+//        fhirMapper.mapQuestionnaire(questionnaire).getCallToActions().stream()
+//            .map(a -> a.get)
+
+        List<String> callToActions = new ArrayList<>();
+        // for call-to-actions:
+        for (QuestionModel callToAction : questionnaireModel.getCallToActions()) {
+            // find matchende spørgmål for call-to-actions enableWhen
+            for (QuestionModel.EnableWhen enableWhen : callToAction.getEnableWhens()) {
+                // led efter et svar der matcher vores enable-when condition
+                Optional<QuestionAnswerPairModel> answer = questionnaireResponseModel.getQuestionAnswerPairs().stream()
+                    .filter(qa -> qa.getAnswer().equals(enableWhen.getAnswer()))
+                    .findFirst();
+
+                if (answer.isPresent()) {
+                    // vi har et match
+                    callToActions.add(callToAction.getText());
+                }
+            }
+        }
+        return callToActions;
+    }
+
     private void refreshFrequencyTimestamps(CarePlanModel carePlanModel, QualifiedId questionnaireId) {
         // Get the wrapper object that we wish to update
         var questionnaireWrapper = getMatchingQuestionnaireWrapper(carePlanModel, questionnaireId);

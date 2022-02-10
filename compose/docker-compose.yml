@@ -25,7 +25,7 @@ services:
       - hjemmebehandling_patient
 
   hapi-server:
-    image: kvalitetsit/hjemmebehandling-hapi-fhir-server:5befecfd52e001fbd00d1672574fd8d4b8915800
+    image: kvalitetsit/hjemmebehandling-hapi-fhir-server:a51d6fbec731b4ef8c8b207a0df11315a07021ea
     environment:
       - spring.datasource.url=jdbc:mysql://mariadb:3306/hapi
       - spring.datasource.username=hapi

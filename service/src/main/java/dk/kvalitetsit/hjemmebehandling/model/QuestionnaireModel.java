@@ -6,6 +6,7 @@ public class QuestionnaireModel extends BaseModel {
     private String title;
     private String status;
     private List<QuestionModel> questions;
+    private List<QuestionModel> callToActions;
 
     public String getTitle() {
         return title;
@@ -29,5 +30,13 @@ public class QuestionnaireModel extends BaseModel {
 
     public void setQuestions(List<QuestionModel> questions) {
         this.questions = questions;
+    }
+
+    public List<QuestionModel> getCallToActions() {
+        return callToActions;
+    }
+
+    public void setCallToActions(List<QuestionModel> callToActions) {
+        this.callToActions = callToActions;
     }
 }

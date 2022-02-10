@@ -1,5 +1,6 @@
 package dk.kvalitetsit.hjemmebehandling.controller;
 
+import dk.kvalitetsit.hjemmebehandling.api.CallToActionDTO;
 import dk.kvalitetsit.hjemmebehandling.api.CarePlanDto;
 import dk.kvalitetsit.hjemmebehandling.api.DtoMapper;
 import dk.kvalitetsit.hjemmebehandling.api.QuestionnaireResponseDto;
@@ -200,7 +201,7 @@ public class QuestionnaireResponseControllerTest {
         setupUserContext(cpr);
 
         // Act
-        ResponseEntity<Void> result = subject.submitQuestionnaireResponse(questionnaireResponseDto);
+        ResponseEntity<CallToActionDTO> result = subject.submitQuestionnaireResponse(questionnaireResponseDto);
 
         // Assert
         assertEquals(HttpStatus.CREATED, result.getStatusCode());

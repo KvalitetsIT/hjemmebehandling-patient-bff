@@ -77,7 +77,7 @@ public class FhirClient {
         return carePlanResult.merge(questionnaireResult);
     }
 
-    private FhirLookupResult lookupQuestionnaires(Collection<String> questionnaireIds) {
+    public FhirLookupResult lookupQuestionnaires(Collection<String> questionnaireIds) {
         var idCriterion = Questionnaire.RES_ID.exactly().codes(questionnaireIds);
 
         return lookupByCriteria(Questionnaire.class, List.of(idCriterion));

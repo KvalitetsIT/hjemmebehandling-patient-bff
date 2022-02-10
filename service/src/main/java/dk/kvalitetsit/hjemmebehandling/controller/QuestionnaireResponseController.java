@@ -1,14 +1,13 @@
 package dk.kvalitetsit.hjemmebehandling.controller;
 
+import dk.kvalitetsit.hjemmebehandling.api.CallToActionDTO;
 import dk.kvalitetsit.hjemmebehandling.api.DtoMapper;
 import dk.kvalitetsit.hjemmebehandling.api.QuestionnaireResponseDto;
-import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
 import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
 import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.BadRequestException;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.ResourceNotFoundException;
 import dk.kvalitetsit.hjemmebehandling.controller.http.LocationHeaderBuilder;
-import dk.kvalitetsit.hjemmebehandling.model.CarePlanModel;
 import dk.kvalitetsit.hjemmebehandling.model.QualifiedId;
 import dk.kvalitetsit.hjemmebehandling.model.QuestionnaireResponseModel;
 import dk.kvalitetsit.hjemmebehandling.service.QuestionnaireResponseService;
@@ -19,7 +18,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -83,12 +81,17 @@ public class QuestionnaireResponseController extends BaseController {
     }
 
     @PostMapping(value = "/v1/questionnaireresponse")
-    public ResponseEntity<Void> submitQuestionnaireResponse(@RequestBody QuestionnaireResponseDto questionnaireResponseDto) {
+    public ResponseEntity<CallToActionDTO> submitQuestionnaireResponse(@RequestBody QuestionnaireResponseDto questionnaireResponseDto) {
         String questionnaireResponseId = null;
+        List<String> callToActions = null;
 
         String cpr = userContextProvider.getUserContext().getCpr();
         try {
-            questionnaireResponseId = questionnaireResponseService.submitQuestionnaireResponse(dtoMapper.mapQuestionnaireResponseDto(questionnaireResponseDto), cpr);
+            QuestionnaireResponseModel questionnaireResponseModel = dtoMapper.mapQuestionnaireResponseDto(questionnaireResponseDto);
+            questionnaireResponseId = questionnaireResponseService.submitQuestionnaireResponse(questionnaireResponseModel, cpr);
+
+            callToActions = questionnaireResponseService.getCallToActions(questionnaireResponseModel);
+
         }
         catch(AccessValidationException | ServiceException e) {
             logger.error("Error creating CarePlan", e);
@@ -96,6 +99,8 @@ public class QuestionnaireResponseController extends BaseController {
         }
 
         URI location = locationHeaderBuilder.buildLocationHeader(questionnaireResponseId);
-        return ResponseEntity.created(location).build();
+        CallToActionDTO responseCallToAction = new CallToActionDTO();
+        responseCallToAction.setCallToActions(callToActions);
+        return ResponseEntity.created(location).body(responseCallToAction);
     }
 }
