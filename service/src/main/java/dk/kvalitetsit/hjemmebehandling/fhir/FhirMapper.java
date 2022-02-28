@@ -72,6 +72,14 @@ public class FhirMapper {
         Patient patient = lookupResult.getPatient(patientId).orElseThrow(() -> new IllegalStateException(String.format("Could not look up Patient for CarePlan %s!", carePlanModel.getId())));
         carePlanModel.setPatient(mapPatient(patient));
 
+        carePlanModel.setPlanDefinitions(new ArrayList<>());
+        for(var ic : carePlan.getInstantiatesCanonical()) {
+            var planDefinition = lookupResult
+                .getPlanDefinition(ic.getValue())
+                .orElseThrow(() -> new IllegalStateException(String.format("Could not look up PlanDefinition for CarePlan %s!", carePlanModel.getId())));
+            carePlanModel.getPlanDefinitions().add(mapPlanDefinition(planDefinition, lookupResult));
+        }
+
         carePlanModel.setQuestionnaires(new ArrayList<>());
         for(var activity : carePlan.getActivity()) {
             String questionnaireId = activity.getDetail().getInstantiatesCanonical().get(0).getValue();
@@ -85,19 +93,19 @@ public class FhirMapper {
             var wrapper = new QuestionnaireWrapperModel();
             wrapper.setQuestionnaire(questionnaireModel);
             wrapper.setFrequency(frequencyModel);
-            List<ThresholdModel> thresholds = getThresholds(activity.getDetail());
-            wrapper.setThresholds(thresholds);
             wrapper.setSatisfiedUntil(ExtensionMapper.extractActivitySatisfiedUntil(activity.getDetail().getExtension()));
 
-            carePlanModel.getQuestionnaires().add(wrapper);
-        }
+            // find thresholds from plandefinition
+            Optional<List<ThresholdModel>> thresholds = carePlanModel.getPlanDefinitions().stream()
+                .flatMap(p -> p.getQuestionnaires().stream())
+                .filter(q -> q.getQuestionnaire().getId().equals(questionnaireModel.getId()))
+                .findFirst()
+                .map(qw -> qw.getThresholds());
+            if (thresholds.isPresent()) {
+                wrapper.setThresholds(thresholds.get());
+            }
 
-        carePlanModel.setPlanDefinitions(new ArrayList<>());
-        for(var ic : carePlan.getInstantiatesCanonical()) {
-            var planDefinition = lookupResult
-                    .getPlanDefinition(ic.getValue())
-                    .orElseThrow(() -> new IllegalStateException(String.format("Could not look up PlanDefinition for CarePlan %s!", carePlanModel.getId())));
-            carePlanModel.getPlanDefinitions().add(mapPlanDefinition(planDefinition, lookupResult));
+            carePlanModel.getQuestionnaires().add(wrapper);
         }
 
         carePlanModel.setSatisfiedUntil(ExtensionMapper.extractCarePlanSatisfiedUntil(carePlan.getExtension()));
@@ -310,10 +318,6 @@ public class FhirMapper {
         if(source.getOrganizationId() != null) {
             target.addExtension(ExtensionMapper.mapOrganizationId(source.getOrganizationId()));
         }
-    }
-
-    private List<ThresholdModel> getThresholds(CarePlan.CarePlanActivityDetailComponent detail) {
-        return ExtensionMapper.extractThresholds(detail.getExtensionsByUrl(Systems.THRESHOLD));
     }
 
     private QualifiedId extractId(DomainResource resource) {
@@ -577,29 +581,24 @@ public class FhirMapper {
         CanonicalType instantiatesCanonical = new CanonicalType(questionnaireWrapperModel.getQuestionnaire().getId().toString());
         Type timing = mapFrequencyModel(questionnaireWrapperModel.getFrequency());
         Extension activitySatisfiedUntil = ExtensionMapper.mapActivitySatisfiedUntil(questionnaireWrapperModel.getSatisfiedUntil());
-        List<Extension> thresholds = ExtensionMapper.mapThresholds(questionnaireWrapperModel.getThresholds());
 
-        return buildActivity(instantiatesCanonical, timing, activitySatisfiedUntil, thresholds);
+        return buildActivity(instantiatesCanonical, timing, activitySatisfiedUntil);
     }
 
-    private CarePlan.CarePlanActivityComponent buildActivity(CanonicalType instantiatesCanonical, Type timing, Extension activitySatisfiedUntil, List<Extension> thresholds) {
+    private CarePlan.CarePlanActivityComponent buildActivity(CanonicalType instantiatesCanonical, Type timing, Extension activitySatisfiedUntil) {
         CarePlan.CarePlanActivityComponent activity = new CarePlan.CarePlanActivityComponent();
 
-        activity.setDetail(buildDetail(instantiatesCanonical, timing, activitySatisfiedUntil, thresholds));
+        activity.setDetail(buildDetail(instantiatesCanonical, timing, activitySatisfiedUntil));
 
         return activity;
     }
 
-    private CarePlan.CarePlanActivityDetailComponent buildDetail(CanonicalType instantiatesCanonical, Type timing, Extension activitySatisfiedUntil, List<Extension> thresholds) {
+    private CarePlan.CarePlanActivityDetailComponent buildDetail(CanonicalType instantiatesCanonical, Type timing, Extension activitySatisfiedUntil) {
         CarePlan.CarePlanActivityDetailComponent detail = new CarePlan.CarePlanActivityDetailComponent();
 
         detail.setInstantiatesCanonical(List.of(instantiatesCanonical));
         detail.setStatus(CarePlan.CarePlanActivityStatus.NOTSTARTED);
         detail.addExtension(activitySatisfiedUntil);
-        for(Extension threshold : thresholds) {
-            detail.addExtension(threshold);
-        }
-
         detail.setScheduled(timing);
 
         return detail;
