@@ -37,19 +37,15 @@ services:
       interval: 1m30s
       timeout: 10s
       retries: 3
-      start_period: 40s
     networks:
       - hjemmebehandling_patient
 
   hapi-server-initializer:
     image: kvalitetsit/hjemmebehandling-data-initializer:latest
     depends_on:
-      hapi-server:
-        condition: service_healthy
+      - hapi-server
     environment:
       - init_test_data=true
-    networks:
-      - hjemmebehandling_patient
 
   mariadb:
     image: mariadb:10.7
