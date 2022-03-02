@@ -29,7 +29,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
     @Test
     public void getQuestionnaireResponsesByCarePlanId_success() throws Exception {
         // Arrange
-        String carePlanId = "careplan-1";
+        String carePlanId = "careplan-infektionsmedicinsk-1";
         List<String> questionnaireIds = List.of("Questionnaire/questionnaire-1");
 
         // Act
