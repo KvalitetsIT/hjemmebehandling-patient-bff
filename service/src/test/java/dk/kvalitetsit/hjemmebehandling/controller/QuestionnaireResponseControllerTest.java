@@ -34,6 +34,7 @@ import org.springframework.http.ResponseEntity;
 
 import javax.swing.text.html.Option;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,13 +67,14 @@ public class QuestionnaireResponseControllerTest {
         // Act
 
         // Assert
-        assertThrows(BadRequestException.class, () -> subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize));
+        assertThrows(BadRequestException.class, () -> subject.getQuestionnaireResponsesByCarePlanId(carePlanId, new ArrayList<>(), pageNumber, pageSize));
     }
 
     @Test
     public void getQuestionnaireResponses_responsesPresent_200() throws Exception {
         // Arrange
         String carePlanId = "careplan-1";
+        String questionnaireId = "questionnaire-1";
         Integer pageNumber = 1;
         Integer pageSize = 10;
 
@@ -82,12 +84,12 @@ public class QuestionnaireResponseControllerTest {
         QuestionnaireResponseDto responseDto2 = new QuestionnaireResponseDto();
 
         PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
-        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId,pageDetails)).thenReturn(List.of(responseModel1, responseModel2));
+        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId, List.of(questionnaireId), pageDetails)).thenReturn(List.of(responseModel1, responseModel2));
         Mockito.when(dtoMapper.mapQuestionnaireResponseModel(responseModel1)).thenReturn(responseDto1);
         Mockito.when(dtoMapper.mapQuestionnaireResponseModel(responseModel2)).thenReturn(responseDto2);
 
         // Act
-        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize);
+        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId, List.of(questionnaireId),pageNumber, pageSize);
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
@@ -100,31 +102,34 @@ public class QuestionnaireResponseControllerTest {
     public void getQuestionnaireResponses_accessViolation_403() throws Exception {
         // Arrange
         String carePlanId = "careplan-1";
+        String questionnaireId = "questionnaire-1";
+
         int pageNumber =1;
         int pageSize =10;
         PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
-        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId,pageDetails)).thenThrow(AccessValidationException.class);
+        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId, List.of(questionnaireId), pageDetails)).thenThrow(AccessValidationException.class);
 
         // Act
 
         // Assert
-        assertThrows(ForbiddenException.class, () -> subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize));
+        assertThrows(ForbiddenException.class, () -> subject.getQuestionnaireResponsesByCarePlanId(carePlanId,  List.of(questionnaireId),pageNumber, pageSize));
     }
 
     @Test
     public void getQuestionnaireResponses_failureToFetch_500() throws Exception {
         // Arrange
         String carePlanId = "careplan-1";
+        String questionnaireId = "questionnaire-1";
         int pageNumber = 1;
         int pageSize = 10;
 
         PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
-        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId,pageDetails)).thenThrow(new ServiceException("error", ErrorKind.INTERNAL_SERVER_ERROR, ErrorDetails.INTERNAL_SERVER_ERROR));
+        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId, List.of(questionnaireId),pageDetails)).thenThrow(new ServiceException("error", ErrorKind.INTERNAL_SERVER_ERROR, ErrorDetails.INTERNAL_SERVER_ERROR));
 
         // Act
 
         // Assert
-        assertThrows(InternalServerErrorException.class, () -> subject.getQuestionnaireResponsesByCarePlanId(carePlanId, pageNumber, pageSize));
+        assertThrows(InternalServerErrorException.class, () -> subject.getQuestionnaireResponsesByCarePlanId(carePlanId,  List.of(questionnaireId), pageNumber, pageSize));
     }
 
     @Test

@@ -39,10 +39,11 @@ public class FhirClient {
         return lookupOrganizationsByCriteria(List.of(idCriterion));
     }
 
-    public FhirLookupResult lookupQuestionnaireResponses(String carePlanId) {
+    public FhirLookupResult lookupQuestionnaireResponses(String carePlanId, List<String> questionnaireIds) {
+        var questionnaireCriterion = QuestionnaireResponse.QUESTIONNAIRE.hasAnyOfIds(questionnaireIds);
         var basedOnCriterion = QuestionnaireResponse.BASED_ON.hasId(carePlanId);
 
-        return lookupQuestionnaireResponsesByCriteria(List.of(basedOnCriterion));
+        return lookupQuestionnaireResponsesByCriteria(List.of(questionnaireCriterion, basedOnCriterion));
     }
 
     public FhirLookupResult lookupQuestionnaireResponseById(String questionnaireResponseId) {
@@ -109,7 +110,30 @@ public class FhirClient {
         FhirLookupResult planDefinitionResult = lookupPlanDefinitions(planDefinitionIds);
 
         // Merge the results
-        return questionnaireResponseResult.merge(planDefinitionResult);
+        questionnaireResponseResult.merge(planDefinitionResult);
+
+        // We also need to lookup the practitioner who (potentially) changed the examination status
+        List<String> practitionerIds = getPractitionerIds(questionnaireResponseResult.getQuestionnaireResponses());
+        if (!practitionerIds.isEmpty()) {
+            FhirLookupResult practitionerResult = lookupPractitioners(practitionerIds);
+            questionnaireResponseResult.merge(practitionerResult);
+        }
+        return questionnaireResponseResult;
+    }
+
+    public FhirLookupResult lookupPractitioners(Collection<String> practitionerIds) {
+        var idCriterion = Practitioner.RES_ID.exactly().codes(practitionerIds);
+
+        return lookupByCriteria(Practitioner.class, List.of(idCriterion));
+    }
+
+    private List<String> getPractitionerIds(List<QuestionnaireResponse> questionnaireResponses) {
+        return questionnaireResponses
+                .stream()
+                .map(qr -> ExtensionMapper.tryExtractExaminationAuthorPractitionerId(qr.getExtension()))
+                .filter(id -> id != null)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     private List<String> getQuestionnaireIds(List<CarePlan> carePlans) {

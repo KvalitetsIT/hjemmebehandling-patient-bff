@@ -26,10 +26,7 @@ import java.time.Instant;
 import java.time.LocalTime;
 import java.time.Period;
 import java.time.temporal.TemporalAmount;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,7 +69,7 @@ public class QuestionnaireResponseServiceTest {
         QuestionnaireResponse response = buildQuestionnaireResponse(QUESTIONNAIRE_RESPONSE_ID_1, QUESTIONNAIRE_ID_1, PATIENT_ID);
         Patient patient = buildPatient(PATIENT_ID);
         FhirLookupResult lookupResult = FhirLookupResult.fromResources(response, patient);
-        Mockito.when(fhirClient.lookupQuestionnaireResponses(carePlanId)).thenReturn(lookupResult);
+        Mockito.when(fhirClient.lookupQuestionnaireResponses(carePlanId, new ArrayList<>())).thenReturn(lookupResult);
 
         QuestionnaireResponseModel responseModel = new QuestionnaireResponseModel();
         Mockito.when(fhirMapper.mapQuestionnaireResponse(response, lookupResult)).thenReturn(responseModel);
@@ -81,7 +78,7 @@ public class QuestionnaireResponseServiceTest {
         int pageNumber = 1;
         int pageSize = 10;
         PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
-        List<QuestionnaireResponseModel> result = subject.getQuestionnaireResponses(carePlanId,pageDetails);
+        List<QuestionnaireResponseModel> result = subject.getQuestionnaireResponses(carePlanId, new ArrayList<>(),pageDetails);
 
         // Assert
         assertEquals(1, result.size());
@@ -93,13 +90,13 @@ public class QuestionnaireResponseServiceTest {
         // Arrange
         String carePlanId = CAREPLAN_ID_1;
 
-        Mockito.when(fhirClient.lookupQuestionnaireResponses(carePlanId)).thenReturn(FhirLookupResult.fromResources());
+        Mockito.when(fhirClient.lookupQuestionnaireResponses(carePlanId, new ArrayList<>())).thenReturn(FhirLookupResult.fromResources());
 
         // Act
         int pageNumber = 1;
         int pageSize = 10;
         PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
-        List<QuestionnaireResponseModel> result = subject.getQuestionnaireResponses(carePlanId,pageDetails);
+        List<QuestionnaireResponseModel> result = subject.getQuestionnaireResponses(carePlanId, new ArrayList<>(), pageDetails);
 
         // Assert
         assertEquals(0, result.size());
@@ -117,12 +114,12 @@ public class QuestionnaireResponseServiceTest {
         FhirLookupResult patientResult = FhirLookupResult.fromResource(patient);
         FhirLookupResult lookupResult = questionnaireResponseResult.merge(patientResult);
 
-        Mockito.when(fhirClient.lookupQuestionnaireResponses(null)).thenReturn(lookupResult);
+        Mockito.when(fhirClient.lookupQuestionnaireResponses(null, new ArrayList<>())).thenReturn(lookupResult);
 
 
 
         PageDetails pageDetails = new PageDetails(1,1);
-        List<QuestionnaireResponseModel> result = qrservice.getQuestionnaireResponses(null, pageDetails);
+        List<QuestionnaireResponseModel> result = qrservice.getQuestionnaireResponses(null,  new ArrayList<>(),pageDetails);
 
 
         assertEquals(1, result.size());
@@ -154,7 +151,7 @@ public class QuestionnaireResponseServiceTest {
         FhirLookupResult patientResult = FhirLookupResult.fromResource(patient);
         FhirLookupResult lookupResult1 = questionnaireResponseResult.merge(patientResult);
 
-        Mockito.when(fhirClient.lookupQuestionnaireResponses(null)).thenReturn(lookupResult1);
+        Mockito.when(fhirClient.lookupQuestionnaireResponses(null, new ArrayList<>())).thenReturn(lookupResult1);
         Mockito.when(fhirMapper.mapQuestionnaireResponse(response1,lookupResult1)).thenReturn(questionnaireResponseToQuestionnaireResponseModel(response1));
         Mockito.when(fhirMapper.mapQuestionnaireResponse(response2,lookupResult1)).thenReturn(questionnaireResponseToQuestionnaireResponseModel(response2));
         Mockito.when(fhirMapper.mapQuestionnaireResponse(response3,lookupResult1)).thenReturn(questionnaireResponseToQuestionnaireResponseModel(response3));
@@ -162,10 +159,10 @@ public class QuestionnaireResponseServiceTest {
 
         //ACTION
         PageDetails pageDetails1 = new PageDetails(1,2);
-        List<QuestionnaireResponseModel> result1 = qrservice.getQuestionnaireResponses(null,pageDetails1);
+        List<QuestionnaireResponseModel> result1 = qrservice.getQuestionnaireResponses(null, new ArrayList<>(),pageDetails1);
 
         PageDetails pageDetails2 = new PageDetails(2,2);
-        List<QuestionnaireResponseModel> result2 = qrservice.getQuestionnaireResponses(null,pageDetails2);
+        List<QuestionnaireResponseModel> result2 = qrservice.getQuestionnaireResponses(null, new ArrayList<>(),pageDetails2);
 
         //ASSERT
         assertEquals(2, result1.size());
@@ -194,12 +191,12 @@ public class QuestionnaireResponseServiceTest {
         FhirLookupResult patientResult = FhirLookupResult.fromResource(patient);
         FhirLookupResult lookupResult = questionnaireResponseResult.merge(patientResult);
 
-        Mockito.when(fhirClient.lookupQuestionnaireResponses(null)).thenReturn(lookupResult);
+        Mockito.when(fhirClient.lookupQuestionnaireResponses(null, new ArrayList<>())).thenReturn(lookupResult);
 
 
 
         PageDetails pageDetails = new PageDetails(1,0);
-        List<QuestionnaireResponseModel> result = qrservice.getQuestionnaireResponses(null, pageDetails);
+        List<QuestionnaireResponseModel> result = qrservice.getQuestionnaireResponses(null, new ArrayList<>(), pageDetails);
 
 
         assertEquals(0, result.size());
@@ -216,10 +213,10 @@ public class QuestionnaireResponseServiceTest {
         Patient patient = new Patient();
         FhirLookupResult patientResult = FhirLookupResult.fromResource(patient);
         FhirLookupResult lookupResult = questionnaireResponseResult.merge(patientResult);
-        Mockito.when(fhirClient.lookupQuestionnaireResponses(null)).thenReturn(lookupResult);
+        Mockito.when(fhirClient.lookupQuestionnaireResponses(null, new ArrayList<>())).thenReturn(lookupResult);
 
         PageDetails pageDetails = new PageDetails(2,1);
-        List<QuestionnaireResponseModel> result = qrservice.getQuestionnaireResponses(null, pageDetails);
+        List<QuestionnaireResponseModel> result = qrservice.getQuestionnaireResponses(null,  new ArrayList<>(),pageDetails);
 
         assertEquals(0, result.size());
     }
@@ -232,14 +229,14 @@ public class QuestionnaireResponseServiceTest {
         QuestionnaireResponse response = buildQuestionnaireResponse(QUESTIONNAIRE_RESPONSE_ID_1, QUESTIONNAIRE_ID_1, PATIENT_ID);
         Patient patient = buildPatient(PATIENT_ID);
         FhirLookupResult lookupResult = FhirLookupResult.fromResources(response, patient);
-        Mockito.when(fhirClient.lookupQuestionnaireResponses(carePlanId)).thenReturn(lookupResult);
+        Mockito.when(fhirClient.lookupQuestionnaireResponses(carePlanId, new ArrayList<>())).thenReturn(lookupResult);
 
         Mockito.doThrow(AccessValidationException.class).when(accessValidator).validateAccess(patient);
 
         // Act
 
         // Assert
-        assertThrows(AccessValidationException.class, () -> subject.getQuestionnaireResponses(carePlanId, new PageDetails(1,10)));
+        assertThrows(AccessValidationException.class, () -> subject.getQuestionnaireResponses(carePlanId,  new ArrayList<>(),new PageDetails(1,10)));
     }
 
     @Test

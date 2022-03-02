@@ -22,6 +22,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -145,17 +146,18 @@ public class FhirClientTest {
     public void lookupQuestionnaireResponses_carePlanAndQuestionnairesPresent_success() {
         // Arrange
         String carePlanId = "careplan-1";
+        String questionnaireId = "questionnaire-1";
 
         QuestionnaireResponse questionnaireResponse1 = new QuestionnaireResponse();
         questionnaireResponse1.setId(QUESTIONNAIRE_RESPONSE_ID_1);
         QuestionnaireResponse questionnaireResponse2 = new QuestionnaireResponse();
         questionnaireResponse2.setId(QUESTIONNAIRE_RESPONSE_ID_2);
-        setupSearchQuestionnaireResponseClient(1, questionnaireResponse1, questionnaireResponse2);
+        setupSearchQuestionnaireResponseClient(2, questionnaireResponse1, questionnaireResponse2);
 
         setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
 
         // Act
-        FhirLookupResult result = subject.lookupQuestionnaireResponses(carePlanId);
+        FhirLookupResult result = subject.lookupQuestionnaireResponses(carePlanId, List.of(questionnaireId));
 
         // Assert
         assertEquals(2, result.getQuestionnaireResponses().size());
@@ -167,17 +169,18 @@ public class FhirClientTest {
     public void lookupQuestionnaireResponses_includesPlanDefinition() {
         // Arrange
         String carePlanId = "careplan-1";
+        String questionnaireId = "questionnaire-1";
 
         QuestionnaireResponse questionnaireResponse1 = new QuestionnaireResponse();
         questionnaireResponse1.setId(QUESTIONNAIRE_RESPONSE_ID_1);
         QuestionnaireResponse questionnaireResponse2 = new QuestionnaireResponse();
         questionnaireResponse2.setId(QUESTIONNAIRE_RESPONSE_ID_2);
-        setupSearchQuestionnaireResponseClient(1, questionnaireResponse1, questionnaireResponse2);
+        setupSearchQuestionnaireResponseClient(2, questionnaireResponse1, questionnaireResponse2);
 
         setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
 
         // Act
-        FhirLookupResult result = subject.lookupQuestionnaireResponses(carePlanId);
+        FhirLookupResult result = subject.lookupQuestionnaireResponses(carePlanId, List.of(questionnaireId));
 
         // Assert
         assertEquals(2, result.getQuestionnaireResponses().size());
