@@ -42,8 +42,8 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         this.triageEvaluator = triageEvaluator;
     }
 
-    public List<QuestionnaireResponseModel> getQuestionnaireResponses(String carePlanId, PageDetails pageDetails) throws ServiceException, AccessValidationException {
-        FhirLookupResult lookupResult = fhirClient.lookupQuestionnaireResponses(carePlanId);
+    public List<QuestionnaireResponseModel> getQuestionnaireResponses(String carePlanId, List<String> questionnaireIds, PageDetails pageDetails) throws ServiceException, AccessValidationException {
+        FhirLookupResult lookupResult = fhirClient.lookupQuestionnaireResponses(carePlanId, questionnaireIds);
         List<QuestionnaireResponse> responses = lookupResult.getQuestionnaireResponses();
         if(responses.isEmpty()) {
             return List.of();

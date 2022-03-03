@@ -39,10 +39,11 @@ public class FhirClient {
         return lookupOrganizationsByCriteria(List.of(idCriterion));
     }
 
-    public FhirLookupResult lookupQuestionnaireResponses(String carePlanId) {
+    public FhirLookupResult lookupQuestionnaireResponses(String carePlanId, List<String> questionnaireIds) {
+        var questionnaireCriterion = QuestionnaireResponse.QUESTIONNAIRE.hasAnyOfIds(questionnaireIds);
         var basedOnCriterion = QuestionnaireResponse.BASED_ON.hasId(carePlanId);
 
-        return lookupQuestionnaireResponsesByCriteria(List.of(basedOnCriterion));
+        return lookupQuestionnaireResponsesByCriteria(List.of(questionnaireCriterion, basedOnCriterion));
     }
 
     public FhirLookupResult lookupQuestionnaireResponseById(String questionnaireResponseId) {
@@ -109,8 +110,11 @@ public class FhirClient {
         FhirLookupResult planDefinitionResult = lookupPlanDefinitions(planDefinitionIds);
 
         // Merge the results
-        return questionnaireResponseResult.merge(planDefinitionResult);
+        questionnaireResponseResult.merge(planDefinitionResult);
+
+        return questionnaireResponseResult;
     }
+
 
     private List<String> getQuestionnaireIds(List<CarePlan> carePlans) {
         return carePlans

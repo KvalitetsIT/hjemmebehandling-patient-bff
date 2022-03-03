@@ -71,6 +71,10 @@ public class ExtensionMapper {
         return buildStringExtension(Systems.TRIAGING_CATEGORY, triagingCategory.toString());
     }
 
+    private static String extractStringFromExtensions(List<Extension> extensions, String url) {
+        return extractFromOptionalExtensions(extensions, url, v -> ((StringType) v).getValue());
+    }
+
     public static Instant extractActivitySatisfiedUntil(List<Extension> extensions) {
         return extractInstantFromExtensions(extensions, Systems.ACTIVITY_SATISFIED_UNTIL);
     }
@@ -94,6 +98,11 @@ public class ExtensionMapper {
     public static List<PhoneHourModel> extractPhoneHours(List<Extension> extensions) {
         return extensions.stream().map(e -> extractPhoneHours(e)).collect(Collectors.toList());
     }
+
+    private static <T> T extractFromOptionalExtensions(List<Extension> extensions, String url, Function<Type, T> extractor) {
+        return tryExtractFromExtensions(extensions, url, extractor).orElse(null);
+    }
+
 
     public static PhoneHourModel extractPhoneHours(Extension extension) {
         PhoneHourModel phoneHourModel = new PhoneHourModel();
