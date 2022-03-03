@@ -112,29 +112,9 @@ public class FhirClient {
         // Merge the results
         questionnaireResponseResult.merge(planDefinitionResult);
 
-        // We also need to lookup the practitioner who (potentially) changed the examination status
-        List<String> practitionerIds = getPractitionerIds(questionnaireResponseResult.getQuestionnaireResponses());
-        if (!practitionerIds.isEmpty()) {
-            FhirLookupResult practitionerResult = lookupPractitioners(practitionerIds);
-            questionnaireResponseResult.merge(practitionerResult);
-        }
         return questionnaireResponseResult;
     }
 
-    public FhirLookupResult lookupPractitioners(Collection<String> practitionerIds) {
-        var idCriterion = Practitioner.RES_ID.exactly().codes(practitionerIds);
-
-        return lookupByCriteria(Practitioner.class, List.of(idCriterion));
-    }
-
-    private List<String> getPractitionerIds(List<QuestionnaireResponse> questionnaireResponses) {
-        return questionnaireResponses
-                .stream()
-                .map(qr -> ExtensionMapper.tryExtractExaminationAuthorPractitionerId(qr.getExtension()))
-                .filter(id -> id != null)
-                .distinct()
-                .collect(Collectors.toList());
-    }
 
     private List<String> getQuestionnaireIds(List<CarePlan> carePlans) {
         return carePlans

@@ -33,10 +33,6 @@ public class ExtensionMapper {
         return buildStringExtension(Systems.EXAMINATION_STATUS, examinationStatus.toString());
     }
 
-    public static String tryExtractExaminationAuthorPractitionerId(List<Extension> extensions) {
-        return extractStringFromExtensions(extensions, Systems.EXAMINATION_AUTHOR);
-    }
-
     public static Extension mapOrganizationId(String organizationId) {
         return buildReferenceExtension(Systems.ORGANIZATION, organizationId);
     }
