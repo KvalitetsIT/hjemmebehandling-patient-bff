@@ -58,8 +58,6 @@ public class QuestionnaireResponseController extends BaseController {
         catch(AccessValidationException | ServiceException e) {
             logger.error("Could not look up questionnaire responses by careplan id", e);
             throw toStatusCodeException(e);
-        } catch(Exception otherE){
-            throw toStatusCodeException(otherE);
         }
     }
 
