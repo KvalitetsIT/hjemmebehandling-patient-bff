@@ -36,6 +36,14 @@ public class DtoMapperTest {
     }
 
     @Test
+    public void mapFrequencyModel_allValuesAreNull_noErrors(){
+        var toMap = new FrequencyModel();
+        var result = subject.mapFrequencyModel(toMap);
+        assertNotNull(result);
+
+    }
+
+    @Test
     public void mapCarePlanModel_success() {
         // Arrange
         CarePlanModel carePlanModel = buildCarePlanModel();
