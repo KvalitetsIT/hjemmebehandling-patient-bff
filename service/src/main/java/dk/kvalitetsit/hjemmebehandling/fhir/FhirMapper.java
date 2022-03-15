@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class FhirMapper {
@@ -654,8 +655,17 @@ public class FhirMapper {
                 .orElseThrow(() -> new IllegalStateException(String.format("Could not look up Questionnaire with id %s!", questionnaireId)));
         wrapper.setQuestionnaire(mapQuestionnaire(questionnaire));
 
-        List<ThresholdModel> thresholds = ExtensionMapper.extractThresholds(action.getExtensionsByUrl(Systems.THRESHOLD));
-        wrapper.setThresholds(thresholds);
+        List<ThresholdModel> questionnaireThresholds = ExtensionMapper.extractThresholds(
+            questionnaire.getItem().stream()
+                .flatMap(q -> q.getExtensionsByUrl(Systems.THRESHOLD).stream())
+                .collect(Collectors.toList())
+        );
+        List<ThresholdModel> planDefinitionThresholds = ExtensionMapper.extractThresholds(action.getExtensionsByUrl(Systems.THRESHOLD));
+
+        List<ThresholdModel> combinedThresholds = Stream.of(questionnaireThresholds, planDefinitionThresholds)
+            .flatMap(t -> t.stream())
+            .collect(Collectors.toList());
+        wrapper.setThresholds(combinedThresholds);
 
         return wrapper;
     }
