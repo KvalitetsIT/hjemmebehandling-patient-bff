@@ -117,7 +117,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         Questionnaire questionnaire = questionnaireResult.getQuestionnaire(questionnaireId).get();
         QuestionnaireModel questionnaireModel = fhirMapper.mapQuestionnaire(questionnaire);
 
-        List<QuestionModel> callToActions = new ArrayList<>();
+        Set<String> callToActions = new HashSet<>();
         // for call-to-actions:
         for (QuestionModel callToAction : questionnaireModel.getCallToActions()) {
             // find matchende spørgmål for call-to-actions enableWhen
@@ -129,14 +129,12 @@ public class QuestionnaireResponseService extends AccessValidatingService {
 
                 if (answer.isPresent()) {
                     // vi har et match
-                    callToActions.add(callToAction);
+                    callToActions.add(callToAction.getText());
                 }
             }
         }
-        
-        return callToActions.stream()
-            .map(cta -> cta.getText())
-            .collect(Collectors.toList());
+
+        return new ArrayList<>(callToActions);
     }
 
     private void refreshFrequencyTimestamps(CarePlanModel carePlanModel, QualifiedId questionnaireId) {
