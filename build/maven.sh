@@ -26,7 +26,7 @@ if [ -d $SRC_FOLDER ]; then
 
   # Wait for it to be ready
   echo 'waiting for bff to be ready ...'
-  curl -o /dev/null --retry 5 --retry-max-time 40 --retry-connrefused http://patient-bff:8080
+  curl -o /dev/null --retry 10 --retry-delay 10 --retry-connrefused http://patient-bff:8080
 
   # Run the integration test
   cd integrationtest
