@@ -431,7 +431,7 @@ public class FhirMapper {
 
         question.setLinkId(item.getLinkId());
         question.setText(item.getText());
-        question.setHelperText( item.getItemFirstRep().getText() );
+        question.setHelperText( mapQuestionnaireItemHelperText(item.getItem()));
         question.setRequired(item.getRequired());
         if(item.getAnswerOption() != null) {
             question.setOptions(mapOptions(item.getAnswerOption()));
@@ -442,6 +442,17 @@ public class FhirMapper {
         }
 
         return question;
+    }
+
+    private String mapQuestionnaireItemHelperText(List<Questionnaire.QuestionnaireItemComponent> item) {
+        return item.stream()
+            .filter(i -> i.getType().equals(Questionnaire.QuestionnaireItemType.DISPLAY))
+            .map(i -> i.getText())
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(null)
+            ;
+
     }
 
     private List<QuestionModel.EnableWhen> mapEnableWhens(List<Questionnaire.QuestionnaireItemEnableWhenComponent> enableWhen) {
