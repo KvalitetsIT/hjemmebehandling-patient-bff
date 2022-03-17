@@ -142,49 +142,20 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 
         questionnaireResponseDto.setQuestionAnswerPairs(new ArrayList<>());
 
-        List<AnswerDto> answers = new ArrayList<>();
+        List<AnswerDto> answers = List.of(
+            buildAnswerDto("urn:uuid:63dc8443-8012-4c1d-ac40-623c4921869c", AnswerDto.AnswerTypeEnum.QUANTITY, "37.5"), // morgen temperatur
+            buildAnswerDto("urn:uuid:fbfe8c5c-e441-47ec-a475-597ec55d9261", AnswerDto.AnswerTypeEnum.QUANTITY, "52"),   // crp
+            buildAnswerDto("urn:uuid:dc22ed52-d1c1-4bc7-bc21-35022c51b0f9", AnswerDto.AnswerTypeEnum.BOOLEAN, "true"),  // antibiotika
+            buildAnswerDto("urn:uuid:c551a88a-f73e-4cd8-976f-7b53f85526cd", AnswerDto.AnswerTypeEnum.BOOLEAN, "false"), // helbredstilstand
+            buildAnswerDto("urn:uuid:132792dc-5dc6-4e3a-8064-da324cd3526f", AnswerDto.AnswerTypeEnum.BOOLEAN, "true"),  // nye symptomer
+            buildAnswerDto("urn:uuid:0ffc36b3-a8b6-48ed-a483-0b9df7a64da2", AnswerDto.AnswerTypeEnum.BOOLEAN,"true"),   // udslæt
+            buildAnswerDto("urn:uuid:707d1946-51c0-4fd7-b579-3dd3ec432531", AnswerDto.AnswerTypeEnum.BOOLEAN, "true"),  // udslæt forværring
+            buildAnswerDto("urn:uuid:68135704-3996-4b1d-85a7-93ab6bc64a9e", AnswerDto.AnswerTypeEnum.BOOLEAN, "true"),  // antibiotika problemer
+            buildAnswerDto("urn:uuid:c187eabf-51d1-4e6e-a07a-9ef9437f4ac7", AnswerDto.AnswerTypeEnum.BOOLEAN, "true"),  // kateter problemer
+            buildAnswerDto("urn:uuid:8472c8ea-48f0-4d66-825c-21b120dae6f8", AnswerDto.AnswerTypeEnum.BOOLEAN, "true"),  // tryg ved behandling
+            buildAnswerDto("urn:uuid:6b1cabe3-9b68-4851-b6a3-34fdcb9d96bf", AnswerDto.AnswerTypeEnum.BOOLEAN, "true")   // fortsæt behandling
+        );
 
-        var answer1 = new AnswerDto();
-        answer1.setLinkId("temperature");
-        answer1.setAnswerType(AnswerDto.AnswerTypeEnum.QUANTITY);
-        answer1.setValue("37.5");
-        answers.add(answer1);
-
-        var answer2 = new AnswerDto();
-        answer2.setLinkId("crp");
-        answer2.setAnswerType(AnswerDto.AnswerTypeEnum.QUANTITY);
-        answer2.setValue("52");
-        answers.add(answer2);
-
-        var answer3 = new AnswerDto();
-        answer3.setLinkId("antibiotika");
-        answer3.setAnswerType(AnswerDto.AnswerTypeEnum.BOOLEAN);
-        answer3.setValue("true");
-        answers.add(answer3);
-
-        var answer4 = new AnswerDto();
-        answer4.setLinkId("helbredstilstand");
-        answer4.setAnswerType(AnswerDto.AnswerTypeEnum.BOOLEAN);
-        answer4.setValue("false");
-        answers.add(answer4);
-
-        var answer5 = new AnswerDto();
-        answer5.setLinkId("nye_symptomer");
-        answer5.setAnswerType(AnswerDto.AnswerTypeEnum.BOOLEAN);
-        answer5.setValue("true");
-        answers.add(answer5);
-
-        var answer6 = new AnswerDto();
-        answer6.setLinkId("udslæt");
-        answer6.setAnswerType(AnswerDto.AnswerTypeEnum.BOOLEAN);
-        answer6.setValue("true");
-        answers.add(answer6);
-
-        var answer7 = new AnswerDto();
-        answer7.setLinkId("udslæt_2");
-        answer7.setAnswerType(AnswerDto.AnswerTypeEnum.BOOLEAN);
-        answer7.setValue("true");
-        answers.add(answer7);
 
         for(var answer : answers) {
             var questionAnswerPair = new QuestionAnswerPairDto();
@@ -200,4 +171,15 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
         assertTrue(response.getHeaders().containsKey("location"));
         assertEquals(1, response.getData().getCallToActions().size());
     }
+
+    private AnswerDto buildAnswerDto(String linkId, AnswerDto.AnswerTypeEnum type, String value) {
+        AnswerDto answerDto = new AnswerDto();
+
+        answerDto.setLinkId(linkId);
+        answerDto.setAnswerType(type);
+        answerDto.setValue(value);
+
+        return answerDto;
+    }
+
 }
