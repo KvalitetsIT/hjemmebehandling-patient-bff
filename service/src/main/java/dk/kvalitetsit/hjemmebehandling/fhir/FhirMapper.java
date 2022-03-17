@@ -431,6 +431,7 @@ public class FhirMapper {
 
         question.setLinkId(item.getLinkId());
         question.setText(item.getText());
+        question.setAbbreviation(ExtensionMapper.extractQuestionAbbreviation(item.getExtension()));
         question.setHelperText( mapQuestionnaireItemHelperText(item.getItem()));
         question.setRequired(item.getRequired());
         if(item.getAnswerOption() != null) {

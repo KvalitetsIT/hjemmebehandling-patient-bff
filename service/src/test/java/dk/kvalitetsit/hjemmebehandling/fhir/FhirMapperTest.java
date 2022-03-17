@@ -211,7 +211,20 @@ public class FhirMapperTest {
         assertEquals(1, result.getItem().size());
         assertEquals(new IntegerType(2).getValue(), result.getItem().get(0).getAnswer().get(0).getValueIntegerType().getValue());
     }
+    @Test
+    public void mapQuestion_abbreviation() {
+        String abbreviation = "dagsform";
+        Questionnaire.QuestionnaireItemComponent question1 = buildQuestionItem("1", Questionnaire.QuestionnaireItemType.BOOLEAN, "Har du det godt?", abbreviation);
+        Questionnaire questionnaire = buildQuestionnaire(QUESTIONNAIRE_ID_1, List.of(question1));
 
+        // Act
+        QuestionnaireModel result = subject.mapQuestionnaire(questionnaire);
+
+        // Assert
+        assertEquals(1, result.getQuestions().size());
+        assertEquals(abbreviation, result.getQuestions().get(0).getAbbreviation());
+
+    }
     @Test
     public void mapQuestionnaireResponseModel_mapsExaminationStatus() {
         // Arrange
@@ -352,8 +365,8 @@ public class FhirMapperTest {
     @Test
     public void mapQuestion_helperText() {
         // Arrange
-        var question = buildQuestionItem("1", Questionnaire.QuestionnaireItemType.STRING, "spørgsmål");
-        var helperText = buildQuestionItem("help", Questionnaire.QuestionnaireItemType.DISPLAY, "hjælpetekst");
+        var question = buildQuestionItem("1", Questionnaire.QuestionnaireItemType.STRING, "spørgsmål","s");
+        var helperText = buildQuestionItem("help", Questionnaire.QuestionnaireItemType.DISPLAY, "hjælpetekst","s");
         question.addItem(helperText);
 
         Questionnaire questionnaire = buildQuestionnaire(QUESTIONNAIRE_ID_1, List.of(question));
@@ -370,7 +383,7 @@ public class FhirMapperTest {
     @Test
     public void mapQuestion_no_helperText_returnsNull() {
         // Arrange
-        var question = buildQuestionItem("1", Questionnaire.QuestionnaireItemType.STRING, "spørgsmål");
+        var question = buildQuestionItem("1", Questionnaire.QuestionnaireItemType.STRING, "spørgsmål","s");
 
         Questionnaire questionnaire = buildQuestionnaire(QUESTIONNAIRE_ID_1, List.of(question));
 
@@ -592,6 +605,10 @@ public class FhirMapperTest {
         return questionnaireModel;
     }
 
+    private QuestionModel buildQuestionModel() {
+        return buildQuestionModel(QuestionType.BOOLEAN, "Hvordan har du det?", "dagsform");
+    }
+
     private QuestionnaireWrapperModel buildQuestionnaireWrapperModel() {
         QuestionnaireWrapperModel questionnaireWrapperModel = new QuestionnaireWrapperModel();
 
@@ -652,22 +669,26 @@ public class FhirMapperTest {
     }
 
     private Questionnaire.QuestionnaireItemComponent buildQuestionItem(String linkId, Questionnaire.QuestionnaireItemType itemType) {
-        return buildQuestionItem(linkId, itemType, null);
+        return buildQuestionItem(linkId, itemType, null, null);
     }
-    private Questionnaire.QuestionnaireItemComponent buildQuestionItem(String linkId, Questionnaire.QuestionnaireItemType itemType, String text) {
+    private Questionnaire.QuestionnaireItemComponent buildQuestionItem(String linkId, Questionnaire.QuestionnaireItemType itemType, String text, String abbreviation) {
         var item = new Questionnaire.QuestionnaireItemComponent();
 
-        item.setLinkId(linkId);
         item.setType(itemType);
+        item.setLinkId(linkId);
         item.setText(text);
+        if (abbreviation != null) {
+            item.addExtension(ExtensionMapper.mapQuestionAbbreviation(abbreviation));
+        }
 
         return item;
     }
 
-    private QuestionModel buildQuestionModel() {
+    private QuestionModel buildQuestionModel(QuestionType type, String text, String abbreviation) {
         QuestionModel questionModel = new QuestionModel();
-
-        questionModel.setText("Hvordan har du det?");
+        questionModel.setText(text);
+        questionModel.setAbbreviation(abbreviation);
+        questionModel.setQuestionType(type);
 
         return questionModel;
     }
