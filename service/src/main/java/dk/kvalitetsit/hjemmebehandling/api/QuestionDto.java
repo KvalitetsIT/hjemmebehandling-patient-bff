@@ -8,6 +8,7 @@ import java.util.List;
 public class QuestionDto {
     private String linkId;
     private String text;
+    private String abbreviation;
     private boolean required;
     private QuestionType questionType;
     private List<String> options;
@@ -72,5 +73,13 @@ public class QuestionDto {
 
     public void setEnableWhens(List<QuestionModel.EnableWhen> enableWhens) {
         this.enableWhens = enableWhens;
+    }
+
+    public String getAbbreviation() {
+        return abbreviation;
+    }
+
+    public void setAbbreviation(String abbreviation) {
+        this.abbreviation = abbreviation;
     }
 }

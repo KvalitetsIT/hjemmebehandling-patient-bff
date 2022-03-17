@@ -23,4 +23,7 @@ public class Systems {
     public static final String PHONE_HOURS_TO = "http://hjemmebehandling.rm.dk/phone-hours-to";
 
     public static final String CONTACT_RELATIONSHIP = "http://hjemmebehandling.rm.dk/contact-relationship";
+
+    public static final String QUESTION_ABBREVIATION = "http://hjemmebehandling.rm.dk/question-abbreviation";
+
 }

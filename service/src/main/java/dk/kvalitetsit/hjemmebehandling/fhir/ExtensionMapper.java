@@ -37,6 +37,10 @@ public class ExtensionMapper {
         return buildReferenceExtension(Systems.ORGANIZATION, organizationId);
     }
 
+    public static Extension mapQuestionAbbreviation(String abbreviation) {
+        return buildStringExtension(Systems.QUESTION_ABBREVIATION, abbreviation);
+    }
+
     public static Extension mapPhoneHours(PhoneHourModel phoneHours) {
         List<Extension> extensions = new ArrayList<>();
 
@@ -77,6 +81,10 @@ public class ExtensionMapper {
 
     public static Instant extractActivitySatisfiedUntil(List<Extension> extensions) {
         return extractInstantFromExtensions(extensions, Systems.ACTIVITY_SATISFIED_UNTIL);
+    }
+
+    public static String extractQuestionAbbreviation(List<Extension> extensions) {
+        return extractStringFromExtensions(extensions, Systems.QUESTION_ABBREVIATION);
     }
 
     public static Instant extractCarePlanSatisfiedUntil(List<Extension> extensions) {
