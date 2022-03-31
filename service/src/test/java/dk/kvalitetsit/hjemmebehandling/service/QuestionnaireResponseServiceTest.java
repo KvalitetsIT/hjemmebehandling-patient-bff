@@ -442,7 +442,7 @@ public class QuestionnaireResponseServiceTest {
         // Assert
         // Verify that the satisfiedUntil-timestamp is advanced twice from the current point in time: to the next deadline (which was met), and to the next one after that.
         var questionnaireWrapper = carePlanModel.getQuestionnaires().get(0);
-        assertEquals(new FrequencyEnumerator(POINT_IN_TIME, questionnaireWrapper.getFrequency()).next().next().getPointInTime(), questionnaireWrapper.getSatisfiedUntil());
+        assertEquals(Instant.parse("2021-11-26T03:00:00Z"), questionnaireWrapper.getSatisfiedUntil());
     }
 
     @Test
@@ -466,7 +466,7 @@ public class QuestionnaireResponseServiceTest {
         // Assert
         // Verify that the satisfiedUntil-timestamp is advanced twice from the current point in time: to the next deadline (which was met), and to the next one after that.
         var questionnaireWrapper = carePlanModel.getQuestionnaires().get(0);
-        assertEquals(new FrequencyEnumerator(POINT_IN_TIME, questionnaireWrapper.getFrequency()).next().next().getPointInTime(), questionnaireWrapper.getSatisfiedUntil());
+        assertEquals(Instant.parse("2021-11-26T03:00:00Z"), questionnaireWrapper.getSatisfiedUntil());
     }
 
     @Test
@@ -492,7 +492,7 @@ public class QuestionnaireResponseServiceTest {
         // Assert
         // Verify that the satisfiedUntil-timestamp on the careplan is now the minimum among the questionnaires.
         // We submitted an answer to QUESTIONNAIRE_ID_1, so the value from QUESTIONNAIRE_ID_2 should be the new one.
-        assertEquals(POINT_IN_TIME.plus(Period.ofDays(1)), carePlanModel.getSatisfiedUntil());
+        assertEquals(Instant.parse("2021-11-23T03:00:00Z"), carePlanModel.getSatisfiedUntil());
     }
 
     private CarePlan buildCarePlan(String carePlanId) {
