@@ -131,9 +131,9 @@ public class FrequencyEnumeratorTest {
 
 
                 //Recalculating before 11 should trigger blue alarm on the same day
-                Arguments.of(allWeekAt11,Instant.parse("2021-11-23T10:11:12.124Z"),Instant.parse("2021-11-24T11:00:00.00Z")),
-                Arguments.of(allWeekAt11,Instant.parse("2021-11-24T10:11:12.124Z"),Instant.parse("2021-11-25T11:00:00.00Z")),
-                Arguments.of(allWeekAt11,Instant.parse("2021-11-25T10:11:12.124Z"),Instant.parse("2021-11-26T11:00:00.00Z")),
+                Arguments.of(allWeekAt11,Instant.parse("2021-11-23T10:11:12.124Z"),Instant.parse("2021-11-23T11:00:00.00Z")),
+                Arguments.of(allWeekAt11,Instant.parse("2021-11-24T10:11:12.124Z"),Instant.parse("2021-11-24T11:00:00.00Z")),
+                Arguments.of(allWeekAt11,Instant.parse("2021-11-25T10:11:12.124Z"),Instant.parse("2021-11-25T11:00:00.00Z")),
 
                 //Recalculating at exactly 11 o'clock should trigger blue alarm the next day
                 Arguments.of(allWeekAt11,Instant.parse("2021-11-24T11:00:00.00Z"),Instant.parse("2021-11-25T11:00:00.00Z")),
