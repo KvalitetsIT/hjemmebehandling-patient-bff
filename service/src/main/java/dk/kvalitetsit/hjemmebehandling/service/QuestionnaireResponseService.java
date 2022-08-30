@@ -43,6 +43,8 @@ public class QuestionnaireResponseService extends AccessValidatingService {
     }
 
     public List<QuestionnaireResponseModel> getQuestionnaireResponses(String carePlanId, List<String> questionnaireIds, PageDetails pageDetails) throws ServiceException, AccessValidationException {
+
+        List<Questionnaire> historicalQuestionnaires = fhirClient.lookupVersionsOfQuestionnaireById(questionnaireIds);
         FhirLookupResult lookupResult = fhirClient.lookupQuestionnaireResponses(carePlanId, questionnaireIds);
         List<QuestionnaireResponse> responses = lookupResult.getQuestionnaireResponses();
         if(responses.isEmpty()) {
@@ -61,7 +63,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         // Map and return the responses
         return responses
                 .stream()
-                .map(qr -> fhirMapper.mapQuestionnaireResponse(qr, lookupResult))
+                .map(qr -> fhirMapper.mapQuestionnaireResponse(qr, lookupResult, historicalQuestionnaires))
                 .collect(Collectors.toList());
     }
 
@@ -73,8 +75,12 @@ public class QuestionnaireResponseService extends AccessValidatingService {
             return Optional.empty();
         }
 
+        List<String> questionnaireIds = lookupResult.getQuestionnaires().stream().map(questionnaire -> questionnaire.getIdElement().toUnqualifiedVersionless().getIdBase()).collect(Collectors.toList());
+
+        List<Questionnaire> historicalQuestionnaires = fhirClient.lookupVersionsOfQuestionnaireById(questionnaireIds);
+
         // Map the resource
-        QuestionnaireResponseModel mappedQuestionnaireResponse = fhirMapper.mapQuestionnaireResponse(questionnaireResponse.get(), lookupResult);
+        QuestionnaireResponseModel mappedQuestionnaireResponse = fhirMapper.mapQuestionnaireResponse(questionnaireResponse.get(), lookupResult, historicalQuestionnaires);
 
         validateCorrectSubject(lookupResult);
 

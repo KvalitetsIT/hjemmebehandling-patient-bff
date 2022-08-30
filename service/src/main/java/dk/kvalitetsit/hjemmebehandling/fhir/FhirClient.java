@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -223,5 +224,19 @@ public class FhirClient {
         }
 
         extendable.addExtension(Systems.ORGANIZATION, new Reference(organizationId));
+    }
+
+    public List<Questionnaire> lookupVersionsOfQuestionnaireById(List<String> questionnaireIds) {
+
+        IGenericClient client = context.newRestfulGenericClient(endpoint);
+
+        List<Questionnaire> resources = new LinkedList<>();
+
+        questionnaireIds.forEach( id -> {
+            Bundle bundle = client.history().onInstance(new IdType("Questionnaire", id)).returnBundle(Bundle.class).execute();
+            bundle.getEntry().forEach(x -> resources.add((Questionnaire) x.getResource()));
+        });
+
+        return resources;
     }
 }

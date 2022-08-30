@@ -365,7 +365,7 @@ public class DtoMapper {
 
     private QuestionDto mapQuestionModel(QuestionModel questionModel) {
         QuestionDto questionDto = new QuestionDto();
-
+        questionDto.setDeprecated(questionModel.isDeprecated());
         questionDto.setLinkId(questionModel.getLinkId());
         questionDto.setText(questionModel.getText());
         questionDto.setAbbreviation(questionModel.getAbbreviation());

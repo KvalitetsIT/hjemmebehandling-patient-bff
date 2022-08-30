@@ -15,6 +15,16 @@ public class QuestionModel {
     private String helperText;
     private List<EnableWhen> enableWhens;
 
+    private boolean deprecated;
+
+    public boolean isDeprecated() {
+        return deprecated;
+    }
+
+    public void setDeprecated(boolean deprecated) {
+        this.deprecated = deprecated;
+    }
+
     public String getLinkId() {
         return linkId;
     }

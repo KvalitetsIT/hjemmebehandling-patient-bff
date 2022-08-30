@@ -15,6 +15,16 @@ public class QuestionDto {
     private String helperText;
     private List<QuestionModel.EnableWhen> enableWhens;
 
+    private boolean deprecated;
+
+    public boolean isDeprecated() {
+        return deprecated;
+    }
+
+    public void setDeprecated(boolean deprecated) {
+        this.deprecated = deprecated;
+    }
+
     public String getLinkId() {
         return linkId;
     }
@@ -82,4 +92,6 @@ public class QuestionDto {
     public void setAbbreviation(String abbreviation) {
         this.abbreviation = abbreviation;
     }
+
+
 }
