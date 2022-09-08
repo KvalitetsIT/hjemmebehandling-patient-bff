@@ -26,18 +26,18 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
         subject.getApiClient().setBasePath(enhanceBasePath(subject.getApiClient().getBasePath()));
     }
 
- /**   @Test
-    public void getQuestionnaireResponsesByCarePlanId_success() throws Exception {
-        // Arrange
-        String carePlanId = "careplan-infektionsmedicinsk-1";
-        List<String> questionnaireIds = List.of("Questionnaire/questionnaire-1");
+    // @Test
+    // public void getQuestionnaireResponsesByCarePlanId_success() throws Exception {
+    //     // Arrange
+    //     String carePlanId = "careplan-infektionsmedicinsk-1";
+    //     List<String> questionnaireIds = List.of("Questionnaire/questionnaire-1");
 
-        // Act
-        ApiResponse<List<QuestionnaireResponseDto>> response = subject.getQuestionnaireResponsesByCarePlanIdWithHttpInfo(carePlanId, questionnaireIds, 1,1);
+    //     // Act
+    //     ApiResponse<List<QuestionnaireResponseDto>> response = subject.getQuestionnaireResponsesByCarePlanIdWithHttpInfo(carePlanId, questionnaireIds, 1,1);
 
-        // Assert
-        assertEquals(200, response.getStatusCode());
-    }*/
+    //     // Assert
+    //     assertEquals(200, response.getStatusCode());
+    // }
 
     @Test
     public void connectionTest() throws Exception {
