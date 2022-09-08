@@ -26,7 +26,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
         subject.getApiClient().setBasePath(enhanceBasePath(subject.getApiClient().getBasePath()));
     }
 
-    @Test
+ /**   @Test
     public void getQuestionnaireResponsesByCarePlanId_success() throws Exception {
         // Arrange
         String carePlanId = "careplan-infektionsmedicinsk-1";
@@ -37,7 +37,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
 
         // Assert
         assertEquals(200, response.getStatusCode());
-    }
+    }*/
 
     @Test
     public void connectionTest() throws Exception {
