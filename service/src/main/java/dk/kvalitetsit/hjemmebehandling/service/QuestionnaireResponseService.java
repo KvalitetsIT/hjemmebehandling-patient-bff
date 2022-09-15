@@ -75,7 +75,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
             return Optional.empty();
         }
 
-        List<String> questionnaireIds = lookupResult.getQuestionnaires().stream().map(questionnaire -> questionnaire.getIdElement().toUnqualifiedVersionless().getIdBase()).collect(Collectors.toList());
+        List<String> questionnaireIds = lookupResult.getQuestionnaires().stream().map(questionnaire -> questionnaire.getIdElement().toUnqualifiedVersionless().getIdPart()).collect(Collectors.toList());
 
         List<Questionnaire> historicalQuestionnaires = fhirClient.lookupVersionsOfQuestionnaireById(questionnaireIds);
 
@@ -126,6 +126,9 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         Set<String> callToActions = new HashSet<>();
         // for call-to-actions:
         for (QuestionModel callToAction : questionnaireModel.getCallToActions()) {
+            if (callToAction.getEnableWhens() == null) {
+                continue;
+            }
             // find matchende spørgmål for call-to-actions enableWhen
             for (QuestionModel.EnableWhen enableWhen : callToAction.getEnableWhens()) {
                 // led efter et svar der matcher vores enable-when condition
