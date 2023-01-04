@@ -59,7 +59,7 @@ public class QuestionnaireResponseServiceTest {
     private static final String QUESTIONNAIRE_ID_2 = "Questionnaire/questionnaire-2";
     private static final String QUESTIONNAIRE_RESPONSE_ID_1 = "QuestionnaireResponse/questionnaireresponse-1";
 
-    private static final Instant POINT_IN_TIME = Instant.parse("2021-11-23T00:00:00.000Z");
+    private static final Instant POINT_IN_TIME = Instant.parse("2021-11-26T10:00:00.000Z");
 
     @Test
     public void getQuestionnaireResponses_responsesPresent_returnsResponses() throws Exception {
@@ -435,7 +435,7 @@ public class QuestionnaireResponseServiceTest {
         FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan);
         Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
 
-        CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_1, PATIENT_ID);
+        CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_1, PATIENT_ID, POINT_IN_TIME.minus(Duration.ofHours(1)));
         Mockito.when(fhirMapper.mapCarePlan(carePlan, lookupResult)).thenReturn(carePlanModel);
 
         Mockito.when(dateProvider.now()).thenReturn(POINT_IN_TIME);
@@ -450,7 +450,7 @@ public class QuestionnaireResponseServiceTest {
     }
 
     @Test
-    public void submitQuestionnaireResponse_submissionOverdue_refreshesSatisfiedUntil() throws Exception {
+    public void submitQuestionnaireResponse_submissionOverdue_dont_refreshesSatisfiedUntil() throws Exception {
         // Arrange
         QuestionnaireResponseModel questionnaireResponseModel = buildQuestionnaireResponseModel();
         String cpr = "0101010101";
@@ -459,7 +459,7 @@ public class QuestionnaireResponseServiceTest {
         FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan);
         Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
 
-        CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_1, PATIENT_ID, POINT_IN_TIME.minus(Period.ofDays(4)).plus(Duration.ofHours(4)));
+        CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_1, PATIENT_ID, POINT_IN_TIME.plus(Duration.ofHours(1)));
         Mockito.when(fhirMapper.mapCarePlan(carePlan, lookupResult)).thenReturn(carePlanModel);
 
         Mockito.when(dateProvider.now()).thenReturn(POINT_IN_TIME);
@@ -470,7 +470,7 @@ public class QuestionnaireResponseServiceTest {
         // Assert
         // Verify that the satisfiedUntil-timestamp is advanced twice from the current point in time: to the next deadline (which was met), and to the next one after that.
         var questionnaireWrapper = carePlanModel.getQuestionnaires().get(0);
-        assertEquals(Instant.parse("2021-11-26T03:00:00Z"), questionnaireWrapper.getSatisfiedUntil());
+        assertEquals(carePlanModel.getSatisfiedUntil(), questionnaireWrapper.getSatisfiedUntil());
     }
 
     @Test

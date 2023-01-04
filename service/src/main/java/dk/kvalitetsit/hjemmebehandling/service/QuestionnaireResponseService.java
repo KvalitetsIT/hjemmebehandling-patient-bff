@@ -150,10 +150,8 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         // Get the wrapper object that we wish to update
         var questionnaireWrapper = getMatchingQuestionnaireWrapper(carePlanModel, questionnaireId);
 
-        // Compute the new deadline from the current point in time. Invoke 'next' once to get the current deadline, then
-        // invoke 'next' again to get the new deadline. This works regardless of whether the current submission is overdue or not.
-        var nextDeadline = new FrequencyEnumerator(dateProvider.now(), questionnaireWrapper.getFrequency()).next().getPointInTime();
-        questionnaireWrapper.setSatisfiedUntil(nextDeadline);
+        var satisfiedUntil = new FrequencyEnumerator(questionnaireWrapper.getFrequency()).getSatisfiedUntil(dateProvider.now());
+        questionnaireWrapper.setSatisfiedUntil(satisfiedUntil);
 
         // Now that the timestamp is updated for the questionnaire, recompute the timestamp for the careplan as well.
         refreshFrequencyTimestampForCarePlan(carePlanModel);
