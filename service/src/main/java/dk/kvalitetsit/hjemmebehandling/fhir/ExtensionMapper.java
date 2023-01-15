@@ -210,7 +210,14 @@ public class ExtensionMapper {
     }
 
     private static Instant extractInstantFromExtensions(List<Extension> extensions, String url) {
-        return extractFromExtensions(extensions, url, v -> ((DateTimeType) v).getValue().toInstant());
+        return extractFromExtensions(extensions, url, v -> {
+            Instant result = ((DateTimeType) v).getValue().toInstant();
+
+            if (result.equals(MAX_SATISFIED_UNTIL_DATE.toInstant(ZoneId.of("Europe/Copenhagen").getRules().getOffset(Instant.now())))) {
+                return Instant.MAX;
+            }
+            return result;
+        });
     }
 
     private static String extractReferenceFromExtensions(List<Extension> extensions, String url) {
