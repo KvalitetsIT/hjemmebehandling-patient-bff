@@ -11,8 +11,7 @@ import dk.kvalitetsit.hjemmebehandling.types.Weekday;
 import org.hl7.fhir.r4.model.*;
 
 import java.sql.Date;
-import java.time.Instant;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +20,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ExtensionMapper {
+    protected static final LocalDateTime MAX_SATISFIED_UNTIL_DATE = LocalDateTime.of(9999, Month.DECEMBER, 31, 11, 00);
+
     public static Extension mapActivitySatisfiedUntil(Instant pointInTime) {
         return buildDateTimeExtension(Systems.ACTIVITY_SATISFIED_UNTIL, pointInTime);
     }
@@ -171,6 +172,11 @@ public class ExtensionMapper {
     }
 
     private static Extension buildDateTimeExtension(String url, Instant value) {
+        // the need for this is so stupid..
+        if (value.equals(Instant.MAX)) {
+            // men hapi-fhir clientens json parser af dato har fixed dato-format med 4 digits år, så den knækker hvis man sender år 'en million millard'
+            value = MAX_SATISFIED_UNTIL_DATE.toInstant(ZoneId.of("Europe/Copenhagen").getRules().getOffset(Instant.now()));
+        }
         return new Extension(url, new DateTimeType(Date.from(value), TemporalPrecisionEnum.MILLI, TimeZone.getTimeZone("UTC")));
     }
 
