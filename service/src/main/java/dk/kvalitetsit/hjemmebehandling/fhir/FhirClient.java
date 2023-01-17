@@ -5,6 +5,8 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICriterion;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import dk.kvalitetsit.hjemmebehandling.constants.SearchParameters;
 import dk.kvalitetsit.hjemmebehandling.constants.Systems;
 import org.hl7.fhir.r4.model.*;
 import org.slf4j.Logger;
@@ -238,5 +240,15 @@ public class FhirClient {
         });
 
         return resources;
+    }
+
+    public FhirLookupResult lookupValueSet(String organizationId) {
+        var organizationCriterion = buildOrganizationCriterion(organizationId);
+
+        return lookupByCriteria(ValueSet.class, List.of(organizationCriterion));
+    }
+
+    private ICriterion<?> buildOrganizationCriterion(String organizationId) {
+        return new ReferenceClientParam(SearchParameters.ORGANIZATION).hasId(organizationId);
     }
 }

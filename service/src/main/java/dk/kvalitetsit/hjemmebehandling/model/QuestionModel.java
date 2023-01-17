@@ -11,6 +11,7 @@ public class QuestionModel {
     private String abbreviation;
     private boolean required;
     private QuestionType questionType;
+    private MeasurementTypeModel measurementType;
     private List<String> options;
     private String helperText;
     private List<EnableWhen> enableWhens;
@@ -55,6 +56,14 @@ public class QuestionModel {
 
     public void setQuestionType(QuestionType questionType) {
         this.questionType = questionType;
+    }
+
+    public MeasurementTypeModel getMeasurementType() {
+        return measurementType;
+    }
+
+    public void setMeasurementType(MeasurementTypeModel measurementType) {
+        this.measurementType = measurementType;
     }
 
     public List<String> getOptions() {

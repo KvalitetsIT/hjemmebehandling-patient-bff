@@ -4,6 +4,7 @@ import dk.kvalitetsit.hjemmebehandling.types.ThresholdType;
 
 public class ThresholdModel {
   private String questionnaireItemLinkId;
+  private String conceptCode;
   private ThresholdType type;
   private Double valueQuantityLow;
   private Double valueQuantityHigh;
@@ -15,6 +16,14 @@ public class ThresholdModel {
 
   public void setQuestionnaireItemLinkId(String questionnaireItemLinkId) {
     this.questionnaireItemLinkId = questionnaireItemLinkId;
+  }
+
+  public String getConceptCode() {
+    return conceptCode;
+  }
+
+  public void setConceptCode(String conceptCode) {
+    this.conceptCode = conceptCode;
   }
 
   public ThresholdType getType() {

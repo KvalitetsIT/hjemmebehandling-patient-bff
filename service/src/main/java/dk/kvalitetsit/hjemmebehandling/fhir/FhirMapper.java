@@ -5,10 +5,8 @@ import dk.kvalitetsit.hjemmebehandling.model.*;
 import dk.kvalitetsit.hjemmebehandling.model.AnswerModel;
 import dk.kvalitetsit.hjemmebehandling.model.QuestionModel;
 import dk.kvalitetsit.hjemmebehandling.types.Weekday;
-import dk.kvalitetsit.hjemmebehandling.util.DateProvider;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumeration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalTime;
@@ -500,11 +498,46 @@ public class FhirMapper {
             question.setOptions(mapOptions(item.getAnswerOption()));
         }
         question.setQuestionType(mapQuestionType(item.getType()));
+        if (item.getType().equals(Questionnaire.QuestionnaireItemType.QUANTITY) && item.hasCode()) {
+            question.setMeasurementType(mapCodingConcept(item.getCodeFirstRep().getSystem(), item.getCodeFirstRep().getCode(), item.getCodeFirstRep().getDisplay()));
+        }
         if (item.hasEnableWhen()) {
             question.setEnableWhens(mapEnableWhens(item.getEnableWhen()));
         }
 
         return question;
+    }
+
+    public List<MeasurementTypeModel> extractMeasurementTypes(ValueSet valueSet) {
+        List<MeasurementTypeModel> result = new ArrayList<>();
+
+        valueSet.getCompose().getInclude()
+                .forEach(csc -> {
+                    var measurementTypes = csc.getConcept().stream()
+                            .map(crc -> mapConceptReferenceComponent(csc.getSystem(), crc))
+                            .collect(Collectors.toList());
+
+                    result.addAll(measurementTypes);
+                });
+
+        return result;
+    }
+
+    private MeasurementTypeModel mapConceptReferenceComponent(String system, ValueSet.ConceptReferenceComponent concept) {
+        MeasurementTypeModel measurementTypeModel = mapCodingConcept(system, concept.getCode(), concept.getDisplay());
+        measurementTypeModel.setThreshold(ExtensionMapper.extractThreshold(concept.getExtensionFirstRep()));
+
+        return measurementTypeModel;
+    }
+
+    private MeasurementTypeModel mapCodingConcept(String system, String code, String display) {
+        MeasurementTypeModel measurementTypeModel = new MeasurementTypeModel();
+
+        measurementTypeModel.setSystem(system);
+        measurementTypeModel.setCode(code);
+        measurementTypeModel.setDisplay(display);
+
+        return measurementTypeModel;
     }
 
     private String mapQuestionnaireItemHelperText(List<Questionnaire.QuestionnaireItemComponent> item) {

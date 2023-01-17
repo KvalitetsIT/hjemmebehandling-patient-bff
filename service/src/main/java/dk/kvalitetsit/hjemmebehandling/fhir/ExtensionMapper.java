@@ -135,6 +135,7 @@ public class ExtensionMapper {
         ThresholdModel thresholdModel = new ThresholdModel();
 
         thresholdModel.setQuestionnaireItemLinkId( extension.getExtensionString(Systems.THRESHOLD_QUESTIONNAIRE_ITEM_LINKID) );
+        thresholdModel.setConceptCode( extension.getExtensionString(Systems.THRESHOLD_CONCEPT_CODE) );
         thresholdModel.setType( Enum.valueOf(ThresholdType.class, extension.getExtensionString(Systems.THRESHOLD_TYPE)) );
         if ( extension.hasExtension(Systems.THRESHOLD_VALUE_BOOLEAN) ) {
             BooleanType valueBoolean = (BooleanType) extension.getExtensionByUrl(Systems.THRESHOLD_VALUE_BOOLEAN).getValue();

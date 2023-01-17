@@ -15,6 +15,8 @@ public class QuestionDto {
     private String helperText;
     private List<QuestionModel.EnableWhen> enableWhens;
 
+    private MeasurementTypeDto measurementType;
+
     private boolean deprecated;
 
     public boolean isDeprecated() {
@@ -93,5 +95,11 @@ public class QuestionDto {
         this.abbreviation = abbreviation;
     }
 
+    public MeasurementTypeDto getMeasurementType() {
+        return measurementType;
+    }
 
+    public void setMeasurementType(MeasurementTypeDto measurementType) {
+        this.measurementType = measurementType;
+    }
 }

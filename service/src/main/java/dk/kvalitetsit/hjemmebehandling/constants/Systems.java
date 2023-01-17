@@ -13,6 +13,7 @@ public class Systems {
 
     public static final String THRESHOLD = "http://hjemmebehandling.rm.dk/threshold";
     public static final String THRESHOLD_QUESTIONNAIRE_ITEM_LINKID = "http://hjemmebehandling.rm.dk/threshold-questionnaire-item-linkid";
+    public static final String THRESHOLD_CONCEPT_CODE = "http://hjemmebehandling.rm.dk/threshold-concept-code";
     public static final String THRESHOLD_TYPE = "http://hjemmebehandling.rm.dk/threshold-type";
     public static final String THRESHOLD_VALUE_RANGE = "http://hjemmebehandling.rm.dk/threshold-value-range";
     public static final String THRESHOLD_VALUE_BOOLEAN = "http://hjemmebehandling.rm.dk/threshold-value-boolean";

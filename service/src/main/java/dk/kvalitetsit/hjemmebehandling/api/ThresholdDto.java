@@ -5,6 +5,7 @@ import dk.kvalitetsit.hjemmebehandling.types.ThresholdType;
 
 public class ThresholdDto {
     private String questionId;
+    private String conceptCode;
     private ThresholdType type;
     private Boolean valueBoolean;
     private Double valueQuantityLow;
@@ -16,6 +17,14 @@ public class ThresholdDto {
 
     public void setQuestionId(String questionId) {
         this.questionId = questionId;
+    }
+
+    public String getConceptCode() {
+        return conceptCode;
+    }
+
+    public void setConceptCode(String conceptCode) {
+        this.conceptCode = conceptCode;
     }
 
     public ThresholdType getType() {

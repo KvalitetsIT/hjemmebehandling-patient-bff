@@ -215,6 +215,7 @@ public class DtoMapper {
         ThresholdDto thresholdDto = new ThresholdDto();
 
         thresholdDto.setQuestionId(thresholdModel.getQuestionnaireItemLinkId());
+        thresholdDto.setConceptCode(thresholdModel.getConceptCode());
         thresholdDto.setType(thresholdModel.getType());
         thresholdDto.setValueBoolean(thresholdModel.getValueBoolean());
         thresholdDto.setValueQuantityLow(thresholdModel.getValueQuantityLow());
@@ -375,7 +376,25 @@ public class DtoMapper {
         questionDto.setQuestionType(questionModel.getQuestionType());
         questionDto.setEnableWhens(questionModel.getEnableWhens());
 
+        if (questionModel.getMeasurementType() != null){
+            questionDto.setMeasurementType(mapMeasurementTypeModel(questionModel.getMeasurementType()));
+        }
+
         return questionDto;
+    }
+
+    public MeasurementTypeDto mapMeasurementTypeModel(MeasurementTypeModel measurementTypeModel) {
+        MeasurementTypeDto measurementTypeDto = new MeasurementTypeDto();
+
+        measurementTypeDto.setSystem(measurementTypeModel.getSystem());
+        measurementTypeDto.setCode(measurementTypeModel.getCode());
+        measurementTypeDto.setDisplay(measurementTypeModel.getDisplay());
+
+        if (measurementTypeModel.getThreshold() != null) {
+            measurementTypeDto.setThreshold(mapThresholdModel(measurementTypeModel.getThreshold()));
+        }
+
+        return measurementTypeDto;
     }
 
     private AnswerModel mapAnswerDto(AnswerDto answerDto) {
