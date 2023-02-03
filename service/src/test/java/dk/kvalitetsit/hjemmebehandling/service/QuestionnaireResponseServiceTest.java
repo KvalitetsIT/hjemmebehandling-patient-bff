@@ -8,7 +8,6 @@ import dk.kvalitetsit.hjemmebehandling.model.*;
 import dk.kvalitetsit.hjemmebehandling.service.access.AccessValidator;
 import dk.kvalitetsit.hjemmebehandling.service.exception.AccessValidationException;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ServiceException;
-import dk.kvalitetsit.hjemmebehandling.service.frequency.FrequencyEnumerator;
 import dk.kvalitetsit.hjemmebehandling.service.triage.TriageEvaluator;
 import dk.kvalitetsit.hjemmebehandling.types.PageDetails;
 import dk.kvalitetsit.hjemmebehandling.types.Weekday;
@@ -25,7 +24,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.Period;
-import java.time.temporal.TemporalAmount;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -435,10 +433,10 @@ public class QuestionnaireResponseServiceTest {
         FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan);
         Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
 
-        CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_1, PATIENT_ID, POINT_IN_TIME.minus(Duration.ofHours(1)));
+        CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_1, PATIENT_ID, POINT_IN_TIME);
         Mockito.when(fhirMapper.mapCarePlan(carePlan, lookupResult)).thenReturn(carePlanModel);
 
-        Mockito.when(dateProvider.now()).thenReturn(POINT_IN_TIME);
+        Mockito.when(dateProvider.now()).thenReturn(POINT_IN_TIME.minus(Duration.ofHours(1)));
 
         // Act
         String result = subject.submitQuestionnaireResponse(questionnaireResponseModel, cpr);
@@ -446,7 +444,7 @@ public class QuestionnaireResponseServiceTest {
         // Assert
         // Verify that the satisfiedUntil-timestamp is advanced twice from the current point in time: to the next deadline (which was met), and to the next one after that.
         var questionnaireWrapper = carePlanModel.getQuestionnaires().get(0);
-        assertEquals(Instant.parse("2021-11-26T03:00:00Z"), questionnaireWrapper.getSatisfiedUntil());
+        assertEquals(Instant.parse("2021-12-03T10:00:00Z"), questionnaireWrapper.getSatisfiedUntil());
     }
 
     @Test
@@ -459,10 +457,10 @@ public class QuestionnaireResponseServiceTest {
         FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan);
         Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
 
-        CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_1, PATIENT_ID, POINT_IN_TIME.plus(Duration.ofHours(1)));
+        CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_1, PATIENT_ID, POINT_IN_TIME);
         Mockito.when(fhirMapper.mapCarePlan(carePlan, lookupResult)).thenReturn(carePlanModel);
 
-        Mockito.when(dateProvider.now()).thenReturn(POINT_IN_TIME);
+        Mockito.when(dateProvider.now()).thenReturn(POINT_IN_TIME.minus(Duration.ofHours(1)));
 
         // Act
         String result = subject.submitQuestionnaireResponse(questionnaireResponseModel, cpr);
@@ -496,7 +494,7 @@ public class QuestionnaireResponseServiceTest {
         // Assert
         // Verify that the satisfiedUntil-timestamp on the careplan is now the minimum among the questionnaires.
         // We submitted an answer to QUESTIONNAIRE_ID_1, so the value from QUESTIONNAIRE_ID_2 should be the new one.
-        assertEquals(Instant.parse("2021-11-23T03:00:00Z"), carePlanModel.getSatisfiedUntil());
+        assertEquals(Instant.parse("2021-11-23T10:00:00Z"), carePlanModel.getSatisfiedUntil());
     }
 
     private CarePlan buildCarePlan(String carePlanId) {
@@ -515,7 +513,7 @@ public class QuestionnaireResponseServiceTest {
     private CarePlanModel buildCarePlanModel(String carePlanId, String patientId, Instant satisfiedUntil) {
         FrequencyModel frequencyModel = new FrequencyModel();
         frequencyModel.setWeekdays(List.of(Weekday.FRI));
-        frequencyModel.setTimeOfDay(LocalTime.parse("04:00"));
+        frequencyModel.setTimeOfDay(LocalTime.parse("11:00"));
 
         var questionnaireWrapper = buildQuestionnaireWrapperModel(QUESTIONNAIRE_ID_1, frequencyModel, satisfiedUntil);
 

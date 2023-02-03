@@ -150,7 +150,8 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         // Get the wrapper object that we wish to update
         var questionnaireWrapper = getMatchingQuestionnaireWrapper(carePlanModel, questionnaireId);
 
-        var satisfiedUntil = new FrequencyEnumerator(questionnaireWrapper.getFrequency()).getSatisfiedUntil(dateProvider.now());
+        var currentSatisfiedUntil = questionnaireWrapper.getSatisfiedUntil();
+        var satisfiedUntil = new FrequencyEnumerator(questionnaireWrapper.getFrequency(), currentSatisfiedUntil).getSatisfiedUntil(dateProvider.now());
         questionnaireWrapper.setSatisfiedUntil(satisfiedUntil);
 
         // Now that the timestamp is updated for the questionnaire, recompute the timestamp for the careplan as well.

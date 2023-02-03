@@ -30,18 +30,19 @@ import java.util.stream.Collectors;
  *  - Indsendes der et spørgeskema på en skemalagt dag inden klokken 11, så laves en genberegning til næste skemalagte dag.
  *  - Indsendes der et spørgeskema på en skemalagt dag efter klokken 11, så laves der ikke en genberegning. Dvs. seneste skemalagte dag er stadig deadline.
  *  - Indsendes der et spørgeskema på en ikke skemalagt dag, så laves der ikke en genberegning. Dvs. seneste skemalagte dag er stadig deadline.
- *  - Blå alarmer vises efter klokken 11.
  */
 public class FrequencyEnumerator {
     private List<DayOfWeek> weekDays;
     private LocalTime deadlineTime; //fx if you wanna say "Før kl 11", deadlineTime should be 11:00
+    private Instant currentSatisfiedUntil;
 
-    public FrequencyEnumerator(FrequencyModel frequency) {
+    public FrequencyEnumerator(FrequencyModel frequency, Instant currensSatisfiedUntil) {
         this.deadlineTime = frequency.getTimeOfDay();
         this.weekDays = frequency.getWeekdays().stream()
             .map(d -> toDayOfWeek(d))
             .sorted(Comparator.naturalOrder())
             .collect(Collectors.toList());
+        this.currentSatisfiedUntil = currensSatisfiedUntil;
     }
 
     /**
@@ -61,16 +62,14 @@ public class FrequencyEnumerator {
         if (zonedDateTime.toLocalTime().isBefore(deadlineTime) && weekDays.contains(zonedDateTime.getDayOfWeek())) {
             // adjust to the successive weekday from the frequency model
             var successiveDayOfWeek = getSuccessiveDayOfWeek(zonedDateTime.getDayOfWeek());
-            zonedDateTime = zonedDateTime.with(TemporalAdjusters.next(successiveDayOfWeek));
+            currentSatisfiedUntil = zonedDateTime
+                    .with(TemporalAdjusters.next(successiveDayOfWeek))
+                    .with(deadlineTime)
+                    .toInstant();
         }
-        else {
-            // adjust to the preceeding weekday, including today, from the frequency model (=most recent deadline)
-            var preceedingDayOfWeek = getPreceedingDayOfWeek(zonedDateTime.getDayOfWeek());
-            zonedDateTime = zonedDateTime.with(TemporalAdjusters.previousOrSame(preceedingDayOfWeek));
-        }
+        // else: ingen genberegning
 
-        // adjust deadline and return
-        return zonedDateTime.with(deadlineTime).toInstant();
+        return currentSatisfiedUntil;
     }
 
     private DayOfWeek getSuccessiveDayOfWeek(DayOfWeek dayOfWeek) {
@@ -78,14 +77,6 @@ public class FrequencyEnumerator {
             .filter(weekDay -> weekDay.compareTo(dayOfWeek) > 0)
             .findFirst()
             .orElseGet(() -> weekDays.get(0));
-    }
-
-    private DayOfWeek getPreceedingDayOfWeek(DayOfWeek dayOfWeek) {
-        return weekDays.stream()
-            .filter(weekDay -> weekDay.compareTo(dayOfWeek) <= 0)
-            .sorted(Comparator.reverseOrder())
-            .findFirst()
-            .orElseGet(() -> weekDays.get(weekDays.size()-1));
     }
 
    private DayOfWeek toDayOfWeek(Weekday weekday) {
