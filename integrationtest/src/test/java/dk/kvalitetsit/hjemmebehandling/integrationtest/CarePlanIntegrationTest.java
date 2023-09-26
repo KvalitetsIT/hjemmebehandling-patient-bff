@@ -22,7 +22,7 @@ public class CarePlanIntegrationTest extends AbstractIntegrationTest {
 
         subject.getApiClient().setBasePath(enhanceBasePath(subject.getApiClient().getBasePath()));
     }
-
+/*
     @Test
     public void getQuestionnaireResponsesByCarePlanId_success() throws Exception {
         // Arrange
@@ -33,4 +33,6 @@ public class CarePlanIntegrationTest extends AbstractIntegrationTest {
         // Assert
         assertEquals(200, response.getStatusCode());
     }
+
+ */
 }

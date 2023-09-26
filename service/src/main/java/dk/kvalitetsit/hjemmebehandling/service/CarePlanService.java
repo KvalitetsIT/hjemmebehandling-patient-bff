@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class CarePlanService extends AccessValidatingService {
@@ -26,17 +27,20 @@ public class CarePlanService extends AccessValidatingService {
         this.fhirMapper = fhirMapper;
     }
 
-    public Optional<CarePlanModel> getActiveCarePlan(String cpr) throws ServiceException, AccessValidationException {
+    public List<CarePlanModel> getActiveCarePlan(String cpr) throws ServiceException, AccessValidationException {
         FhirLookupResult lookupResult = fhirClient.lookupActiveCarePlan(cpr);
         List<CarePlan> carePlans = lookupResult.getCarePlans();
+
+        /*
+
         if(carePlans.size() > 1) {
             throw new IllegalStateException(String.format("Expected to look up zero or one active careplan for cpr %s, got %s!", cpr, carePlans.size()));
         }
         if(carePlans.isEmpty()) {
             return Optional.empty();
         }
-
+         */
         validateCorrectSubject(lookupResult);
-        return Optional.of(fhirMapper.mapCarePlan(carePlans.get(0), lookupResult));
+        return carePlans.stream().map((carePlan) -> fhirMapper.mapCarePlan(carePlan, lookupResult)).collect(Collectors.toList());
     }
 }

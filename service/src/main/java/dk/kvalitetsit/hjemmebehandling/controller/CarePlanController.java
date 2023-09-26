@@ -16,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "CarePlan", description = "API for retrieving CarePlans.")
@@ -34,22 +36,22 @@ public class CarePlanController extends BaseController {
     }
 
     @GetMapping(value = "/v1/careplan/active")
-    public ResponseEntity<CarePlanDto> getActiveCarePlan() {
+    public ResponseEntity<List<CarePlanDto>> getActiveCarePlans() {
         String cpr = userContextProvider.getUserContext().getCpr();
 
-        Optional<CarePlanModel> carePlan = Optional.empty();
+        List<CarePlanModel> carePlans = new ArrayList<>();
 
         try {
-            carePlan = carePlanService.getActiveCarePlan(cpr);
+            carePlans = carePlanService.getActiveCarePlan(cpr);
         }
         catch(AccessValidationException | ServiceException e) {
             logger.error("Could not update questionnaire response", e);
             throw toStatusCodeException(e);
         }
 
-        if(!carePlan.isPresent()) {
+        if(carePlans.isEmpty()) {
             throw new ResourceNotFoundException("No active careplan exists for the current user.", ErrorDetails.NO_ACTIVE_CAREPLAN_EXISTS);
         }
-        return ResponseEntity.ok(dtoMapper.mapCarePlanModel(carePlan.get()));
+        return ResponseEntity.ok(carePlans.stream().map(carePlan -> dtoMapper.mapCarePlanModel(carePlan)).collect(Collectors.toList()));
     }
 }

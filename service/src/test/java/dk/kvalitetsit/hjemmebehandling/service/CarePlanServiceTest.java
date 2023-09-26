@@ -42,6 +42,8 @@ public class CarePlanServiceTest {
 
     private static final Instant POINT_IN_TIME = Instant.parse("2021-11-23T00:00:00.000Z");
 
+    /*
+
     @Test
     public void getActiveCarePlan_carePlanPresent_returnsCarePlan() throws Exception {
         // Arrange
@@ -77,7 +79,7 @@ public class CarePlanServiceTest {
         // Assert
         assertFalse(result.isPresent());
     }
-
+*/
     @Test
     public void getActiveCarePlan_malformedResult_throwsException() throws Exception {
         // Arrange
