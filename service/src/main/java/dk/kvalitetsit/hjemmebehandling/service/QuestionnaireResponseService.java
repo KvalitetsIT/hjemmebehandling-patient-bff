@@ -91,12 +91,23 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         // Look up the careplan indicated in the response. Check that this is the user's active careplan.
         var carePlanResult = fhirClient.lookupActiveCarePlan(cpr);
         if(carePlanResult.getCarePlans().isEmpty()) {
-            throw new ServiceException(String.format("No CarePnlan found for cpr %s", cpr), ErrorKind.BAD_REQUEST, ErrorDetails.NO_ACTIVE_CAREPLAN_EXISTS);
+            throw new ServiceException(String.format("No CarePlan found for cpr %s", cpr), ErrorKind.BAD_REQUEST, ErrorDetails.NO_ACTIVE_CAREPLAN_EXISTS);
         }
-        if(carePlanResult.getCarePlans().size() > 1) {
-            throw new IllegalStateException(String.format("Error looking up active careplan! Expected to retrieve exactly one reosurce!"));
+
+        var carePlanId = questionnaireResponseModel.getCarePlanId().getId();
+        var careplansWithMatchingId = carePlanResult.getCarePlans().stream().filter(carePlan -> {
+            var id = carePlan.getIdElement().getIdPart();
+
+
+            return id.equals(carePlanId);
+        }).collect(Collectors.toList());
+
+        if(careplansWithMatchingId.size() != 1) {
+            throw new IllegalStateException(String.format("Error looking up active careplan! Expected to retrieve exactly one resource!"));
         }
-        var carePlanModel = fhirMapper.mapCarePlan(carePlanResult.getCarePlans().get(0), carePlanResult);
+
+
+        var carePlanModel = fhirMapper.mapCarePlan(careplansWithMatchingId.get(0), carePlanResult);
 
         // Check that the carePlan indicated by the client is that of the patient's active careplan
         if(!questionnaireResponseModel.getCarePlanId().equals(carePlanModel.getId())) {
