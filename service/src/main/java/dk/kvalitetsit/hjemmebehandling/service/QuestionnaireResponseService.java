@@ -95,24 +95,23 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         }
 
         var carePlanId = questionnaireResponseModel.getCarePlanId().getId();
+
         var careplansWithMatchingId = carePlanResult.getCarePlans().stream().filter(carePlan -> {
             var id = carePlan.getIdElement().getIdPart();
-
-
             return id.equals(carePlanId);
         }).collect(Collectors.toList());
 
-        if(careplansWithMatchingId.size() != 1) {
-            throw new IllegalStateException(String.format("Error looking up active careplan! Expected to retrieve exactly one resource!"));
-        }
-
-
-        var carePlanModel = fhirMapper.mapCarePlan(careplansWithMatchingId.get(0), carePlanResult);
 
         // Check that the carePlan indicated by the client is that of the patient's active careplan
-        if(!questionnaireResponseModel.getCarePlanId().equals(carePlanModel.getId())) {
+        if(careplansWithMatchingId.size() < 1 ) {
             throw new ServiceException("The provided CarePlan id does not identify the patient's current active careplan.", ErrorKind.BAD_REQUEST, ErrorDetails.WRONG_CAREPLAN_ID);
         }
+
+        if(careplansWithMatchingId.size() != 1) {
+            throw new IllegalStateException(String.format("Error looking up active careplan! Expected to retrieve exactly one resource with matching id!"));
+        }
+
+        var carePlanModel = fhirMapper.mapCarePlan(careplansWithMatchingId.get(0), carePlanResult);
 
         // Update the frequency timestamps on the careplan (the specific activity and the careplan itself)
         refreshFrequencyTimestamps(carePlanModel, questionnaireResponseModel.getQuestionnaireId());

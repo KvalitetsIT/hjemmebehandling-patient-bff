@@ -306,7 +306,7 @@ public class QuestionnaireResponseServiceTest {
         // Assert
         assertThrows(ServiceException.class, () -> subject.submitQuestionnaireResponse(questionnaireResponseModel, cpr));
     }
-/*
+/*  This test has become irrelevant since loopupActiveCareplan may now return multiple careplans
     @Test
     public void submitQuestionnaireResponse_multipleCarePlans_throwsException() {
         // Arrange
@@ -320,10 +320,8 @@ public class QuestionnaireResponseServiceTest {
         // Assert
         assertThrows(IllegalStateException.class, () -> subject.submitQuestionnaireResponse(questionnaireResponseModel, cpr));
     }
+*/
 
-
- */
-/*
     @Test
     public void submitQuestionnaireResponse_wrongCarePlanId_throwsException() {
         // Arrange
@@ -335,8 +333,8 @@ public class QuestionnaireResponseServiceTest {
         FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan);
         Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
 
-        CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_2, PATIENT_ID);
-        Mockito.when(fhirMapper.mapCarePlan(carePlan, lookupResult)).thenReturn(carePlanModel);
+//        CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_2, PATIENT_ID);
+//        Mockito.when(fhirMapper.mapCarePlan(carePlan, lookupResult)).thenReturn(carePlanModel);
 
         // Act
 
@@ -344,8 +342,8 @@ public class QuestionnaireResponseServiceTest {
         assertThrows(ServiceException.class, () -> subject.submitQuestionnaireResponse(questionnaireResponseModel, cpr));
     }
 
- */
-/*
+
+
     @Test
     public void submitQuestionnaireResponse_success_returnsGeneratedId() throws Exception {
         // Arrange
@@ -375,8 +373,7 @@ public class QuestionnaireResponseServiceTest {
         assertEquals(QUESTIONNAIRE_RESPONSE_ID_1, result);
     }
 
- */
-/*
+
     @Test
     public void submitQuestionnaireResponse_success_populatesAttributes() throws Exception {
         // Arrange
@@ -403,8 +400,8 @@ public class QuestionnaireResponseServiceTest {
         assertEquals(new QualifiedId(PATIENT_ID), questionnaireResponseModel.getPatient().getId());
     }
 
- */
-/*
+
+
     @Test
     public void submitQuestionnaireResponse_success_computesTriagingCategory() throws Exception {
         // Arrange
@@ -431,9 +428,7 @@ public class QuestionnaireResponseServiceTest {
         // Assert
         assertEquals(TriagingCategory.YELLOW, questionnaireResponseModel.getTriagingCategory());
     }
-    */
 
-/*
     @Test
     public void submitQuestionnaireResponse_submittedInTime_refreshesSatisfiedUntil() throws Exception {
         // Arrange
@@ -458,8 +453,7 @@ public class QuestionnaireResponseServiceTest {
         assertEquals(Instant.parse("2021-12-03T10:00:00Z"), questionnaireWrapper.getSatisfiedUntil());
     }
 
- */
-/*
+
     @Test
     public void submitQuestionnaireResponse_submissionOverdue_dont_refreshesSatisfiedUntil() throws Exception {
         // Arrange
@@ -483,8 +477,7 @@ public class QuestionnaireResponseServiceTest {
         var questionnaireWrapper = carePlanModel.getQuestionnaires().get(0);
         assertEquals(carePlanModel.getSatisfiedUntil(), questionnaireWrapper.getSatisfiedUntil());
     }
-*/
-    /*
+
     @Test
     public void submitQuestionnaireResponse_refreshesSatisfiedUntilForCarePlan() throws Exception {
         // Arrange
@@ -510,7 +503,6 @@ public class QuestionnaireResponseServiceTest {
         // We submitted an answer to QUESTIONNAIRE_ID_1, so the value from QUESTIONNAIRE_ID_2 should be the new one.
         assertEquals(Instant.parse("2021-11-23T10:00:00Z"), carePlanModel.getSatisfiedUntil());
     }
-    */
 
 
     private CarePlan buildCarePlan(String carePlanId) {
