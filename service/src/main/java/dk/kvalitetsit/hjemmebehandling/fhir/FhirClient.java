@@ -251,4 +251,11 @@ public class FhirClient {
     private ICriterion<?> buildOrganizationCriterion(String organizationId) {
         return new ReferenceClientParam(SearchParameters.ORGANIZATION).hasId(organizationId);
     }
+
+    public FhirLookupResult lookupQuestionnaireResponsesForMultipleCarePlans(List<String> carePlanIds, List<String> questionnaireIds) {
+        var questionnaireCriterion = QuestionnaireResponse.QUESTIONNAIRE.hasAnyOfIds(questionnaireIds);
+        var basedOnCriterion = QuestionnaireResponse.BASED_ON.hasAnyOfIds(carePlanIds);
+
+        return lookupQuestionnaireResponsesByCriteria(List.of(questionnaireCriterion, basedOnCriterion));
+    }
 }

@@ -61,6 +61,25 @@ public class QuestionnaireResponseController extends BaseController {
         }
     }
 
+    @GetMapping(value = "/v1/questionnaireresponses")
+    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnaireResponsesForMultipleCarePlans(@RequestParam("carePlanIds") List<String> carePlanIds, @RequestParam("questionnaireIds") List<String> questionnaireIds, int pageNumber, int pageSize) {
+        if(carePlanIds == null || carePlanIds.isEmpty() || questionnaireIds == null || questionnaireIds.isEmpty()) {
+            throw new BadRequestException(ErrorDetails.PARAMETERS_INCOMPLETE);
+        }
+
+        try {
+            PageDetails pageDetails = new PageDetails(pageNumber,pageSize);
+            List<QuestionnaireResponseModel> questionnaireResponses = questionnaireResponseService.getQuestionnaireResponsesForMultipleCarePlans(carePlanIds, questionnaireIds, pageDetails);
+
+            return ResponseEntity.ok(questionnaireResponses.stream().map(qr -> dtoMapper.mapQuestionnaireResponseModel(qr)).collect(Collectors.toList()));
+        }
+        catch(AccessValidationException e) {
+            logger.error("Could not look up questionnaire responses by careplan id", e);
+            throw toStatusCodeException(e);
+        }
+    }
+
+
     @GetMapping(value = "/v1/questionnaireresponse/{id}")
     public ResponseEntity<QuestionnaireResponseDto> getQuestionnaireResponseById(@PathVariable("id") String id) {
         // Look up the QuestionnaireResponse

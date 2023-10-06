@@ -47,7 +47,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         List<Questionnaire> historicalQuestionnaires = fhirClient.lookupVersionsOfQuestionnaireById(questionnaireIds);
         FhirLookupResult lookupResult = fhirClient.lookupQuestionnaireResponses(carePlanId, questionnaireIds);
         List<QuestionnaireResponse> responses = lookupResult.getQuestionnaireResponses();
-        if(responses.isEmpty()) {
+        if (responses.isEmpty()) {
             return List.of();
         }
 
@@ -57,7 +57,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         responses = sortResponsesByDate(responses);
 
         // Perform paging if required.
-        if(pageDetails != null) {
+        if (pageDetails != null) {
             responses = pageResponses(responses, pageDetails);
         }
         // Map and return the responses
@@ -71,7 +71,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         FhirLookupResult lookupResult = fhirClient.lookupQuestionnaireResponseById(id.toString());
 
         Optional<QuestionnaireResponse> questionnaireResponse = lookupResult.getQuestionnaireResponse(id.toString());
-        if(!questionnaireResponse.isPresent()) {
+        if (!questionnaireResponse.isPresent()) {
             return Optional.empty();
         }
 
@@ -90,7 +90,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
     public String submitQuestionnaireResponse(QuestionnaireResponseModel questionnaireResponseModel, String cpr) throws ServiceException, AccessValidationException {
         // Look up the careplan indicated in the response. Check that this is the user's active careplan.
         var carePlanResult = fhirClient.lookupActiveCarePlan(cpr);
-        if(carePlanResult.getCarePlans().isEmpty()) {
+        if (carePlanResult.getCarePlans().isEmpty()) {
             throw new ServiceException(String.format("No CarePlan found for cpr %s", cpr), ErrorKind.BAD_REQUEST, ErrorDetails.NO_ACTIVE_CAREPLAN_EXISTS);
         }
 
@@ -103,11 +103,11 @@ public class QuestionnaireResponseService extends AccessValidatingService {
 
 
         // Check that the carePlan indicated by the client is that of the patient's active careplan
-        if(careplansWithMatchingId.size() < 1 ) {
+        if (careplansWithMatchingId.size() < 1) {
             throw new ServiceException("The provided CarePlan id does not identify the patient's current active careplan.", ErrorKind.BAD_REQUEST, ErrorDetails.WRONG_CAREPLAN_ID);
         }
 
-        if(careplansWithMatchingId.size() != 1) {
+        if (careplansWithMatchingId.size() != 1) {
             throw new IllegalStateException(String.format("Error looking up active careplan! Expected to retrieve exactly one resource with matching id!"));
         }
 
@@ -125,7 +125,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
 
     public List<String> getCallToActions(QuestionnaireResponseModel questionnaireResponseModel) throws ServiceException {
         String questionnaireId = questionnaireResponseModel.getQuestionnaireId().toString();
-        var questionnaireResult = fhirClient.lookupQuestionnaires( List.of(questionnaireId) );
+        var questionnaireResult = fhirClient.lookupQuestionnaires(List.of(questionnaireId));
         if (questionnaireResult.getQuestionnaires().isEmpty()) {
             throw new ServiceException(String.format("No Questionnaire found for id %s", questionnaireId), ErrorKind.BAD_REQUEST, ErrorDetails.QUESTIONNAIRE_DOES_NOT_EXIST);
         }
@@ -143,8 +143,8 @@ public class QuestionnaireResponseService extends AccessValidatingService {
             for (QuestionModel.EnableWhen enableWhen : callToAction.getEnableWhens()) {
                 // led efter et svar der matcher vores enable-when condition
                 Optional<QuestionAnswerPairModel> answer = questionnaireResponseModel.getQuestionAnswerPairs().stream()
-                    .filter(qa -> qa.getAnswer().equals(enableWhen.getAnswer()))
-                    .findFirst();
+                        .filter(qa -> qa.getAnswer().equals(enableWhen.getAnswer()))
+                        .findFirst();
 
                 if (answer.isPresent()) {
                     // vi har et match
@@ -205,7 +205,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
     private List<QuestionnaireResponse> sortResponsesByDate(List<QuestionnaireResponse> responses) {
         return responses
                 .stream()
-                .sorted( (a,b) -> b.getAuthored().compareTo(a.getAuthored()) )
+                .sorted((a, b) -> b.getAuthored().compareTo(a.getAuthored()))
                 .collect(Collectors.toList());
     }
 
@@ -228,5 +228,28 @@ public class QuestionnaireResponseService extends AccessValidatingService {
                 .filter(q -> q.getQuestionnaire().getId().equals(questionnaireId))
                 .findFirst()
                 .get();
+    }
+
+    public List<QuestionnaireResponseModel> getQuestionnaireResponsesForMultipleCarePlans(List<String> carePlanIds, List<String> questionnaireIds, PageDetails pageDetails) throws AccessValidationException {
+        List<Questionnaire> historicalQuestionnaires = fhirClient.lookupVersionsOfQuestionnaireById(questionnaireIds);
+        FhirLookupResult lookupResult = fhirClient.lookupQuestionnaireResponsesForMultipleCarePlans(carePlanIds, questionnaireIds);
+        List<QuestionnaireResponse> responses = lookupResult.getQuestionnaireResponses();
+        if (responses.isEmpty()) {
+            return List.of();
+        }
+
+        validateCorrectSubject(lookupResult);
+
+        // Sort the responses by priority.
+        responses = sortResponsesByDate(responses);
+
+        // Perform paging if required.
+        if (pageDetails != null) {
+            responses = pageResponses(responses, pageDetails);
+        }
+        // Map and return the responses
+        return responses
+                .stream()
+                .map(qr -> fhirMapper.mapQuestionnaireResponse(qr, lookupResult, historicalQuestionnaires)).collect(Collectors.toList());
     }
 }
