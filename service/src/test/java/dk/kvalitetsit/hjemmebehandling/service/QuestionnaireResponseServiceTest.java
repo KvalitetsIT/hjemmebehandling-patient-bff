@@ -78,7 +78,7 @@ public class QuestionnaireResponseServiceTest {
         int pageNumber = 1;
         int pageSize = 10;
         PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
-        List<QuestionnaireResponseModel> result = subject.getQuestionnaireResponses(carePlanId, new ArrayList<>(),pageDetails);
+        List<QuestionnaireResponseModel> result = subject.getQuestionnaireResponses(carePlanId, new ArrayList<>(), pageDetails);
 
         // Assert
         assertEquals(1, result.size());
@@ -105,7 +105,7 @@ public class QuestionnaireResponseServiceTest {
     @Test
     public void getQuestionnaireResponses_ReturnOneItem_WhenPagesizeIsOne() throws Exception {
         //Arrange
-        QuestionnaireResponseService qrservice = new QuestionnaireResponseService(fhirClient, fhirMapper, null,triageEvaluator, accessValidator);
+        QuestionnaireResponseService qrservice = new QuestionnaireResponseService(fhirClient, fhirMapper, null, triageEvaluator, accessValidator);
 
 
         QuestionnaireResponse response = new QuestionnaireResponse();
@@ -117,73 +117,132 @@ public class QuestionnaireResponseServiceTest {
         Mockito.when(fhirClient.lookupQuestionnaireResponses(null, new ArrayList<>())).thenReturn(lookupResult);
 
 
-
-        PageDetails pageDetails = new PageDetails(1,1);
-        List<QuestionnaireResponseModel> result = qrservice.getQuestionnaireResponses(null,  new ArrayList<>(),pageDetails);
+        PageDetails pageDetails = new PageDetails(1, 1);
+        List<QuestionnaireResponseModel> result = qrservice.getQuestionnaireResponses(null, new ArrayList<>(), pageDetails);
 
 
         assertEquals(1, result.size());
     }
 
+    /**
+     * This test is supposed to check that the service is outputting the correct entities and in the correct order following the specified pagination
+     */
+    @Test
+    public void getQuestionnaireResponsesForMultipleCarePlans_ReturnSortedPages() throws Exception {
+
+        //Arrange
+        QuestionnaireResponseService subject = new QuestionnaireResponseService(fhirClient, fhirMapper, null, triageEvaluator, accessValidator);
+
+
+        List<QuestionnaireResponse> responses = new LinkedList<>();
+
+        List<String> carePlanIds = List.of("carePlan-1", "carePlan-2");
+        List<String> questionnaireIds = List.of("questionnaire-1", "questionnaire-2");
+
+        final int months = 12;
+
+        for (int i = 0; i < months; i++) {
+            QuestionnaireResponse response = new QuestionnaireResponse();
+            response.setAuthored(new Date(i, i, i));
+            response.setId(Integer.toString(i));
+            responses.add(response);
+        }
+
+        Patient patient = new Patient();
+
+        FhirLookupResult result = FhirLookupResult.fromResources(responses.toArray(new Resource[0]));
+        result.merge(FhirLookupResult.fromResources(patient));
+
+
+        Mockito.when(fhirClient.lookupQuestionnaireResponsesForMultipleCarePlans(carePlanIds, questionnaireIds)).thenReturn(result);
+
+        for (int i = 0; i < responses.size(); i++) {
+            Mockito.when(fhirMapper.mapQuestionnaireResponse(responses.get(i), result, List.of())).thenReturn(questionnaireResponseToQuestionnaireResponseModel(responses.get(i)));
+        }
+
+        List<List<QuestionnaireResponseModel>> results = new LinkedList<>();
+
+        final int pageSize = 2;
+
+        // ACTION
+        for (int i = 0; i < (months/pageSize); i++) {
+            PageDetails pageDetails1 = new PageDetails(i+1, pageSize);
+            results.add(subject.getQuestionnaireResponsesForMultipleCarePlans(carePlanIds, questionnaireIds, pageDetails1));
+        }
+
+        //ASSERT
+        for (int i = 0; i < results.size(); i++) {
+            List<QuestionnaireResponseModel> r = results.get(i);
+            assertEquals(pageSize, r.size());
+            for (int j = 0; j < pageSize; j++) {
+                var id = (responses.size() - 1 - (j + i*2));
+                assertEquals(Integer.toString(id), r.get(j).getId().getId());
+            }
+
+        }
+    }
+
+
     @Test
     public void getQuestionnaireResponses_ReturnSortedPages_WhenTwoPages() throws Exception {
         //Arrange
-        QuestionnaireResponseService qrservice = new QuestionnaireResponseService(fhirClient, fhirMapper, null, triageEvaluator,accessValidator);
+        QuestionnaireResponseService qrservice = new QuestionnaireResponseService(fhirClient, fhirMapper, null, triageEvaluator, accessValidator);
 
         QuestionnaireResponse response1 = new QuestionnaireResponse();
-        response1.setAuthored(new Date(1,Calendar.JANUARY,1));
+        response1.setAuthored(new Date(1, Calendar.JANUARY, 1));
         response1.setId("1");
 
         QuestionnaireResponse response2 = new QuestionnaireResponse();
-        response2.setAuthored(new Date(2, Calendar.FEBRUARY,2));
+        response2.setAuthored(new Date(2, Calendar.FEBRUARY, 2));
         response2.setId("2");
 
         QuestionnaireResponse response3 = new QuestionnaireResponse();
-        response3.setAuthored(new Date(3,Calendar.MARCH,3));
+        response3.setAuthored(new Date(3, Calendar.MARCH, 3));
         response3.setId("3");
 
         QuestionnaireResponse response4 = new QuestionnaireResponse();
-        response4.setAuthored(new Date(4,Calendar.APRIL,4));
+        response4.setAuthored(new Date(4, Calendar.APRIL, 4));
         response4.setId("4");
 
-        FhirLookupResult questionnaireResponseResult = FhirLookupResult.fromResources(response1,response3, response4, response2);
+        FhirLookupResult questionnaireResponseResult = FhirLookupResult.fromResources(response1, response3, response4, response2);
         Patient patient = new Patient();
         FhirLookupResult patientResult = FhirLookupResult.fromResource(patient);
         FhirLookupResult lookupResult1 = questionnaireResponseResult.merge(patientResult);
 
         Mockito.when(fhirClient.lookupVersionsOfQuestionnaireById(List.of())).thenReturn(List.of());
         Mockito.when(fhirClient.lookupQuestionnaireResponses(null, new ArrayList<>())).thenReturn(lookupResult1);
-        Mockito.when(fhirMapper.mapQuestionnaireResponse(response1,lookupResult1, List.of())).thenReturn(questionnaireResponseToQuestionnaireResponseModel(response1));
-        Mockito.when(fhirMapper.mapQuestionnaireResponse(response2,lookupResult1, List.of())).thenReturn(questionnaireResponseToQuestionnaireResponseModel(response2));
-        Mockito.when(fhirMapper.mapQuestionnaireResponse(response3,lookupResult1, List.of())).thenReturn(questionnaireResponseToQuestionnaireResponseModel(response3));
-        Mockito.when(fhirMapper.mapQuestionnaireResponse(response4,lookupResult1, List.of())).thenReturn(questionnaireResponseToQuestionnaireResponseModel(response4));
+        Mockito.when(fhirMapper.mapQuestionnaireResponse(response1, lookupResult1, List.of())).thenReturn(questionnaireResponseToQuestionnaireResponseModel(response1));
+        Mockito.when(fhirMapper.mapQuestionnaireResponse(response2, lookupResult1, List.of())).thenReturn(questionnaireResponseToQuestionnaireResponseModel(response2));
+        Mockito.when(fhirMapper.mapQuestionnaireResponse(response3, lookupResult1, List.of())).thenReturn(questionnaireResponseToQuestionnaireResponseModel(response3));
+        Mockito.when(fhirMapper.mapQuestionnaireResponse(response4, lookupResult1, List.of())).thenReturn(questionnaireResponseToQuestionnaireResponseModel(response4));
 
         //ACTION
-        PageDetails pageDetails1 = new PageDetails(1,2);
-        List<QuestionnaireResponseModel> result1 = qrservice.getQuestionnaireResponses(null, new ArrayList<>(),pageDetails1);
+        PageDetails pageDetails1 = new PageDetails(1, 2);
+        List<QuestionnaireResponseModel> result1 = qrservice.getQuestionnaireResponses(null, new ArrayList<>(), pageDetails1);
 
-        PageDetails pageDetails2 = new PageDetails(2,2);
-        List<QuestionnaireResponseModel> result2 = qrservice.getQuestionnaireResponses(null, new ArrayList<>(),pageDetails2);
+        PageDetails pageDetails2 = new PageDetails(2, 2);
+        List<QuestionnaireResponseModel> result2 = qrservice.getQuestionnaireResponses(null, new ArrayList<>(), pageDetails2);
 
         //ASSERT
         assertEquals(2, result1.size());
         assertEquals(2, result2.size());
 
-        assertEquals("4",result1.get(0).getId().getId());
-        assertEquals("3",result1.get(1).getId().getId());
-        assertEquals("2",result2.get(0).getId().getId());
-        assertEquals("1",result2.get(1).getId().getId());
+        assertEquals("4", result1.get(0).getId().getId());
+        assertEquals("3", result1.get(1).getId().getId());
+        assertEquals("2", result2.get(0).getId().getId());
+        assertEquals("1", result2.get(1).getId().getId());
     }
-    QuestionnaireResponseModel questionnaireResponseToQuestionnaireResponseModel(QuestionnaireResponse questionnaireResponse){
+
+    QuestionnaireResponseModel questionnaireResponseToQuestionnaireResponseModel(QuestionnaireResponse questionnaireResponse) {
         QuestionnaireResponseModel responseModel1 = new QuestionnaireResponseModel();
-        responseModel1.setId(new QualifiedId("QuestionnaireResponse/"+questionnaireResponse.getId()));
+        responseModel1.setId(new QualifiedId("QuestionnaireResponse/" + questionnaireResponse.getId()));
         return responseModel1;
     }
 
     @Test
     public void getQuestionnaireResponses_ReturnZeroItem_WhenPagesizeIsZero() throws Exception {
         //Arrange
-        QuestionnaireResponseService qrservice = new QuestionnaireResponseService(fhirClient, fhirMapper, null, triageEvaluator,accessValidator);
+        QuestionnaireResponseService qrservice = new QuestionnaireResponseService(fhirClient, fhirMapper, null, triageEvaluator, accessValidator);
 
 
         QuestionnaireResponse response = new QuestionnaireResponse();
@@ -195,8 +254,7 @@ public class QuestionnaireResponseServiceTest {
         Mockito.when(fhirClient.lookupQuestionnaireResponses(null, new ArrayList<>())).thenReturn(lookupResult);
 
 
-
-        PageDetails pageDetails = new PageDetails(1,0);
+        PageDetails pageDetails = new PageDetails(1, 0);
         List<QuestionnaireResponseModel> result = qrservice.getQuestionnaireResponses(null, new ArrayList<>(), pageDetails);
 
 
@@ -206,7 +264,7 @@ public class QuestionnaireResponseServiceTest {
     @Test
     public void getQuestionnaireResponses_ReturnZeroItem_WhenOnSecondPage() throws Exception {
         //Arrange
-        QuestionnaireResponseService qrservice = new QuestionnaireResponseService(fhirClient, fhirMapper, null,triageEvaluator, accessValidator);
+        QuestionnaireResponseService qrservice = new QuestionnaireResponseService(fhirClient, fhirMapper, null, triageEvaluator, accessValidator);
 
 
         QuestionnaireResponse response = new QuestionnaireResponse();
@@ -216,8 +274,8 @@ public class QuestionnaireResponseServiceTest {
         FhirLookupResult lookupResult = questionnaireResponseResult.merge(patientResult);
         Mockito.when(fhirClient.lookupQuestionnaireResponses(null, new ArrayList<>())).thenReturn(lookupResult);
 
-        PageDetails pageDetails = new PageDetails(2,1);
-        List<QuestionnaireResponseModel> result = qrservice.getQuestionnaireResponses(null,  new ArrayList<>(),pageDetails);
+        PageDetails pageDetails = new PageDetails(2, 1);
+        List<QuestionnaireResponseModel> result = qrservice.getQuestionnaireResponses(null, new ArrayList<>(), pageDetails);
 
         assertEquals(0, result.size());
     }
@@ -237,7 +295,7 @@ public class QuestionnaireResponseServiceTest {
         // Act
 
         // Assert
-        assertThrows(AccessValidationException.class, () -> subject.getQuestionnaireResponses(carePlanId,  new ArrayList<>(),new PageDetails(1,10)));
+        assertThrows(AccessValidationException.class, () -> subject.getQuestionnaireResponses(carePlanId, new ArrayList<>(), new PageDetails(1, 10)));
     }
 
     @Test
@@ -343,7 +401,6 @@ public class QuestionnaireResponseServiceTest {
     }
 
 
-
     @Test
     public void submitQuestionnaireResponse_success_returnsGeneratedId() throws Exception {
         // Arrange
@@ -401,7 +458,6 @@ public class QuestionnaireResponseServiceTest {
     }
 
 
-
     @Test
     public void submitQuestionnaireResponse_success_computesTriagingCategory() throws Exception {
         // Arrange
@@ -420,7 +476,7 @@ public class QuestionnaireResponseServiceTest {
         Mockito.when(triageEvaluator.determineTriagingCategory(
                 questionnaireResponseModel.getQuestionAnswerPairs().stream().map(qa -> qa.getAnswer()).collect(Collectors.toList()),
                 carePlanModel.getQuestionnaires().get(0).getThresholds())
-                ).thenReturn(TriagingCategory.YELLOW);
+        ).thenReturn(TriagingCategory.YELLOW);
 
         // Act
         String result = subject.submitQuestionnaireResponse(questionnaireResponseModel, cpr);

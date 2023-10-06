@@ -98,6 +98,58 @@ public class QuestionnaireResponseControllerTest {
         assertTrue(result.getBody().contains(responseDto2));
     }
 
+
+
+
+    @Test
+    public void getQuestionnaireResponsesForMultipleCarePlans_responsesPresent_200() throws Exception {
+
+        // Arrange
+        List<String> carePlanIds = List.of("careplan-1", "careplan-2");
+        List<String> questionnaireId = List.of("questionnaire-1", "questionnaire-2");
+        Integer pageNumber = 1;
+        Integer pageSize = 10;
+
+        QuestionnaireResponseModel responseModel1 = new QuestionnaireResponseModel();
+        QuestionnaireResponseModel responseModel2 = new QuestionnaireResponseModel();
+
+        responseModel1.setCarePlanId(new QualifiedId("CarePlan/" + carePlanIds.get(0)));
+        responseModel2.setCarePlanId(new QualifiedId("CarePlan/" +carePlanIds.get(1)));
+
+        QuestionnaireResponseDto responseDto1 = new QuestionnaireResponseDto();
+        QuestionnaireResponseDto responseDto2 = new QuestionnaireResponseDto();
+
+        PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
+
+        Mockito.when(questionnaireResponseService.getQuestionnaireResponsesForMultipleCarePlans(carePlanIds, questionnaireId, pageDetails)).thenReturn(List.of(responseModel1, responseModel2));
+        Mockito.when(dtoMapper.mapQuestionnaireResponseModel(responseModel1)).thenReturn(responseDto1);
+        Mockito.when(dtoMapper.mapQuestionnaireResponseModel(responseModel2)).thenReturn(responseDto2);
+
+        // Act
+        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesForMultipleCarePlans(carePlanIds,questionnaireId,pageNumber, pageSize);
+
+        // Assert
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(2, result.getBody().size());
+        assertTrue(result.getBody().contains(responseDto1));
+        assertTrue(result.getBody().contains(responseDto2));
+    }
+
+    @Test
+    public void getQuestionnaireResponsesForMultipleCarePlans_accessViolation_403() throws Exception {
+        // Arrange
+        List<String> carePlanIds = List.of("careplan-1", "careplan-2");
+        List<String> questionnaireId = List.of("questionnaire-1", "questionnaire-2");
+
+        int pageNumber =1;
+        int pageSize =10;
+        PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
+        Mockito.when(questionnaireResponseService.getQuestionnaireResponsesForMultipleCarePlans(carePlanIds, questionnaireId, pageDetails)).thenThrow(AccessValidationException.class);
+
+        // Act + Assert
+        assertThrows(ForbiddenException.class, () -> subject.getQuestionnaireResponsesForMultipleCarePlans(carePlanIds,  questionnaireId,pageNumber, pageSize));
+    }
+
     @Test
     public void getQuestionnaireResponses_accessViolation_403() throws Exception {
         // Arrange
@@ -150,6 +202,9 @@ public class QuestionnaireResponseControllerTest {
         assertEquals(questionnaireResponseDto, result.getBody());
     }
 
+
+
+
     @Test
     public void getQuestionnaireResponseById_responseMissing_404() throws Exception {
         // Arrange
@@ -162,6 +217,9 @@ public class QuestionnaireResponseControllerTest {
         // Assert
         assertThrows(ResourceNotFoundException.class, () -> subject.getQuestionnaireResponseById(questionnaireResponseId));
     }
+
+
+
 
     @Test
     public void getQuestionnaireResponseById_accessViolation_403() throws Exception {
