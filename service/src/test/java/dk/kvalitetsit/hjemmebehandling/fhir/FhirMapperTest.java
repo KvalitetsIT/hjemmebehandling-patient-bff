@@ -71,14 +71,14 @@ public class FhirMapperTest {
         assertEquals(patientModel.getName(),patientModel.getName());
 
         //== Primarycontact
-        var primaryContactDetails = result.getPrimaryRelativeContactDetails();
+        var primaryContactDetails = result.getPrimaryContacts().get(0).getContactDetails();
         var primaryContactNumbers = patientModel.getTelecom();
-        assertEquals(primaryContactNumbers.get(0).getValue(),primaryContactDetails.getPrimaryPhone());
-        assertEquals(primaryContactNumbers.get(1).getValue(),primaryContactDetails.getSecondaryPhone());
+        assertEquals(primaryContactNumbers.get(0).getValue(), primaryContactDetails.getPrimaryPhone());
+        assertEquals(primaryContactNumbers.get(1).getValue(), primaryContactDetails.getSecondaryPhone());
         assertEquals(patientModel.getContactFirstRep().getAddress().getCountry(),primaryContactDetails.getCountry());
         assertEquals(patientModel.getContactFirstRep().getAddress().getPostalCode(),primaryContactDetails.getPostalCode());
         assertEquals(patientModel.getContactFirstRep().getAddress().getCity(),primaryContactDetails.getCity());
-        assertEquals(patientModel.getContactFirstRep().getRelationshipFirstRep().getCodingFirstRep().getCode(),result.getPrimaryRelativeAffiliation());
+        assertEquals(patientModel.getContactFirstRep().getRelationshipFirstRep().getCodingFirstRep().getCode(),result.getPrimaryContacts().get(0).getAffiliation());
     }
 
     @Test
@@ -459,6 +459,18 @@ public class FhirMapperTest {
         return contactDetailsModel;
     }
 
+    private PrimaryContactModel buildPrimaryContactModel() {
+        PrimaryContactModel model = new PrimaryContactModel();
+
+        model.setName("tove");
+        model.setAffiliation("tante");
+
+        model.setContactDetails(buildContactDetailsModel());
+
+        return model;
+    }
+
+
     private FrequencyModel buildFrequencyModel() {
         FrequencyModel frequencyModel = new FrequencyModel();
 
@@ -545,8 +557,7 @@ public class FhirMapperTest {
         patientModel.setId(new QualifiedId(PATIENT_ID_1));
         patientModel.setCpr("0101010101");
         patientModel.setPatientContactDetails(buildContactDetailsModel());
-        patientModel.setPrimaryRelativeContactDetails(buildContactDetailsModel());
-        patientModel.setAdditionalRelativeContactDetails(List.of(buildContactDetailsModel()));
+        patientModel.setPrimaryContacts(List.of(buildPrimaryContactModel()));
 
         return patientModel;
     }

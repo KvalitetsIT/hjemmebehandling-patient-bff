@@ -89,7 +89,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
 
     public String submitQuestionnaireResponse(QuestionnaireResponseModel questionnaireResponseModel, String cpr) throws ServiceException, AccessValidationException {
         // Look up the careplan indicated in the response. Check that this is the user's active careplan.
-        var carePlanResult = fhirClient.lookupActiveCarePlan(cpr);
+        var carePlanResult = fhirClient.lookupActiveCarePlans(cpr);
         if (carePlanResult.getCarePlans().isEmpty()) {
             throw new ServiceException(String.format("No CarePlan found for cpr %s", cpr), ErrorKind.BAD_REQUEST, ErrorDetails.NO_ACTIVE_CAREPLAN_EXISTS);
         }

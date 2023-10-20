@@ -137,14 +137,21 @@ public class DtoMapper {
         if(patient.getPatientContactDetails() != null) {
             patientModel.setPatientContactDetails(mapContactDetailsDto(patient.getPatientContactDetails()));
         }
-        if(patient.getPrimaryRelativeContactDetails() != null) {
-            patientModel.setPrimaryRelativeContactDetails(mapContactDetailsDto(patient.getPrimaryRelativeContactDetails()));
-        }
-        if(patient.getAdditionalRelativeContactDetails() != null) {
-            patientModel.setAdditionalRelativeContactDetails(patient.getAdditionalRelativeContactDetails().stream().map(cd -> mapContactDetailsDto(cd)).collect(Collectors.toList()));
-        }
+        patientModel.setPrimaryContacts(mapPrimaryContactDtos(patient.getPrimaryContacts()));
 
         return patientModel;
+    }
+
+    private List<PrimaryContactModel> mapPrimaryContactDtos(List<PrimaryContactDto> contacts) {
+
+        return contacts.stream().map(contact -> {
+            PrimaryContactModel model = new PrimaryContactModel();
+
+            if(contact.getContactDetails() != null) {
+                model.setContactDetails(mapContactDetailsDto(contact.getContactDetails()));
+            }
+            return  model;
+        }).collect(Collectors.toList());
     }
 
     public PatientDto mapPatientModel(PatientModel patient) {
@@ -153,20 +160,22 @@ public class DtoMapper {
         patientDto.setCpr(patient.getCpr());
         patientDto.setFamilyName(patient.getFamilyName());
         patientDto.setGivenName(patient.getGivenName());
-//        patientDto.setCustomUserName(patient.getCustomUserName());
+        // patientDto.setCustomUserName(patient.getCustomUserName());
         if(patient.getPatientContactDetails() != null) {
             patientDto.setPatientContactDetails(mapContactDetailsModel(patient.getPatientContactDetails()));
         }
-        patientDto.setPrimaryRelativeName(patient.getPrimaryRelativeName());
-        patientDto.setPrimaryRelativeAffiliation(patient.getPrimaryRelativeAffiliation());
-        if(patient.getPrimaryRelativeContactDetails() != null) {
-            patientDto.setPrimaryRelativeContactDetails(mapContactDetailsModel(patient.getPrimaryRelativeContactDetails()));
-        }
-        if(patient.getAdditionalRelativeContactDetails() != null) {
-            patientDto.setAdditionalRelativeContactDetails(patient.getAdditionalRelativeContactDetails().stream().map(cd -> mapContactDetailsModel(cd)).collect(Collectors.toList()));
-        }
-
+        patientDto.setPrimaryContacts(mapPrimaryContactModels(patient.getPrimaryContacts()));;
         return patientDto;
+    }
+
+    private List<PrimaryContactDto> mapPrimaryContactModels(List<PrimaryContactModel> contacts) {
+        return contacts.stream().map(contact -> {
+            PrimaryContactDto dto = new PrimaryContactDto();
+            dto.setName(contact.getName());
+            dto.setAffiliation(contact.getAffiliation());
+
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     public PlanDefinitionModel mapPlanDefinitionDto(PlanDefinitionDto planDefinitionDto) {

@@ -8,10 +8,8 @@ public class PatientDto {
     private String cpr;
     private String customUserName;
     private ContactDetailsDto patientContactDetails;
-    private String primaryRelativeName;
-    private String primaryRelativeAffiliation;
-    private ContactDetailsDto primaryRelativeContactDetails;
-    private List<ContactDetailsDto> additionalRelativeContactDetails;
+    private List<PrimaryContactDto> primaryContacts;
+
 
     public String getGivenName() {
         return givenName;
@@ -37,6 +35,14 @@ public class PatientDto {
         this.cpr = cpr;
     }
 
+    public String getCustomUserName() {
+        return customUserName;
+    }
+
+    public void setCustomUserName(String customUserName) {
+        this.customUserName = customUserName;
+    }
+
     public ContactDetailsDto getPatientContactDetails() {
         return patientContactDetails;
     }
@@ -45,43 +51,11 @@ public class PatientDto {
         this.patientContactDetails = patientContactDetails;
     }
 
-    public String getPrimaryRelativeName() {
-        return primaryRelativeName;
+    public List<PrimaryContactDto> getPrimaryContacts() {
+        return primaryContacts;
     }
 
-    public void setPrimaryRelativeName(String primaryRelativeName) {
-        this.primaryRelativeName = primaryRelativeName;
-    }
-
-    public String getPrimaryRelativeAffiliation() {
-        return primaryRelativeAffiliation;
-    }
-
-    public void setPrimaryRelativeAffiliation(String primaryRelativeAffiliation) {
-        this.primaryRelativeAffiliation = primaryRelativeAffiliation;
-    }
-
-    public ContactDetailsDto getPrimaryRelativeContactDetails() {
-        return primaryRelativeContactDetails;
-    }
-
-    public void setPrimaryRelativeContactDetails(ContactDetailsDto primaryRelativeContactDetails) {
-        this.primaryRelativeContactDetails = primaryRelativeContactDetails;
-    }
-
-    public List<ContactDetailsDto> getAdditionalRelativeContactDetails() {
-        return additionalRelativeContactDetails;
-    }
-
-    public void setAdditionalRelativeContactDetails(List<ContactDetailsDto> additionalRelativeContactDetails) {
-        this.additionalRelativeContactDetails = additionalRelativeContactDetails;
-    }
-
-    public String getCustomUserName() {
-        return customUserName;
-    }
-
-    public void setCustomUserName(String customUserName) {
-        this.customUserName = customUserName;
+    public void setPrimaryContacts(List<PrimaryContactDto> primaryContacts) {
+        this.primaryContacts = primaryContacts;
     }
 }

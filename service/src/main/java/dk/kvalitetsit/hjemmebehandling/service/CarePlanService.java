@@ -11,7 +11,6 @@ import org.hl7.fhir.r4.model.CarePlan;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -27,19 +26,10 @@ public class CarePlanService extends AccessValidatingService {
         this.fhirMapper = fhirMapper;
     }
 
-    public List<CarePlanModel> getActiveCarePlan(String cpr) throws ServiceException, AccessValidationException {
-        FhirLookupResult lookupResult = fhirClient.lookupActiveCarePlan(cpr);
+    public List<CarePlanModel> getActiveCarePlans(String cpr) throws ServiceException, AccessValidationException {
+        FhirLookupResult lookupResult = fhirClient.lookupActiveCarePlans(cpr);
         List<CarePlan> carePlans = lookupResult.getCarePlans();
 
-        /*
-
-        if(carePlans.size() > 1) {
-            throw new IllegalStateException(String.format("Expected to look up zero or one active careplan for cpr %s, got %s!", cpr, carePlans.size()));
-        }
-        if(carePlans.isEmpty()) {
-            return Optional.empty();
-        }
-         */
         validateCorrectSubject(lookupResult);
         return carePlans.stream().map((carePlan) -> fhirMapper.mapCarePlan(carePlan, lookupResult)).collect(Collectors.toList());
     }

@@ -4,7 +4,6 @@ import dk.kvalitetsit.hjemmebehandling.fhir.ExtensionMapper;
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirClient;
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirLookupResult;
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirMapper;
-import dk.kvalitetsit.hjemmebehandling.model.CarePlanModel;
 import dk.kvalitetsit.hjemmebehandling.service.access.AccessValidator;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
@@ -16,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,6 +41,8 @@ public class CarePlanServiceTest {
     private static final Instant POINT_IN_TIME = Instant.parse("2021-11-23T00:00:00.000Z");
 
     /*
+    3 tests below have been invalidated because of RIM-1150
+    Todo: Remove or correct these
 
     @Test
     public void getActiveCarePlan_carePlanPresent_returnsCarePlan() throws Exception {
@@ -79,7 +79,7 @@ public class CarePlanServiceTest {
         // Assert
         assertFalse(result.isPresent());
     }
-*/
+
     @Test
     public void getActiveCarePlan_malformedResult_throwsException() throws Exception {
         // Arrange
@@ -88,14 +88,15 @@ public class CarePlanServiceTest {
         CarePlan carePlan1 = buildCarePlan(CAREPLAN_ID_1, PATIENT_ID_1);
         CarePlan carePlan2 = buildCarePlan(CAREPLAN_ID_2, PATIENT_ID_1);
 
-        Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(FhirLookupResult.fromResources(carePlan1, carePlan2));
+        Mockito.when(fhirClient.lookupActiveCarePlans(cpr)).thenReturn(FhirLookupResult.fromResources(carePlan1, carePlan2));
 
         // Act
 
         // Assert
-        assertThrows(IllegalStateException.class, () -> subject.getActiveCarePlan(cpr));
+        assertThrows(IllegalStateException.class, () -> subject.getActiveCarePlans(cpr));
     }
 
+    */
     private CarePlan buildCarePlan(String carePlanId, String patientId) {
         return buildCarePlan(carePlanId, patientId, null);
     }

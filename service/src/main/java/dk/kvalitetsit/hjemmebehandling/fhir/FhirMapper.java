@@ -151,34 +151,42 @@ public class FhirMapper {
         patientModel.setCpr(extractCpr(patient));
         patientModel.setPatientContactDetails(extractPatientContactDetails(patient));
 
-        if(patient.getContact() != null && !patient.getContact().isEmpty()) {
-            var contact = patient.getContactFirstRep();
 
-            patientModel.setPrimaryRelativeName(contact.getName().getText());
-            for(var coding : contact.getRelationshipFirstRep().getCoding()) {
-                if(coding.getSystem().equals(Systems.CONTACT_RELATIONSHIP)) {
-                    patientModel.setPrimaryRelativeAffiliation(coding.getCode());
-                }
-            }
+        patientModel.setPrimaryContacts(mapContacts(patient));
 
-            // Extract phone numbers
-            if(contact.getTelecom() != null && !contact.getTelecom().isEmpty()) {
-                var primaryRelativeContactDetails = new ContactDetailsModel();
+        return patientModel;
+    }
 
-                for(var telecom : contact.getTelecom()) {
-                    if(telecom.getRank() == 1) {
-                        primaryRelativeContactDetails.setPrimaryPhone(telecom.getValue());
-                    }
-                    if(telecom.getRank() == 2) {
-                        primaryRelativeContactDetails.setSecondaryPhone(telecom.getValue());
-                    }
-                }
+    public List<PrimaryContactModel> mapContacts(Patient patient) {
+        return patient.getContact().stream().map(this::mapContact).collect(Collectors.toList());
+    }
 
-                patientModel.setPrimaryRelativeContactDetails(primaryRelativeContactDetails);
+    public PrimaryContactModel mapContact(Patient.ContactComponent contact) {
+        PrimaryContactModel model = new PrimaryContactModel();
+        model.setName(contact.getName().getText());
+
+        for(var coding : contact.getRelationshipFirstRep().getCoding()) {
+            if(coding.getSystem().equals(Systems.CONTACT_RELATIONSHIP)) {
+                model.setAffiliation(coding.getCode());
             }
         }
 
-        return patientModel;
+        // Extract phone numbers
+        if(contact.getTelecom() != null && !contact.getTelecom().isEmpty()) {
+            var primaryRelativeContactDetails = new ContactDetailsModel();
+
+            for(var telecom : contact.getTelecom()) {
+                if(telecom.getRank() == 1) {
+                    primaryRelativeContactDetails.setPrimaryPhone(telecom.getValue());
+                }
+                if(telecom.getRank() == 2) {
+                    primaryRelativeContactDetails.setSecondaryPhone(telecom.getValue());
+                }
+            }
+
+            model.setContactDetails(primaryRelativeContactDetails);
+        }
+        return model;
     }
 
     public PlanDefinitionModel mapPlanDefinition(PlanDefinition planDefinition, FhirLookupResult lookupResult) {

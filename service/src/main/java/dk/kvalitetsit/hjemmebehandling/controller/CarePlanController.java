@@ -35,14 +35,14 @@ public class CarePlanController extends BaseController {
         this.userContextProvider = userContextProvider;
     }
 
-    @GetMapping(value = "/v1/careplan/active")
+    @GetMapping(value = "/v1/careplans/active")
     public ResponseEntity<List<CarePlanDto>> getActiveCarePlans() {
         String cpr = userContextProvider.getUserContext().getCpr();
 
         List<CarePlanModel> carePlans = new ArrayList<>();
 
         try {
-            carePlans = carePlanService.getActiveCarePlan(cpr);
+            carePlans = carePlanService.getActiveCarePlans(cpr);
         }
         catch(AccessValidationException | ServiceException e) {
             logger.error("Could not update questionnaire response", e);
@@ -50,7 +50,7 @@ public class CarePlanController extends BaseController {
         }
 
         if(carePlans.isEmpty()) {
-            throw new ResourceNotFoundException("No active careplan exists for the current user.", ErrorDetails.NO_ACTIVE_CAREPLAN_EXISTS);
+            throw new ResourceNotFoundException("No active careplans exists for the current user.", ErrorDetails.NO_ACTIVE_CAREPLAN_EXISTS);
         }
         return ResponseEntity.ok(carePlans.stream().map(carePlan -> dtoMapper.mapCarePlanModel(carePlan)).collect(Collectors.toList()));
     }

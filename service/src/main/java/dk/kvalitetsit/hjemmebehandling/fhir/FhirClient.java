@@ -29,7 +29,7 @@ public class FhirClient {
         this.endpoint = endpoint;
     }
 
-    public FhirLookupResult lookupActiveCarePlan(String cpr) {
+    public FhirLookupResult lookupActiveCarePlans(String cpr) {
         var statusCriterion = CarePlan.STATUS.exactly().code(CarePlan.CarePlanStatus.ACTIVE.toCode());
         var cprCriterion = CarePlan.SUBJECT.hasChainedProperty("Patient", Patient.IDENTIFIER.exactly().systemAndValues(Systems.CPR, cpr));
 

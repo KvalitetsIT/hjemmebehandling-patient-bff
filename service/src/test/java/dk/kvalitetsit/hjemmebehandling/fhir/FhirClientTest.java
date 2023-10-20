@@ -2,18 +2,12 @@ package dk.kvalitetsit.hjemmebehandling.fhir;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICriterion;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
 import dk.kvalitetsit.hjemmebehandling.constants.Systems;
-import dk.kvalitetsit.hjemmebehandling.context.UserContext;
-import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -21,10 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -68,7 +59,7 @@ public class FhirClientTest {
         setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
 
         // Act
-        FhirLookupResult result = subject.lookupActiveCarePlan(cpr);
+        FhirLookupResult result = subject.lookupActiveCarePlans(cpr);
 
         // Assert
         assertTrue(result.getCarePlan(CAREPLAN_ID_1).isPresent());
@@ -86,7 +77,7 @@ public class FhirClientTest {
         setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
 
         // Act
-        FhirLookupResult result = subject.lookupActiveCarePlan(cpr);
+        FhirLookupResult result = subject.lookupActiveCarePlans(cpr);
 
         // Assert
         assertFalse(result.getCarePlan(CAREPLAN_ID_1).isPresent());
@@ -104,7 +95,7 @@ public class FhirClientTest {
         setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
 
         // Act
-        FhirLookupResult result = subject.lookupActiveCarePlan(cpr);
+        FhirLookupResult result = subject.lookupActiveCarePlans(cpr);
 
         // Assert
         assertTrue(result.getOrganization(ORGANIZATION_ID_1).isPresent());

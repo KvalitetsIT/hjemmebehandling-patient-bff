@@ -162,6 +162,18 @@ public class DtoMapperTest {
 
         return carePlanModel;
     }
+    private PrimaryContactDto buildPrimaryContactDto() {
+        PrimaryContactDto dto = new PrimaryContactDto();
+        dto.setContactDetails(buildContactDetailsDto());
+        return dto;
+    }
+
+    private PrimaryContactModel buildPrimaryContactModel() {
+        PrimaryContactModel model = new PrimaryContactModel();
+        model.setContactDetails(buildContactDetailsModel());
+        return model;
+    }
+
 
     private ContactDetailsDto buildContactDetailsDto() {
         ContactDetailsDto contactDetailsDto = new ContactDetailsDto();
@@ -241,8 +253,7 @@ public class DtoMapperTest {
 
         patientDto.setCpr("0101010101");
         patientDto.setPatientContactDetails(buildContactDetailsDto());
-        patientDto.setPrimaryRelativeContactDetails(buildContactDetailsDto());
-        patientDto.setAdditionalRelativeContactDetails(List.of(buildContactDetailsDto()));
+        patientDto.setPrimaryContacts(List.of(buildPrimaryContactDto()));
 
         return patientDto;
     }
@@ -252,8 +263,8 @@ public class DtoMapperTest {
 
         patientModel.setCpr("0101010101");
         patientModel.setPatientContactDetails(buildContactDetailsModel());
-        patientModel.setPrimaryRelativeContactDetails(buildContactDetailsModel());
-        patientModel.setAdditionalRelativeContactDetails(List.of(buildContactDetailsModel()));
+        patientModel.setPrimaryContacts(List.of(buildPrimaryContactModel()));
+
 
         return patientModel;
     }

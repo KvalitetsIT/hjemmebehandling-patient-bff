@@ -79,7 +79,7 @@ public class CarePlanControllerTest {
     public void getActiveCarePlan_failure_500() throws Exception {
         // Arrange
         String cpr = "0101010101";
-        Mockito.doThrow(new ServiceException("error", ErrorKind.INTERNAL_SERVER_ERROR, ErrorDetails.INTERNAL_SERVER_ERROR)).when(carePlanService).getActiveCarePlan(cpr);
+        Mockito.doThrow(new ServiceException("error", ErrorKind.INTERNAL_SERVER_ERROR, ErrorDetails.INTERNAL_SERVER_ERROR)).when(carePlanService).getActiveCarePlans(cpr);
 
         // Act
 

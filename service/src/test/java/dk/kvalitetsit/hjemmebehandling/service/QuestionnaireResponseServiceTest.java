@@ -357,7 +357,7 @@ public class QuestionnaireResponseServiceTest {
         QuestionnaireResponseModel questionnaireResponseModel = buildQuestionnaireResponseModel();
         String cpr = "0101010101";
 
-        Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(FhirLookupResult.fromResources());
+        Mockito.when(fhirClient.lookupActiveCarePlans(cpr)).thenReturn(FhirLookupResult.fromResources());
 
         // Act
 
@@ -389,7 +389,7 @@ public class QuestionnaireResponseServiceTest {
 
         CarePlan carePlan = buildCarePlan(CAREPLAN_ID_2);
         FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan);
-        Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
+        Mockito.when(fhirClient.lookupActiveCarePlans(cpr)).thenReturn(lookupResult);
 
 //        CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_2, PATIENT_ID);
 //        Mockito.when(fhirMapper.mapCarePlan(carePlan, lookupResult)).thenReturn(carePlanModel);
@@ -409,7 +409,7 @@ public class QuestionnaireResponseServiceTest {
 
         CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1);
         FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan);
-        Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
+        Mockito.when(fhirClient.lookupActiveCarePlans(cpr)).thenReturn(lookupResult);
 
         CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_1, PATIENT_ID);
         Mockito.when(fhirMapper.mapCarePlan(carePlan, lookupResult)).thenReturn(carePlanModel);
@@ -439,7 +439,7 @@ public class QuestionnaireResponseServiceTest {
 
         CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1);
         FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan);
-        Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
+        Mockito.when(fhirClient.lookupActiveCarePlans(cpr)).thenReturn(lookupResult);
 
         CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_1, PATIENT_ID);
         Mockito.when(fhirMapper.mapCarePlan(carePlan, lookupResult)).thenReturn(carePlanModel);
@@ -466,7 +466,7 @@ public class QuestionnaireResponseServiceTest {
 
         CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1);
         FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan);
-        Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
+        Mockito.when(fhirClient.lookupActiveCarePlans(cpr)).thenReturn(lookupResult);
 
         CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_1, PATIENT_ID);
         Mockito.when(fhirMapper.mapCarePlan(carePlan, lookupResult)).thenReturn(carePlanModel);
@@ -493,7 +493,7 @@ public class QuestionnaireResponseServiceTest {
 
         CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1);
         FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan);
-        Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
+        Mockito.when(fhirClient.lookupActiveCarePlans(cpr)).thenReturn(lookupResult);
 
         CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_1, PATIENT_ID, POINT_IN_TIME);
         Mockito.when(fhirMapper.mapCarePlan(carePlan, lookupResult)).thenReturn(carePlanModel);
@@ -518,7 +518,7 @@ public class QuestionnaireResponseServiceTest {
 
         CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1);
         FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan);
-        Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
+        Mockito.when(fhirClient.lookupActiveCarePlans(cpr)).thenReturn(lookupResult);
 
         CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_1, PATIENT_ID, POINT_IN_TIME);
         Mockito.when(fhirMapper.mapCarePlan(carePlan, lookupResult)).thenReturn(carePlanModel);
@@ -542,7 +542,7 @@ public class QuestionnaireResponseServiceTest {
 
         CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1);
         FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan);
-        Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
+        Mockito.when(fhirClient.lookupActiveCarePlans(cpr)).thenReturn(lookupResult);
 
         CarePlanModel carePlanModel = buildCarePlanModel(CAREPLAN_ID_1, PATIENT_ID, List.of(
                 buildQuestionnaireWrapperModel(QUESTIONNAIRE_ID_1, POINT_IN_TIME.minus(Period.ofDays(3))),

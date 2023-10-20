@@ -1,5 +1,7 @@
 package dk.kvalitetsit.hjemmebehandling.model;
 
+import dk.kvalitetsit.hjemmebehandling.api.PrimaryContactDto;
+
 import java.util.List;
 
 public class PatientModel {
@@ -8,10 +10,10 @@ public class PatientModel {
     private String familyName;
     private String cpr;
     private ContactDetailsModel patientContactDetails;
-    private String primaryRelativeName;
-    private String primaryRelativeAffiliation;
-    private ContactDetailsModel primaryRelativeContactDetails;
-    private List<ContactDetailsModel> additionalRelativeContactDetails;
+
+    private List<PrimaryContactModel> primaryContacts;
+
+
 
     public QualifiedId getId() {
         return id;
@@ -53,35 +55,11 @@ public class PatientModel {
         this.patientContactDetails = patientContactDetails;
     }
 
-    public String getPrimaryRelativeName() {
-        return primaryRelativeName;
+    public List<PrimaryContactModel> getPrimaryContacts() {
+        return primaryContacts;
     }
 
-    public void setPrimaryRelativeName(String primaryRelativeName) {
-        this.primaryRelativeName = primaryRelativeName;
-    }
-
-    public String getPrimaryRelativeAffiliation() {
-        return primaryRelativeAffiliation;
-    }
-
-    public void setPrimaryRelativeAffiliation(String primaryRelativeAffiliation) {
-        this.primaryRelativeAffiliation = primaryRelativeAffiliation;
-    }
-
-    public ContactDetailsModel getPrimaryRelativeContactDetails() {
-        return primaryRelativeContactDetails;
-    }
-
-    public void setPrimaryRelativeContactDetails(ContactDetailsModel primaryRelativeContactDetails) {
-        this.primaryRelativeContactDetails = primaryRelativeContactDetails;
-    }
-
-    public List<ContactDetailsModel> getAdditionalRelativeContactDetails() {
-        return additionalRelativeContactDetails;
-    }
-
-    public void setAdditionalRelativeContactDetails(List<ContactDetailsModel> additionalRelativeContactDetails) {
-        this.additionalRelativeContactDetails = additionalRelativeContactDetails;
+    public void setPrimaryContacts(List<PrimaryContactModel> primaryContacts) {
+        this.primaryContacts = primaryContacts;
     }
 }
