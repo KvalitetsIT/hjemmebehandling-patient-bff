@@ -8,7 +8,20 @@ public class PrimaryContactModel {
     private String affiliation;
     private ContactDetailsModel contactDetails;
 
+    /**
+     * The id of the organisation of which this contact is associated
+     */
+    private String organisation;
 
+    public PrimaryContactModel(String name, String affiliation, ContactDetailsModel contactDetails, String organisation) {
+        this.name = name;
+        this.affiliation = affiliation;
+        this.contactDetails = contactDetails;
+        this.organisation = organisation;
+    }
+
+    public PrimaryContactModel() {
+    }
 
     public String getName() {
         return name;
@@ -32,5 +45,24 @@ public class PrimaryContactModel {
 
     public void setContactDetails(ContactDetailsModel contactDetails) {
         this.contactDetails = contactDetails;
+    }
+
+    public String getOrganisation() {
+        return organisation;
+    }
+
+    public void setOrganisation(String organisation) {
+        this.organisation = organisation;
+    }
+
+
+    @Override
+    public String toString() {
+        return "PrimaryContactModel{" +
+                "name='" + name + '\'' +
+                ", affiliation='" + affiliation + '\'' +
+                ", contactDetails=" + contactDetails +
+                ", organisation='" + organisation + '\'' +
+                '}';
     }
 }

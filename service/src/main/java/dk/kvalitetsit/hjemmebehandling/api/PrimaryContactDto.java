@@ -6,6 +6,8 @@ public class PrimaryContactDto {
     private String affiliation;
     private ContactDetailsDto contactDetails;
 
+    private String organization;
+
     public String getName() {
         return name;
     }
@@ -30,4 +32,11 @@ public class PrimaryContactDto {
         this.contactDetails = contactDetails;
     }
 
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
 }

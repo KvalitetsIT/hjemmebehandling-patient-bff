@@ -145,14 +145,19 @@ public class DtoMapper {
 
     private List<PrimaryContactModel> mapPrimaryContactDtos(List<PrimaryContactDto> contacts) {
 
-        return contacts.stream().map(contact -> {
-            PrimaryContactModel model = new PrimaryContactModel();
+        return contacts.stream().map(this::mapPrimaryContactDto).collect(Collectors.toList());
+    }
 
-            if(contact.getContactDetails() != null) {
-                model.setContactDetails(mapContactDetailsDto(contact.getContactDetails()));
-            }
-            return  model;
-        }).collect(Collectors.toList());
+    private PrimaryContactModel mapPrimaryContactDto(PrimaryContactDto contact) {
+        PrimaryContactModel model = new PrimaryContactModel();
+        model.setOrganisation(contact.getOrganization());
+        model.setAffiliation(contact.getAffiliation());
+        model.setName(contact.getName());
+        if(contact.getContactDetails() != null) {
+            model.setContactDetails(mapContactDetailsDto(contact.getContactDetails()));
+        }
+
+        return model;
     }
 
     public PatientDto mapPatientModel(PatientModel patient) {
@@ -170,13 +175,15 @@ public class DtoMapper {
     }
 
     private List<PrimaryContactDto> mapPrimaryContactModels(List<PrimaryContactModel> contacts) {
-        return contacts.stream().map(contact -> {
-            PrimaryContactDto dto = new PrimaryContactDto();
-            dto.setName(contact.getName());
-            dto.setAffiliation(contact.getAffiliation());
+        return contacts.stream().map(this::mapPrimaryContactModel).collect(Collectors.toList());
+    }
+    private PrimaryContactDto mapPrimaryContactModel(PrimaryContactModel contact) {
+        PrimaryContactDto dto = new PrimaryContactDto();
+        dto.setName(contact.getName());
+        dto.setAffiliation(contact.getAffiliation());
+        dto.setOrganization(contact.getOrganisation());
 
-            return dto;
-        }).collect(Collectors.toList());
+        return dto;
     }
 
     public PlanDefinitionModel mapPlanDefinitionDto(PlanDefinitionDto planDefinitionDto) {

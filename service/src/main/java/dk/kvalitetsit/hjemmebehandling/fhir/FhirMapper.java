@@ -169,6 +169,8 @@ public class FhirMapper {
         PrimaryContactModel model = new PrimaryContactModel();
         model.setName(contact.getName().getText());
         model.setAffiliation(contact.getRelationshipFirstRep().getText());
+        model.setOrganisation(contact.getOrganization().getReference());
+
         var primaryRelativeContactDetails = new ContactDetailsModel();
         primaryRelativeContactDetails.setAddress(new AddressModel());
 
