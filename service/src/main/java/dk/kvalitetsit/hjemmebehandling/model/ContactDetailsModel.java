@@ -1,57 +1,40 @@
 package dk.kvalitetsit.hjemmebehandling.model;
 
 public class ContactDetailsModel {
-    private String street;
-    private String postalCode;
-    private String city;
-    private String country;
-    private String primaryPhone;
-    private String secondaryPhone;
-    public String getStreet() {
-        return street;
+
+    private AddressModel address;
+    private PhoneModel phone;
+
+
+    public ContactDetailsModel(AddressModel address, PhoneModel phone) {
+        this.address = address;
+        this.phone = phone;
     }
 
-    public void setStreet(String street) {
-        this.street = street;
+    public ContactDetailsModel() {
     }
 
-    public String getCity() {
-        return city;
+    public AddressModel getAddress() {
+        return address;
     }
 
-    public void setCity(String city) {
-        this.city = city;
+    public void setAddress(AddressModel address) {
+        this.address = address;
     }
 
-    public String getPostalCode() {
-        return postalCode;
+    public PhoneModel getPhone() {
+        return phone;
     }
 
-    public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
+    public void setPhone(PhoneModel phone) {
+        this.phone = phone;
     }
 
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public String getPrimaryPhone() {
-        return primaryPhone;
-    }
-
-    public void setPrimaryPhone(String primaryPhone) {
-        this.primaryPhone = primaryPhone;
-    }
-
-    public String getSecondaryPhone() {
-        return secondaryPhone;
-    }
-
-    public void setSecondaryPhone(String secondaryPhone) {
-        this.secondaryPhone = secondaryPhone;
+    @Override
+    public String toString() {
+        return "ContactDetailsModel{" +
+                "address=" + address +
+                ", phone=" + phone +
+                '}';
     }
 }

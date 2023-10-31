@@ -5,12 +5,21 @@ import java.util.List;
 public class OrganizationModel {
     private QualifiedId id;
     private String name;
-    private String street;
-    private String postalCode;
-    private String city;
-    private String country;
-    private String phone;
+
+    private ContactDetailsModel contactDetails;
+
     private List<PhoneHourModel> phoneHours;
+
+
+    public OrganizationModel(QualifiedId id, String name, ContactDetailsModel contactDetails, List<PhoneHourModel> phoneHours) {
+        this.id = id;
+        this.name = name;
+        this.contactDetails = contactDetails;
+        this.phoneHours = phoneHours;
+    }
+
+    public OrganizationModel() {
+    }
 
     public QualifiedId getId() {
         return id;
@@ -28,44 +37,12 @@ public class OrganizationModel {
         this.name = name;
     }
 
-    public String getStreet() {
-        return street;
+    public ContactDetailsModel getContactDetails() {
+        return contactDetails;
     }
 
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
-    public String getPostalCode() {
-        return postalCode;
-    }
-
-    public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setContactDetails(ContactDetailsModel contactDetails) {
+        this.contactDetails = contactDetails;
     }
 
     public List<PhoneHourModel> getPhoneHours() {
@@ -74,5 +51,16 @@ public class OrganizationModel {
 
     public void setPhoneHours(List<PhoneHourModel> phoneHours) {
         this.phoneHours = phoneHours;
+    }
+
+
+    @Override
+    public String toString() {
+        return "OrganizationModel{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", contactDetails=" + contactDetails +
+                ", phoneHours=" + phoneHours +
+                '}';
     }
 }

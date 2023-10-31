@@ -46,40 +46,45 @@ public class FhirMapperTest {
         assertEquals(result.getSubject().getReference(), carePlanModel.getPatient().getId().toString());
     }
 
+
     @Test
     public void mapPatientModel_mapsSubject() {
         // Arrange
-        Patient patientModel = buildPatient(PATIENT_ID_1, "1234567890");
+        Patient patient = buildPatient(PATIENT_ID_1, "1234567890");
 
         // Act
-        PatientModel result = subject.mapPatient(patientModel);
+        PatientModel patientModel = subject.mapPatient(patient);
 
         // Assert
 
-        ContactDetailsModel contactDetails = result.getPatientContactDetails();
+        ContactDetailsModel contactDetails = patientModel.getPatientContactDetails();
 
         //=== Address
-        assertEquals(patientModel.getAddressFirstRep().getCountry(), contactDetails.getCountry());
-        assertEquals(patientModel.getAddressFirstRep().getCity(), contactDetails.getCity());
-        assertEquals(patientModel.getAddressFirstRep().getPostalCode(), contactDetails.getPostalCode());
+        assertEquals(patient.getAddressFirstRep().getCountry(), contactDetails.getAddress().getCountry());
+        assertEquals(patient.getAddressFirstRep().getCity(), contactDetails.getAddress().getCity());
+        assertEquals(patient.getAddressFirstRep().getPostalCode(), contactDetails.getAddress().getPostalCode());
 
         //=== Patient contact information
-        var phoneNumbers = patientModel.getTelecom();
-        assertNotEquals(contactDetails.getSecondaryPhone(), contactDetails.getPrimaryPhone(),"For testing purposes theese should not be the same");
-        assertEquals(phoneNumbers.get(0).getValue(), contactDetails.getPrimaryPhone());
-        assertEquals(phoneNumbers.get(1).getValue(), contactDetails.getSecondaryPhone());
-        assertEquals(patientModel.getName(),patientModel.getName());
+        var phoneNumbers = patient.getTelecom();
+        assertNotEquals(contactDetails.getPhone().getSecondary(), contactDetails.getPhone().getPrimary(),"For testing purposes theese should not be the same");
+        assertEquals(phoneNumbers.get(0).getValue(), contactDetails.getPhone().getPrimary());
+        assertEquals(phoneNumbers.get(1).getValue(), contactDetails.getPhone().getSecondary());
+        assertEquals(patient.getName(),patient.getName());
 
         //== Primarycontact
-        var primaryContactDetails = result.getPrimaryContacts().get(0).getContactDetails();
-        var primaryContactNumbers = patientModel.getTelecom();
-        assertEquals(primaryContactNumbers.get(0).getValue(), primaryContactDetails.getPrimaryPhone());
-        assertEquals(primaryContactNumbers.get(1).getValue(), primaryContactDetails.getSecondaryPhone());
-        assertEquals(patientModel.getContactFirstRep().getAddress().getCountry(),primaryContactDetails.getCountry());
-        assertEquals(patientModel.getContactFirstRep().getAddress().getPostalCode(),primaryContactDetails.getPostalCode());
-        assertEquals(patientModel.getContactFirstRep().getAddress().getCity(),primaryContactDetails.getCity());
-        assertEquals(patientModel.getContactFirstRep().getRelationshipFirstRep().getCodingFirstRep().getCode(),result.getPrimaryContacts().get(0).getAffiliation());
+        var primaryContactDetails = patientModel.getPrimaryContacts().get(0).getContactDetails();
+        var primaryContactNumbers = patient.getTelecom();
+        assertEquals(primaryContactNumbers.get(0).getValue(), primaryContactDetails.getPhone().getPrimary());
+        assertEquals(primaryContactNumbers.get(1).getValue(), primaryContactDetails.getPhone().getSecondary());
+        assertEquals(patient.getContactFirstRep().getAddress().getCountry(),primaryContactDetails.getAddress().getCountry());
+        assertEquals(patient.getContactFirstRep().getAddress().getPostalCode(),primaryContactDetails.getAddress().getPostalCode());
+        assertEquals(patient.getContactFirstRep().getAddress().getCity(),primaryContactDetails.getAddress().getCity());
+        assertEquals(patient.getContactFirstRep().getRelationshipFirstRep().getText(),patientModel.getPrimaryContacts().get(0).getAffiliation());
     }
+
+
+
+
 
     @Test
     public void mapCarePlan_mapsPeriod() {
@@ -195,7 +200,7 @@ public class FhirMapperTest {
         // Assert
         assertEquals(ORGANIZATION_ID_1, result.getId().toString());
         assertEquals(organization.getName(), result.getName());
-        assertEquals(organization.getTelecomFirstRep().getValue(), result.getPhone());
+        assertEquals(organization.getTelecomFirstRep().getValue(), result.getContactDetails().getPhone().getPrimary());
         assertNotNull(organization.getTelecomFirstRep().getExtensionByUrl(Systems.PHONE_HOURS));
     }
 
@@ -453,8 +458,10 @@ public class FhirMapperTest {
 
     private ContactDetailsModel buildContactDetailsModel() {
         ContactDetailsModel contactDetailsModel = new ContactDetailsModel();
+        contactDetailsModel.setPhone(new PhoneModel());
+        contactDetailsModel.setAddress(new AddressModel());
 
-        contactDetailsModel.setStreet("Fiskergade");
+        contactDetailsModel.getAddress().setStreet("Fiskergade");
 
         return contactDetailsModel;
     }
@@ -543,7 +550,10 @@ public class FhirMapperTest {
         var contactName = new HumanName();
         contactName.setText("Slartibartfast");
         contactComponent.setName(contactName);
-        contactComponent.setRelationship(List.of(new CodeableConcept(new Coding(Systems.CONTACT_RELATIONSHIP, "Ven", "Ven"))));
+
+        var concept = new CodeableConcept();
+        concept.setText("Ven");
+        contactComponent.setRelationship(List.of(concept));
         contactComponent.addTelecom(primaryTelecom);
         contactComponent.addTelecom(secondaryTelecom);
         patient.addContact(contactComponent);

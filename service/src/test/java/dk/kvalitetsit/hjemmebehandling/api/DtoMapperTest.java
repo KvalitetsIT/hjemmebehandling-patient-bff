@@ -6,6 +6,7 @@ import dk.kvalitetsit.hjemmebehandling.model.*;
 import dk.kvalitetsit.hjemmebehandling.model.AnswerModel;
 import dk.kvalitetsit.hjemmebehandling.model.QuestionModel;
 import dk.kvalitetsit.hjemmebehandling.types.Weekday;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;
@@ -64,8 +65,8 @@ public class DtoMapperTest {
         OrganizationModel result = subject.mapOrganizationDto(organizationDto);
 
         // Assert
-        assertEquals(organizationDto.getCity(), result.getCity());
-        assertEquals(organizationDto.getPostalCode(), result.getPostalCode());
+        assertEquals(organizationDto.getContactDetails().getAddress().getCity(), result.getContactDetails().getAddress().getCity());
+        assertEquals(organizationDto.getContactDetails().getAddress().getPostalCode(), result.getContactDetails().getAddress().getPostalCode());
     }
 
     @Test
@@ -77,8 +78,8 @@ public class DtoMapperTest {
         OrganizationDto result = subject.mapOrganizationModel(organizationModel);
 
         // Assert
-        assertEquals(organizationModel.getCity(), result.getCity());
-        assertEquals(organizationModel.getPostalCode(), result.getPostalCode());
+        assertEquals(organizationModel.getContactDetails().getAddress().getCity(), result.getContactDetails().getAddress().getCity());
+        assertEquals(organizationModel.getContactDetails().getAddress().getPostalCode(), result.getContactDetails().getAddress().getPostalCode());
     }
 
     @Test
@@ -91,11 +92,11 @@ public class DtoMapperTest {
 
         // Assert
         assertEquals(patientDto.getCpr(), result.getCpr());
-        assertEquals(patientDto.getPatientContactDetails().getStreet(), result.getPatientContactDetails().getStreet());
-        assertEquals(patientDto.getPatientContactDetails().getCountry(), result.getPatientContactDetails().getCountry());
-        assertEquals(patientDto.getPatientContactDetails().getPostalCode(), result.getPatientContactDetails().getPostalCode());
-        assertEquals(patientDto.getPatientContactDetails().getPrimaryPhone(), result.getPatientContactDetails().getPrimaryPhone());
-        assertEquals(patientDto.getPatientContactDetails().getSecondaryPhone(), result.getPatientContactDetails().getSecondaryPhone());
+        assertEquals(patientDto.getPatientContactDetails().getAddress().getStreet(), result.getPatientContactDetails().getAddress().getStreet());
+        assertEquals(patientDto.getPatientContactDetails().getAddress().getCountry(), result.getPatientContactDetails().getAddress().getCountry());
+        assertEquals(patientDto.getPatientContactDetails().getAddress().getPostalCode(), result.getPatientContactDetails().getAddress().getPostalCode());
+        assertEquals(patientDto.getPatientContactDetails().getPhone().getPrimary(), result.getPatientContactDetails().getPhone().getPrimary());
+        assertEquals(patientDto.getPatientContactDetails().getPhone().getSecondary(), result.getPatientContactDetails().getPhone().getSecondary());
     }
 
     @Test
@@ -108,11 +109,11 @@ public class DtoMapperTest {
 
         // Assert
         assertEquals(patientModel.getCpr(), result.getCpr());
-        assertEquals(patientModel.getPatientContactDetails().getStreet(), result.getPatientContactDetails().getStreet());
-        assertEquals(patientModel.getPatientContactDetails().getCountry(), result.getPatientContactDetails().getCountry());
-        assertEquals(patientModel.getPatientContactDetails().getPostalCode(), result.getPatientContactDetails().getPostalCode());
-        assertEquals(patientModel.getPatientContactDetails().getPrimaryPhone(), result.getPatientContactDetails().getPrimaryPhone());
-        assertEquals(patientModel.getPatientContactDetails().getSecondaryPhone(), result.getPatientContactDetails().getSecondaryPhone());
+        assertEquals(patientModel.getPatientContactDetails().getAddress().getStreet(), result.getPatientContactDetails().getAddress().getStreet());
+        assertEquals(patientModel.getPatientContactDetails().getAddress().getCountry(), result.getPatientContactDetails().getAddress().getCountry());
+        assertEquals(patientModel.getPatientContactDetails().getAddress().getPostalCode(), result.getPatientContactDetails().getAddress().getPostalCode());
+        assertEquals(patientModel.getPatientContactDetails().getPhone().getPrimary(), result.getPatientContactDetails().getPhone().getPrimary());
+        assertEquals(patientModel.getPatientContactDetails().getPhone().getSecondary(), result.getPatientContactDetails().getPhone().getSecondary());
 
     }
 
@@ -177,16 +178,18 @@ public class DtoMapperTest {
 
     private ContactDetailsDto buildContactDetailsDto() {
         ContactDetailsDto contactDetailsDto = new ContactDetailsDto();
-
-        contactDetailsDto.setStreet("Fiskergade");
+        contactDetailsDto.setAddress(new AddressDto());
+        contactDetailsDto.setPhone(new PhoneDto());
+        contactDetailsDto.getAddress().setStreet("Fiskergade");
 
         return contactDetailsDto;
     }
 
     private ContactDetailsModel buildContactDetailsModel() {
         ContactDetailsModel contactDetailsModel = new ContactDetailsModel();
-
-        contactDetailsModel.setStreet("Fiskergade");
+        contactDetailsModel.setAddress(new AddressModel());
+        contactDetailsModel.setPhone(new PhoneModel());
+        contactDetailsModel.getAddress().setStreet("Fiskergade");
 
         return contactDetailsModel;
     }
@@ -213,11 +216,15 @@ public class DtoMapperTest {
         OrganizationDto organizationDto = new OrganizationDto();
 
         organizationDto.setName("Infektionsmedicinsk afdeling");
-        organizationDto.setStreet("Fiskergade 66");
-        organizationDto.setPostalCode("8000");
-        organizationDto.setCity("Aarhus");
-        organizationDto.setCountry("Danmark");
-        organizationDto.setPhone("22334455");
+        organizationDto.setContactDetails(new ContactDetailsDto());
+        organizationDto.getContactDetails().setAddress(new AddressDto());
+        organizationDto.getContactDetails().setPhone(new PhoneDto());
+
+        organizationDto.getContactDetails().getAddress().setStreet("Fiskergade 66");
+        organizationDto.getContactDetails().getAddress().setPostalCode("8000");
+        organizationDto.getContactDetails().getAddress().setCity("Aarhus");
+        organizationDto.getContactDetails().getAddress().setCountry("Danmark");
+        organizationDto.getContactDetails().getPhone().setPrimary("22334455");
 
         PhoneHourDto phoneHourDto = new PhoneHourDto();
         phoneHourDto.setWeekdays(List.of(Weekday.MON, Weekday.FRI));
@@ -233,11 +240,15 @@ public class DtoMapperTest {
 
         organizationModel.setId(new QualifiedId(ORGANIZATION_ID_1));
         organizationModel.setName("Infektionsmedicinsk afdeling");
-        organizationModel.setStreet("Fiskergade 66");
-        organizationModel.setPostalCode("8000");
-        organizationModel.setCity("Aarhus");
-        organizationModel.setCountry("Danmark");
-        organizationModel.setPhone("22334455");
+        organizationModel.setContactDetails(new ContactDetailsModel());
+        organizationModel.getContactDetails().setAddress(new AddressModel());
+        organizationModel.getContactDetails().getAddress().setStreet("Fiskergade 66");
+        organizationModel.getContactDetails().getAddress().setPostalCode("8000");
+        organizationModel.getContactDetails().getAddress().setCity("Aarhus");
+        organizationModel.getContactDetails().getAddress().setCountry("Danmark");
+
+        organizationModel.getContactDetails().setPhone(new PhoneModel());
+        organizationModel.getContactDetails().getPhone().setPrimary("22334455");
 
         PhoneHourModel phoneHourModel = new PhoneHourModel();
         phoneHourModel.setWeekdays(List.of(Weekday.MON, Weekday.FRI));

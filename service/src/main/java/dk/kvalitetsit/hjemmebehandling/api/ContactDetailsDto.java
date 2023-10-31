@@ -1,58 +1,40 @@
 package dk.kvalitetsit.hjemmebehandling.api;
 
 public class ContactDetailsDto {
-    private String street;
-    private String postalCode;
-    private String country;
-    private String city;
-    private String primaryPhone;
-    private String secondaryPhone;
 
-    public String getStreet() {
-        return street;
+    private AddressDto address;
+    private PhoneDto phone;
+
+
+    public ContactDetailsDto(AddressDto addressDto, PhoneDto phone) {
+        this.address = addressDto;
+        this.phone = phone;
     }
 
-    public void setStreet(String street) {
-        this.street = street;
+    public ContactDetailsDto() {
     }
 
-    public String getPostalCode() {
-        return postalCode;
+    public AddressDto getAddress() {
+        return address;
     }
 
-    public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
+    public void setAddress(AddressDto addressDto) {
+        this.address = addressDto;
     }
 
-    public String getCountry() {
-        return country;
+    public PhoneDto getPhone() {
+        return phone;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
+    public void setPhone(PhoneDto phone) {
+        this.phone = phone;
     }
 
-    public String getPrimaryPhone() {
-        return primaryPhone;
+    @Override
+    public String toString() {
+        return "ContactDetailsDto{" +
+                "addressDto=" + address +
+                ", phone=" + phone +
+                '}';
     }
-
-    public void setPrimaryPhone(String primaryPhone) {
-        this.primaryPhone = primaryPhone;
-    }
-
-    public String getSecondaryPhone() {
-        return secondaryPhone;
-    }
-
-    public void setSecondaryPhone(String secondaryPhone) {
-        this.secondaryPhone = secondaryPhone;
-    }
-
-	public String getCity() {
-		return city;
-	}
-
-	public void setCity(String city) {
-		this.city = city;
-	}
 }

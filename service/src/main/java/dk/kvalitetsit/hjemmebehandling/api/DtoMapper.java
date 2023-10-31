@@ -81,11 +81,10 @@ public class DtoMapper {
         OrganizationModel organizationModel = new OrganizationModel();
 
         organizationModel.setName(organizationDto.getName());
-        organizationModel.setStreet(organizationDto.getStreet());
-        organizationModel.setPostalCode(organizationDto.getPostalCode());
-        organizationModel.setCity(organizationDto.getCity());
-        organizationModel.setCountry(organizationDto.getCountry());
-        organizationModel.setPhone(organizationDto.getPhone());
+
+        organizationModel.setContactDetails(mapContactDetailsDto(organizationDto.getContactDetails()));
+
+
         if(organizationDto.getPhoneHours() != null) {
             organizationModel.setPhoneHours(organizationDto.getPhoneHours()
                     .stream()
@@ -102,16 +101,18 @@ public class DtoMapper {
         return organizationModel;
     }
 
+    private PhoneModel mapPhoneDto(PhoneDto phone) {
+        return new PhoneModel(phone.getPrimary(), phone.getSecondary());
+    }
+
     public OrganizationDto mapOrganizationModel(OrganizationModel organizationModel) {
         OrganizationDto organizationDto = new OrganizationDto();
 
         organizationDto.setId(organizationModel.getId().toString());
         organizationDto.setName(organizationModel.getName());
-        organizationDto.setStreet(organizationModel.getStreet());
-        organizationDto.setPostalCode(organizationModel.getPostalCode());
-        organizationDto.setCity(organizationModel.getCity());
-        organizationDto.setCountry(organizationModel.getCountry());
-        organizationDto.setPhone(organizationModel.getPhone());
+
+        organizationDto.setContactDetails(mapContactDetailsModel(organizationModel.getContactDetails()));
+
         if(organizationModel.getPhoneHours() != null) {
             organizationDto.setPhoneHours(organizationModel.getPhoneHours()
                     .stream()
@@ -319,28 +320,31 @@ public class DtoMapper {
 
     private ContactDetailsModel mapContactDetailsDto(ContactDetailsDto contactDetails) {
         ContactDetailsModel contactDetailsModel = new ContactDetailsModel();
-
-        contactDetailsModel.setCountry(contactDetails.getCountry());
-        contactDetailsModel.setPrimaryPhone(contactDetails.getPrimaryPhone());
-        contactDetailsModel.setSecondaryPhone(contactDetails.getSecondaryPhone());
-        contactDetailsModel.setPostalCode(contactDetails.getPostalCode());
-        contactDetailsModel.setStreet(contactDetails.getStreet());
-
+        contactDetailsModel.setAddress(mapAddressDto(contactDetails.getAddress()));
+        if (contactDetails.getPhone() != null) contactDetailsModel.setPhone(mapPhoneDto(contactDetails.getPhone()));
         return contactDetailsModel;
+    }
+
+    private AddressModel mapAddressDto(AddressDto address) {
+        return new AddressModel(address.getStreet(), address.getPostalCode(), address.getCountry(), address.getCity());
     }
 
     public ContactDetailsDto mapContactDetailsModel(ContactDetailsModel contactDetails) {
         ContactDetailsDto contactDetailsDto = new ContactDetailsDto();
-
-        contactDetailsDto.setCountry(contactDetails.getCountry());
-        contactDetailsDto.setCity(contactDetails.getCity());
-        contactDetailsDto.setPrimaryPhone(contactDetails.getPrimaryPhone());
-        contactDetailsDto.setSecondaryPhone(contactDetails.getSecondaryPhone());
-        contactDetailsDto.setPostalCode(contactDetails.getPostalCode());
-        contactDetailsDto.setStreet(contactDetails.getStreet());
-
+        contactDetailsDto.setAddress(mapAddressModel(contactDetails.getAddress()));
+        if (contactDetails.getPhone() != null) contactDetailsDto.setPhone(mapPhoneModel(contactDetails.getPhone()));
         return contactDetailsDto;
     }
+
+    private PhoneDto mapPhoneModel(PhoneModel phone) {
+
+        return new PhoneDto(phone.getPrimary(), phone.getSecondary());
+    }
+
+    private AddressDto mapAddressModel(AddressModel address) {
+        return new AddressDto(address.getStreet(), address.getPostalCode(), address.getCountry(), address.getCity());
+    }
+
 
     private QuestionAnswerPairModel mapQuestionAnswerPairDto(QuestionAnswerPairDto questionAnswerPairDto) {
         QuestionAnswerPairModel questionAnswerPairModel = new QuestionAnswerPairModel();

@@ -4,6 +4,7 @@ import dk.kvalitetsit.hjemmebehandling.api.CarePlanDto;
 import dk.kvalitetsit.hjemmebehandling.api.DtoMapper;
 import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
 import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
+import dk.kvalitetsit.hjemmebehandling.controller.exception.BadRequestException;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.ResourceNotFoundException;
 import dk.kvalitetsit.hjemmebehandling.model.CarePlanModel;
 import dk.kvalitetsit.hjemmebehandling.service.CarePlanService;
@@ -25,9 +26,9 @@ import java.util.stream.Collectors;
 public class CarePlanController extends BaseController {
     private static final Logger logger = LoggerFactory.getLogger(CarePlanController.class);
 
-    private CarePlanService carePlanService;
-    private DtoMapper dtoMapper;
-    private UserContextProvider userContextProvider;
+    private final CarePlanService carePlanService;
+    private final DtoMapper dtoMapper;
+    private final UserContextProvider userContextProvider;
 
     public CarePlanController(CarePlanService carePlanService, DtoMapper dtoMapper, UserContextProvider userContextProvider) {
         this.carePlanService = carePlanService;
@@ -39,19 +40,26 @@ public class CarePlanController extends BaseController {
     public ResponseEntity<List<CarePlanDto>> getActiveCarePlans() {
         String cpr = userContextProvider.getUserContext().getCpr();
 
-        List<CarePlanModel> carePlans = new ArrayList<>();
+        if(cpr == null || cpr.isEmpty()) {
+            throw new BadRequestException(ErrorDetails.MISSING_CONTEXT);
+        }
 
         try {
-            carePlans = carePlanService.getActiveCarePlans(cpr);
+            List<CarePlanModel> carePlans = carePlanService.getActiveCarePlans(cpr);
+
+            if(carePlans.isEmpty()) {
+                throw new ResourceNotFoundException("No active careplans exists for the current user.", ErrorDetails.NO_ACTIVE_CAREPLAN_EXISTS);
+            }
+
+            return ResponseEntity.ok(carePlans
+                    .stream()
+                    .map(dtoMapper::mapCarePlanModel)
+                    .collect(Collectors.toList()));
         }
         catch(AccessValidationException | ServiceException e) {
             logger.error("Could not update questionnaire response", e);
             throw toStatusCodeException(e);
         }
 
-        if(carePlans.isEmpty()) {
-            throw new ResourceNotFoundException("No active careplans exists for the current user.", ErrorDetails.NO_ACTIVE_CAREPLAN_EXISTS);
-        }
-        return ResponseEntity.ok(carePlans.stream().map(carePlan -> dtoMapper.mapCarePlanModel(carePlan)).collect(Collectors.toList()));
     }
 }

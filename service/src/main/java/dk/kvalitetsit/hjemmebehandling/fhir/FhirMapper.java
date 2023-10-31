@@ -123,17 +123,21 @@ public class FhirMapper {
         organizationModel.setId(extractId(organization));
         organizationModel.setName(organization.getName());
 
+        organizationModel.setContactDetails(new ContactDetailsModel());
+
         var address = organization.getAddressFirstRep();
         if(address != null) {
-            organizationModel.setStreet(String.join("\n", address.getLine().stream().map(l -> l.getValue()).collect(Collectors.toList())));
-            organizationModel.setPostalCode(address.getPostalCode());
-            organizationModel.setCity(address.getCity());
-            organizationModel.setCountry(address.getCountry());
+            organizationModel.getContactDetails().setAddress(new AddressModel());
+            organizationModel.getContactDetails().getAddress().setStreet(String.join("\n", address.getLine().stream().map(l -> l.getValue()).collect(Collectors.toList())));
+            organizationModel.getContactDetails().getAddress().setPostalCode(address.getPostalCode());
+            organizationModel.getContactDetails().getAddress().setCity(address.getCity());
+            organizationModel.getContactDetails().getAddress().setCountry(address.getCountry());
         }
 
         var telecom = organization.getTelecomFirstRep();
         if(telecom != null) {
-            organizationModel.setPhone(telecom.getValue());
+            organizationModel.getContactDetails().setPhone(new PhoneModel());
+            organizationModel.getContactDetails().getPhone().setPrimary(telecom.getValue());
             organizationModel.setPhoneHours(ExtensionMapper.extractPhoneHours(telecom.getExtensionsByUrl(Systems.PHONE_HOURS)));
         }
 
@@ -164,23 +168,19 @@ public class FhirMapper {
     public PrimaryContactModel mapContact(Patient.ContactComponent contact) {
         PrimaryContactModel model = new PrimaryContactModel();
         model.setName(contact.getName().getText());
-
-        for(var coding : contact.getRelationshipFirstRep().getCoding()) {
-            if(coding.getSystem().equals(Systems.CONTACT_RELATIONSHIP)) {
-                model.setAffiliation(coding.getCode());
-            }
-        }
+        model.setAffiliation(contact.getRelationshipFirstRep().getText());
+        var primaryRelativeContactDetails = new ContactDetailsModel();
+        primaryRelativeContactDetails.setAddress(new AddressModel());
 
         // Extract phone numbers
         if(contact.getTelecom() != null && !contact.getTelecom().isEmpty()) {
-            var primaryRelativeContactDetails = new ContactDetailsModel();
-
+            primaryRelativeContactDetails.setPhone(new PhoneModel());
             for(var telecom : contact.getTelecom()) {
                 if(telecom.getRank() == 1) {
-                    primaryRelativeContactDetails.setPrimaryPhone(telecom.getValue());
+                    primaryRelativeContactDetails.getPhone().setPrimary(telecom.getValue());
                 }
                 if(telecom.getRank() == 2) {
-                    primaryRelativeContactDetails.setSecondaryPhone(telecom.getValue());
+                    primaryRelativeContactDetails.getPhone().setSecondary(telecom.getValue());
                 }
             }
 
@@ -424,15 +424,18 @@ public class FhirMapper {
     private ContactDetailsModel extractPatientContactDetails(Patient patient) {
         ContactDetailsModel contactDetails = new ContactDetailsModel();
 
+        contactDetails.setAddress(new AddressModel());
         var lines = patient.getAddressFirstRep().getLine();
         if(lines != null && !lines.isEmpty()) {
-            contactDetails.setStreet(String.join(", ", lines.stream().map(l -> l.getValue()).collect(Collectors.toList())));
+            contactDetails.getAddress().setStreet(String.join(", ", lines.stream().map(l -> l.getValue()).collect(Collectors.toList())));
         }
-        contactDetails.setCity(patient.getAddressFirstRep().getCity());
-        contactDetails.setPostalCode(patient.getAddressFirstRep().getPostalCode());
-        contactDetails.setPrimaryPhone(extractPrimaryPhone(patient.getTelecom()));
-        contactDetails.setSecondaryPhone(extractSecondaryPhone(patient.getTelecom()));
-        contactDetails.setCountry(extractCountry(patient));
+        contactDetails.getAddress().setCity(patient.getAddressFirstRep().getCity());
+        contactDetails.getAddress().setPostalCode(patient.getAddressFirstRep().getPostalCode());
+        contactDetails.getAddress().setCountry(extractCountry(patient));
+
+        contactDetails.setPhone(new PhoneModel());
+        contactDetails.getPhone().setPrimary(extractPrimaryPhone(patient.getTelecom()));
+        contactDetails.getPhone().setSecondary(extractSecondaryPhone(patient.getTelecom()));
 
         return contactDetails;
     }

@@ -80,7 +80,7 @@ public class QuestionnaireResponseController extends BaseController {
     }
 
 
-    @GetMapping(value = "/v1/questionnaireresponse/{id}")
+    @GetMapping(value = "/v1/questionnaireresponses/{id}")
     public ResponseEntity<QuestionnaireResponseDto> getQuestionnaireResponseById(@PathVariable("id") String id) {
         // Look up the QuestionnaireResponse
         Optional<QuestionnaireResponseModel> questionnaireResponse = Optional.empty();

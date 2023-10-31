@@ -192,7 +192,7 @@ public class FhirClient {
         return lookupResult;
     }
 
-    private FhirLookupResult lookupOrganizations(List<String> organizationIds) {
+    public FhirLookupResult lookupOrganizations(List<String> organizationIds) {
         var idCriterion = Organization.RES_ID.exactly().codes(organizationIds);
 
         return lookupOrganizationsByCriteria(List.of(idCriterion));
@@ -258,4 +258,23 @@ public class FhirClient {
 
         return lookupQuestionnaireResponsesByCriteria(List.of(questionnaireCriterion, basedOnCriterion));
     }
+
+    public Optional<Patient> lookupPatientByCPR(String cpr) {
+        var cprCriterion = Patient.IDENTIFIER.exactly().systemAndValues(Systems.CPR, cpr);
+        return lookupPatient(List.of(cprCriterion));
+    }
+
+
+    private Optional<Patient> lookupPatient(List<ICriterion<?>> criterion) {
+        var lookupResult = lookupByCriteria(Patient.class, criterion);
+
+        if(lookupResult.getPatients().isEmpty()) {
+            return Optional.empty();
+        }
+        if(lookupResult.getPatients().size() > 1) {
+            throw new IllegalStateException(String.format("Could not lookup single resource of class %s!", Patient.class));
+        }
+        return Optional.of(lookupResult.getPatients().get(0));
+    }
+
 }
