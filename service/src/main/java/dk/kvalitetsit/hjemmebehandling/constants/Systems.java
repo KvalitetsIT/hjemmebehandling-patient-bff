@@ -27,4 +27,7 @@ public class Systems {
 
     public static final String QUESTION_ABBREVIATION = "http://hjemmebehandling.rm.dk/question-abbreviation";
 
+    public static final String ORGANISATION_BLOB = "http://hjemmebehandling.rm.dk/organisation-blob";
+
+
 }

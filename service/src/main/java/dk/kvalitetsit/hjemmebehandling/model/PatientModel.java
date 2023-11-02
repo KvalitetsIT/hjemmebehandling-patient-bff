@@ -1,6 +1,5 @@
 package dk.kvalitetsit.hjemmebehandling.model;
 
-import dk.kvalitetsit.hjemmebehandling.api.PrimaryContactDto;
 
 import java.util.List;
 
@@ -9,12 +8,10 @@ public class PatientModel {
     private String givenName;
     private String familyName;
     private String cpr;
-    private ContactDetailsModel patientContactDetails;
+    private ContactDetailsModel contactDetails;
 
-    private List<PrimaryContactModel> primaryContacts;
-
-
-
+    private List<PrimaryContactModel> contacts;
+    
     public QualifiedId getId() {
         return id;
     }
@@ -47,19 +44,19 @@ public class PatientModel {
         this.cpr = cpr;
     }
 
-    public ContactDetailsModel getPatientContactDetails() {
-        return patientContactDetails;
+    public ContactDetailsModel getContactDetails() {
+        return contactDetails;
     }
 
-    public void setPatientContactDetails(ContactDetailsModel patientContactDetails) {
-        this.patientContactDetails = patientContactDetails;
+    public void setContactDetails(ContactDetailsModel contactDetails) {
+        this.contactDetails = contactDetails;
     }
 
-    public List<PrimaryContactModel> getPrimaryContacts() {
-        return primaryContacts;
+    public List<PrimaryContactModel> getContacts() {
+        return contacts;
     }
 
-    public void setPrimaryContacts(List<PrimaryContactModel> primaryContacts) {
-        this.primaryContacts = primaryContacts;
+    public void setContacts(List<PrimaryContactModel> contacts) {
+        this.contacts = contacts;
     }
 }

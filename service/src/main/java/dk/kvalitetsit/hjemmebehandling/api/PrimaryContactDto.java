@@ -5,7 +5,6 @@ public class PrimaryContactDto {
     private String name;
     private String affiliation;
     private ContactDetailsDto contactDetails;
-
     private String organization;
 
     public String getName() {

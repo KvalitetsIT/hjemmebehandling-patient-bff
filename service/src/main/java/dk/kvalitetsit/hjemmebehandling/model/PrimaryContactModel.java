@@ -8,6 +8,7 @@ public class PrimaryContactModel {
     private String affiliation;
     private ContactDetailsModel contactDetails;
 
+    // TODO: Below might be the actual organisation otherwise the frontend has to look up the name of the organisation by the organisation id
     /**
      * The id of the organisation of which this contact is associated
      */

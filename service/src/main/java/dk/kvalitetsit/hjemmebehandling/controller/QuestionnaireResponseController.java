@@ -31,10 +31,10 @@ import java.util.stream.Collectors;
 public class QuestionnaireResponseController extends BaseController {
     private static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseController.class);
 
-    private QuestionnaireResponseService questionnaireResponseService;
-    private DtoMapper dtoMapper;
-    private LocationHeaderBuilder locationHeaderBuilder;
-    private UserContextProvider userContextProvider;
+    private final QuestionnaireResponseService questionnaireResponseService;
+    private final DtoMapper dtoMapper;
+    private final LocationHeaderBuilder locationHeaderBuilder;
+    private final UserContextProvider userContextProvider;
 
     public QuestionnaireResponseController(QuestionnaireResponseService questionnaireResponseService, DtoMapper dtoMapper, LocationHeaderBuilder locationHeaderBuilder, UserContextProvider userContextProvider) {
         this.questionnaireResponseService = questionnaireResponseService;
@@ -43,8 +43,13 @@ public class QuestionnaireResponseController extends BaseController {
         this.userContextProvider = userContextProvider;
     }
 
-    @GetMapping(value = "/v1/questionnaireresponses/{carePlanId}")
-    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnaireResponsesByCarePlanId(@PathVariable("carePlanId") String carePlanId, @RequestParam("questionnaireIds") List<String> questionnaireIds, int pageNumber, int pageSize) {
+    @GetMapping(params ="questionnaireIds",  value = "/v1/questionnaireresponses/{carePlanId}")
+    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnaireResponsesByCarePlanId(
+            @PathVariable("carePlanId") String carePlanId,
+            @RequestParam("questionnaireIds") List<String> questionnaireIds,
+            int pageNumber,
+            int pageSize
+    ) {
         if(carePlanId == null || questionnaireIds == null || questionnaireIds.isEmpty()) {
             throw new BadRequestException(ErrorDetails.PARAMETERS_INCOMPLETE);
         }
@@ -53,32 +58,13 @@ public class QuestionnaireResponseController extends BaseController {
             PageDetails pageDetails = new PageDetails(pageNumber,pageSize);
             List<QuestionnaireResponseModel> questionnaireResponses = questionnaireResponseService.getQuestionnaireResponses(carePlanId, questionnaireIds, pageDetails);
 
-            return ResponseEntity.ok(questionnaireResponses.stream().map(qr -> dtoMapper.mapQuestionnaireResponseModel(qr)).collect(Collectors.toList()));
+            return ResponseEntity.ok(questionnaireResponses.stream().map(dtoMapper::mapQuestionnaireResponseModel).collect(Collectors.toList()));
         }
         catch(AccessValidationException | ServiceException e) {
             logger.error("Could not look up questionnaire responses by careplan id", e);
             throw toStatusCodeException(e);
         }
     }
-
-    @GetMapping(value = "/v1/questionnaireresponses")
-    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnaireResponsesForMultipleCarePlans(@RequestParam("carePlanIds") List<String> carePlanIds, @RequestParam("questionnaireIds") List<String> questionnaireIds, int pageNumber, int pageSize) {
-        if(carePlanIds == null || carePlanIds.isEmpty() || questionnaireIds == null || questionnaireIds.isEmpty()) {
-            throw new BadRequestException(ErrorDetails.PARAMETERS_INCOMPLETE);
-        }
-
-        try {
-            PageDetails pageDetails = new PageDetails(pageNumber,pageSize);
-            List<QuestionnaireResponseModel> questionnaireResponses = questionnaireResponseService.getQuestionnaireResponsesForMultipleCarePlans(carePlanIds, questionnaireIds, pageDetails);
-
-            return ResponseEntity.ok(questionnaireResponses.stream().map(qr -> dtoMapper.mapQuestionnaireResponseModel(qr)).collect(Collectors.toList()));
-        }
-        catch(AccessValidationException e) {
-            logger.error("Could not look up questionnaire responses by careplan id", e);
-            throw toStatusCodeException(e);
-        }
-    }
-
 
     @GetMapping(value = "/v1/questionnaireresponses/{id}")
     public ResponseEntity<QuestionnaireResponseDto> getQuestionnaireResponseById(@PathVariable("id") String id) {
@@ -93,11 +79,33 @@ public class QuestionnaireResponseController extends BaseController {
             throw toStatusCodeException(e);
         }
 
-        if(!questionnaireResponse.isPresent()) {
+        if(questionnaireResponse.isEmpty()) {
             throw new ResourceNotFoundException(String.format("QuestionnaireResponse with id %s not found.", id), ErrorDetails.QUESTIONNAIRE_RESPONSE_DOES_NOT_EXIST);
         }
         return ResponseEntity.ok(dtoMapper.mapQuestionnaireResponseModel(questionnaireResponse.get()));
     }
+
+    @GetMapping(value = "/v1/questionnaireresponses")
+    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnaireResponsesForMultipleCarePlans(
+            @RequestParam("carePlanIds") List<String> carePlanIds,
+            @RequestParam("questionnaireIds") List<String> questionnaireIds,
+            int pageNumber, int pageSize) {
+        if(carePlanIds == null || carePlanIds.isEmpty() || questionnaireIds == null || questionnaireIds.isEmpty()) {
+            throw new BadRequestException(ErrorDetails.PARAMETERS_INCOMPLETE);
+        }
+
+        try {
+            PageDetails pageDetails = new PageDetails(pageNumber,pageSize);
+            List<QuestionnaireResponseModel> questionnaireResponses = questionnaireResponseService.getQuestionnaireResponsesForMultipleCarePlans(carePlanIds, questionnaireIds, pageDetails);
+
+            return ResponseEntity.ok(questionnaireResponses.stream().map(dtoMapper::mapQuestionnaireResponseModel).collect(Collectors.toList()));
+        }
+        catch(AccessValidationException e) {
+            logger.error("Could not look up questionnaire responses by careplan id", e);
+            throw toStatusCodeException(e);
+        }
+    }
+
 
     @PostMapping(value = "/v1/questionnaireresponse")
     public ResponseEntity<CallToActionDTO> submitQuestionnaireResponse(@RequestBody QuestionnaireResponseDto questionnaireResponseDto) {

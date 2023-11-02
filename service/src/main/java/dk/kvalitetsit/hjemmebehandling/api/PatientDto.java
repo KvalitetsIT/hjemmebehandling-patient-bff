@@ -7,7 +7,7 @@ public class PatientDto {
     private String familyName;
     private String cpr;
     private String customUserName;
-    private ContactDetailsDto patientContactDetails;
+    private ContactDetailsDto contactsDetails;
     private List<PrimaryContactDto> primaryContacts;
 
 
@@ -43,12 +43,12 @@ public class PatientDto {
         this.customUserName = customUserName;
     }
 
-    public ContactDetailsDto getPatientContactDetails() {
-        return patientContactDetails;
+    public ContactDetailsDto getContactsDetails() {
+        return contactsDetails;
     }
 
-    public void setPatientContactDetails(ContactDetailsDto patientContactDetails) {
-        this.patientContactDetails = patientContactDetails;
+    public void setContactsDetails(ContactDetailsDto contactsDetails) {
+        this.contactsDetails = contactsDetails;
     }
 
     public List<PrimaryContactDto> getPrimaryContacts() {

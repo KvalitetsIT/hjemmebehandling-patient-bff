@@ -5,17 +5,20 @@ import java.util.List;
 public class OrganizationModel {
     private QualifiedId id;
     private String name;
-
     private ContactDetailsModel contactDetails;
-
     private List<PhoneHourModel> phoneHours;
 
+    /**
+     * Some blob of html specifying the phone hours and other details associated to the contact of the organisation
+     */
+    private String blob;
 
-    public OrganizationModel(QualifiedId id, String name, ContactDetailsModel contactDetails, List<PhoneHourModel> phoneHours) {
+    public OrganizationModel(QualifiedId id, String name, ContactDetailsModel contactDetails, List<PhoneHourModel> phoneHours, String blob) {
         this.id = id;
         this.name = name;
         this.contactDetails = contactDetails;
         this.phoneHours = phoneHours;
+        this.blob = blob;
     }
 
     public OrganizationModel() {
@@ -62,5 +65,13 @@ public class OrganizationModel {
                 ", contactDetails=" + contactDetails +
                 ", phoneHours=" + phoneHours +
                 '}';
+    }
+
+    public String getBlob() {
+        return blob;
+    }
+
+    public void setBlob(String blob) {
+        this.blob = blob;
     }
 }

@@ -39,7 +39,7 @@ public class FhirMapper {
         if(carePlanModel.getQuestionnaires() != null) {
             carePlan.setActivity(carePlanModel.getQuestionnaires()
                     .stream()
-                    .map(q -> buildCarePlanActivity(q))
+                    .map(this::buildCarePlanActivity)
                     .collect(Collectors.toList()));
         }
 
@@ -99,10 +99,8 @@ public class FhirMapper {
                 .flatMap(p -> p.getQuestionnaires().stream())
                 .filter(q -> q.getQuestionnaire().getId().equals(questionnaireModel.getId()))
                 .findFirst()
-                .map(qw -> qw.getThresholds());
-            if (thresholds.isPresent()) {
-                wrapper.setThresholds(thresholds.get());
-            }
+                .map(QuestionnaireWrapperModel::getThresholds);
+            thresholds.ifPresent(wrapper::setThresholds);
 
             carePlanModel.getQuestionnaires().add(wrapper);
         }
@@ -122,13 +120,13 @@ public class FhirMapper {
 
         organizationModel.setId(extractId(organization));
         organizationModel.setName(organization.getName());
-
+        if (organization.getExtensionByUrl(Systems.ORGANISATION_BLOB) != null) organizationModel.setBlob(organization.getExtensionByUrl(Systems.ORGANISATION_BLOB).getValue().primitiveValue());
         organizationModel.setContactDetails(new ContactDetailsModel());
 
         var address = organization.getAddressFirstRep();
         if(address != null) {
             organizationModel.getContactDetails().setAddress(new AddressModel());
-            organizationModel.getContactDetails().getAddress().setStreet(String.join("\n", address.getLine().stream().map(l -> l.getValue()).collect(Collectors.toList())));
+            organizationModel.getContactDetails().getAddress().setStreet(String.join("\n", address.getLine().stream().map(PrimitiveType::getValue).collect(Collectors.toList())));
             organizationModel.getContactDetails().getAddress().setPostalCode(address.getPostalCode());
             organizationModel.getContactDetails().getAddress().setCity(address.getCity());
             organizationModel.getContactDetails().getAddress().setCountry(address.getCountry());
@@ -153,10 +151,10 @@ public class FhirMapper {
         patientModel.setGivenName(extractGivenNames(patient));
         patientModel.setFamilyName(extractFamilyName(patient));
         patientModel.setCpr(extractCpr(patient));
-        patientModel.setPatientContactDetails(extractPatientContactDetails(patient));
+        patientModel.setContactDetails(extractPatientContactDetails(patient));
 
 
-        patientModel.setPrimaryContacts(mapContacts(patient));
+        patientModel.setContacts(mapContacts(patient));
 
         return patientModel;
     }
@@ -185,7 +183,6 @@ public class FhirMapper {
                     primaryRelativeContactDetails.getPhone().setSecondary(telecom.getValue());
                 }
             }
-
             model.setContactDetails(primaryRelativeContactDetails);
         }
         return model;
@@ -214,11 +211,11 @@ public class FhirMapper {
         questionnaireModel.setStatus(questionnaire.getStatus().getDisplay());
         questionnaireModel.setQuestions(questionnaire.getItem().stream()
             .filter(type -> !type.getType().equals(Questionnaire.QuestionnaireItemType.GROUP)) // filter out call-to-action's
-            .map(item -> mapQuestionnaireItem(item)).collect(Collectors.toList()));
+            .map(this::mapQuestionnaireItem).collect(Collectors.toList()));
         questionnaireModel.setCallToActions(questionnaire.getItem().stream()
             .filter(q -> q.getType().equals(Questionnaire.QuestionnaireItemType.GROUP)) // process call-to-action's
             .flatMap(group -> group.getItem().stream())
-            .map(item -> mapQuestionnaireItem(item)).collect(Collectors.toList()));
+            .map(this::mapQuestionnaireItem).collect(Collectors.toList()));
 
         return questionnaireModel;
     }
@@ -257,6 +254,7 @@ public class FhirMapper {
             QuestionModel question = null;
             boolean deprecated = false;
             int i = 0;
+            assert historicalQuestionnaires != null;
             for (Questionnaire q : historicalQuestionnaires) {
                 if (i > 0) deprecated = true;
                 boolean hasNext = i < historicalQuestionnaires.size()-1;
@@ -429,7 +427,7 @@ public class FhirMapper {
         contactDetails.setAddress(new AddressModel());
         var lines = patient.getAddressFirstRep().getLine();
         if(lines != null && !lines.isEmpty()) {
-            contactDetails.getAddress().setStreet(String.join(", ", lines.stream().map(l -> l.getValue()).collect(Collectors.toList())));
+            contactDetails.getAddress().setStreet(String.join(", ", lines.stream().map(PrimitiveType::getValue).collect(Collectors.toList())));
         }
         contactDetails.getAddress().setCity(patient.getAddressFirstRep().getCity());
         contactDetails.getAddress().setPostalCode(patient.getAddressFirstRep().getPostalCode());
@@ -556,7 +554,7 @@ public class FhirMapper {
     private String mapQuestionnaireItemHelperText(List<Questionnaire.QuestionnaireItemComponent> item) {
         return item.stream()
             .filter(i -> i.getType().equals(Questionnaire.QuestionnaireItemType.DISPLAY))
-            .map(i -> i.getText())
+            .map(Questionnaire.QuestionnaireItemComponent::getText)
             .filter(Objects::nonNull)
             .findFirst()
             .orElse(null)
@@ -567,7 +565,7 @@ public class FhirMapper {
     private List<QuestionModel.EnableWhen> mapEnableWhens(List<Questionnaire.QuestionnaireItemEnableWhenComponent> enableWhen) {
         return enableWhen
             .stream()
-            .map(ew -> mapEnableWhen(ew))
+            .map(this::mapEnableWhen)
             .collect(Collectors.toList());
     }
 
@@ -783,7 +781,7 @@ public class FhirMapper {
         List<ThresholdModel> planDefinitionThresholds = ExtensionMapper.extractThresholds(action.getExtensionsByUrl(Systems.THRESHOLD));
 
         List<ThresholdModel> combinedThresholds = Stream.of(questionnaireThresholds, planDefinitionThresholds)
-            .flatMap(t -> t.stream())
+            .flatMap(Collection::stream)
             .collect(Collectors.toList());
         wrapper.setThresholds(combinedThresholds);
 

@@ -264,7 +264,6 @@ public class FhirClient {
         return lookupPatient(List.of(cprCriterion));
     }
 
-
     private Optional<Patient> lookupPatient(List<ICriterion<?>> criterion) {
         var lookupResult = lookupByCriteria(Patient.class, criterion);
 

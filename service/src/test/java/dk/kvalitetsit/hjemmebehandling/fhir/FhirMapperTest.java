@@ -57,7 +57,7 @@ public class FhirMapperTest {
 
         // Assert
 
-        ContactDetailsModel contactDetails = patientModel.getPatientContactDetails();
+        ContactDetailsModel contactDetails = patientModel.getContactDetails();
 
         //=== Address
         assertEquals(patient.getAddressFirstRep().getCountry(), contactDetails.getAddress().getCountry());
@@ -72,14 +72,14 @@ public class FhirMapperTest {
         assertEquals(patient.getName(),patient.getName());
 
         //== Primarycontact
-        var primaryContactDetails = patientModel.getPrimaryContacts().get(0).getContactDetails();
+        var primaryContactDetails = patientModel.getContacts().get(0).getContactDetails();
         var primaryContactNumbers = patient.getTelecom();
         assertEquals(primaryContactNumbers.get(0).getValue(), primaryContactDetails.getPhone().getPrimary());
         assertEquals(primaryContactNumbers.get(1).getValue(), primaryContactDetails.getPhone().getSecondary());
         assertEquals(patient.getContactFirstRep().getAddress().getCountry(),primaryContactDetails.getAddress().getCountry());
         assertEquals(patient.getContactFirstRep().getAddress().getPostalCode(),primaryContactDetails.getAddress().getPostalCode());
         assertEquals(patient.getContactFirstRep().getAddress().getCity(),primaryContactDetails.getAddress().getCity());
-        assertEquals(patient.getContactFirstRep().getRelationshipFirstRep().getText(),patientModel.getPrimaryContacts().get(0).getAffiliation());
+        assertEquals(patient.getContactFirstRep().getRelationshipFirstRep().getText(),patientModel.getContacts().get(0).getAffiliation());
     }
 
 
@@ -202,6 +202,7 @@ public class FhirMapperTest {
         assertEquals(organization.getName(), result.getName());
         assertEquals(organization.getTelecomFirstRep().getValue(), result.getContactDetails().getPhone().getPrimary());
         assertNotNull(organization.getTelecomFirstRep().getExtensionByUrl(Systems.PHONE_HOURS));
+        assertEquals(organization.getExtensionByUrl(Systems.ORGANISATION_BLOB).getValue().primitiveValue(), result.getBlob());
     }
 
     @Test
@@ -327,7 +328,7 @@ public class FhirMapperTest {
         QuestionnaireResponse result = subject.mapQuestionnaireResponseModel(subject.mapQuestionnaireResponse(questionnaireResponse, lookupResult));
 
         // Assert
-        assertTrue(!questionnaireResponse.getBasedOn().isEmpty());
+        assertFalse(questionnaireResponse.getBasedOn().isEmpty());
         assertEquals(questionnaireResponse.getBasedOn().size(), result.getBasedOn().size());
         assertEquals(questionnaireResponse.getBasedOn().get(0).getReference(), result.getBasedOn().get(0).getReference());
 
@@ -504,6 +505,9 @@ public class FhirMapperTest {
                 .setValue("22334455")
                 .setRank(1);
 
+        String blob = "<h1>Infektionsmedicinsk</h1><h3>Åbningstider:<h3><p>08:00 - 16:00</p>";
+        organization.addExtension(ExtensionMapper.mapBlob(blob));
+
         PhoneHourModel phoneHourModel = new PhoneHourModel();
         phoneHourModel.setWeekdays(List.of(Weekday.MON, Weekday.FRI));
         phoneHourModel.setFrom(LocalTime.parse("07:00"));
@@ -566,8 +570,8 @@ public class FhirMapperTest {
 
         patientModel.setId(new QualifiedId(PATIENT_ID_1));
         patientModel.setCpr("0101010101");
-        patientModel.setPatientContactDetails(buildContactDetailsModel());
-        patientModel.setPrimaryContacts(List.of(buildPrimaryContactModel()));
+        patientModel.setContactDetails(buildContactDetailsModel());
+        patientModel.setContacts(List.of(buildPrimaryContactModel()));
 
         return patientModel;
     }

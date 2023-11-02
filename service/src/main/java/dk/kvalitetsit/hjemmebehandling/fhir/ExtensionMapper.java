@@ -42,6 +42,11 @@ public class ExtensionMapper {
         return buildStringExtension(Systems.QUESTION_ABBREVIATION, abbreviation);
     }
 
+    public static Extension mapBlob(String blob) {
+        return buildStringExtension(Systems.ORGANISATION_BLOB, blob);
+    }
+
+
     public static Extension mapPhoneHours(PhoneHourModel phoneHours) {
         List<Extension> extensions = new ArrayList<>();
 

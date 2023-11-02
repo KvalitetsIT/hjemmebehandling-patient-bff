@@ -10,12 +10,17 @@ public class OrganizationDto {
     private ContactDetailsDto contactDetails;
     private List<PhoneHourDto> phoneHours;
 
+    /**
+     * Some blob of html specifying the phone hours and other details associated to the contact of the organisation
+     */
+    private String blob;
 
-    public OrganizationDto(String id, String name, ContactDetailsDto contactDetails, List<PhoneHourDto> phoneHours) {
+    public OrganizationDto(String id, String name, ContactDetailsDto contactDetails, List<PhoneHourDto> phoneHours, String blob) {
         this.id = id;
         this.name = name;
         this.contactDetails = contactDetails;
         this.phoneHours = phoneHours;
+        this.blob = blob;
     }
 
     public OrganizationDto() {
@@ -28,6 +33,15 @@ public class OrganizationDto {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+
+    public String getBlob() {
+        return blob;
+    }
+
+    public void setBlob(String blob) {
+        this.blob = blob;
     }
 
     public String getName() {

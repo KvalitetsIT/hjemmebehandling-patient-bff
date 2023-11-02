@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class PatientController extends BaseController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    private UserContextProvider userContextProvider;
+    private final UserContextProvider userContextProvider;
 
     private final PatientService patientService;
     private final DtoMapper dtoMapper;
@@ -34,7 +34,7 @@ public class PatientController extends BaseController {
 
 
     @GetMapping(value = "/v1/patient")
-    public @ResponseBody ResponseEntity<PatientDto> getUser() throws JsonMappingException, JsonProcessingException {
+    public @ResponseBody ResponseEntity<PatientDto> getPatient() throws JsonMappingException, JsonProcessingException {
         logger.info("Getting current patient");
         var cpr = userContextProvider.getUserContext().getCpr();
 

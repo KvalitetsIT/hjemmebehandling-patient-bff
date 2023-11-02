@@ -30,6 +30,7 @@ public class PatientService {
         if (patient.isEmpty()) {
             throw new ServiceException("Could not retrieve patient with the specified cpr", ErrorKind.NOT_FOUND, ErrorDetails.PATIENT_NOT_FOUND);
         }
+
         return fhirMapper.mapPatient(patient.get());
 
     }

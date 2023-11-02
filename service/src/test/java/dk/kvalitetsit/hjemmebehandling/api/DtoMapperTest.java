@@ -6,7 +6,6 @@ import dk.kvalitetsit.hjemmebehandling.model.*;
 import dk.kvalitetsit.hjemmebehandling.model.AnswerModel;
 import dk.kvalitetsit.hjemmebehandling.model.QuestionModel;
 import dk.kvalitetsit.hjemmebehandling.types.Weekday;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;
@@ -92,11 +91,11 @@ public class DtoMapperTest {
 
         // Assert
         assertEquals(patientDto.getCpr(), result.getCpr());
-        assertEquals(patientDto.getPatientContactDetails().getAddress().getStreet(), result.getPatientContactDetails().getAddress().getStreet());
-        assertEquals(patientDto.getPatientContactDetails().getAddress().getCountry(), result.getPatientContactDetails().getAddress().getCountry());
-        assertEquals(patientDto.getPatientContactDetails().getAddress().getPostalCode(), result.getPatientContactDetails().getAddress().getPostalCode());
-        assertEquals(patientDto.getPatientContactDetails().getPhone().getPrimary(), result.getPatientContactDetails().getPhone().getPrimary());
-        assertEquals(patientDto.getPatientContactDetails().getPhone().getSecondary(), result.getPatientContactDetails().getPhone().getSecondary());
+        assertEquals(patientDto.getContactsDetails().getAddress().getStreet(), result.getContactDetails().getAddress().getStreet());
+        assertEquals(patientDto.getContactsDetails().getAddress().getCountry(), result.getContactDetails().getAddress().getCountry());
+        assertEquals(patientDto.getContactsDetails().getAddress().getPostalCode(), result.getContactDetails().getAddress().getPostalCode());
+        assertEquals(patientDto.getContactsDetails().getPhone().getPrimary(), result.getContactDetails().getPhone().getPrimary());
+        assertEquals(patientDto.getContactsDetails().getPhone().getSecondary(), result.getContactDetails().getPhone().getSecondary());
     }
 
     @Test
@@ -109,11 +108,11 @@ public class DtoMapperTest {
 
         // Assert
         assertEquals(patientModel.getCpr(), result.getCpr());
-        assertEquals(patientModel.getPatientContactDetails().getAddress().getStreet(), result.getPatientContactDetails().getAddress().getStreet());
-        assertEquals(patientModel.getPatientContactDetails().getAddress().getCountry(), result.getPatientContactDetails().getAddress().getCountry());
-        assertEquals(patientModel.getPatientContactDetails().getAddress().getPostalCode(), result.getPatientContactDetails().getAddress().getPostalCode());
-        assertEquals(patientModel.getPatientContactDetails().getPhone().getPrimary(), result.getPatientContactDetails().getPhone().getPrimary());
-        assertEquals(patientModel.getPatientContactDetails().getPhone().getSecondary(), result.getPatientContactDetails().getPhone().getSecondary());
+        assertEquals(patientModel.getContactDetails().getAddress().getStreet(), result.getContactsDetails().getAddress().getStreet());
+        assertEquals(patientModel.getContactDetails().getAddress().getCountry(), result.getContactsDetails().getAddress().getCountry());
+        assertEquals(patientModel.getContactDetails().getAddress().getPostalCode(), result.getContactsDetails().getAddress().getPostalCode());
+        assertEquals(patientModel.getContactDetails().getPhone().getPrimary(), result.getContactsDetails().getPhone().getPrimary());
+        assertEquals(patientModel.getContactDetails().getPhone().getSecondary(), result.getContactsDetails().getPhone().getSecondary());
 
     }
 
@@ -263,7 +262,7 @@ public class DtoMapperTest {
         PatientDto patientDto = new PatientDto();
 
         patientDto.setCpr("0101010101");
-        patientDto.setPatientContactDetails(buildContactDetailsDto());
+        patientDto.setContactsDetails(buildContactDetailsDto());
         patientDto.setPrimaryContacts(List.of(buildPrimaryContactDto()));
 
         return patientDto;
@@ -273,8 +272,8 @@ public class DtoMapperTest {
         PatientModel patientModel = new PatientModel();
 
         patientModel.setCpr("0101010101");
-        patientModel.setPatientContactDetails(buildContactDetailsModel());
-        patientModel.setPrimaryContacts(List.of(buildPrimaryContactModel()));
+        patientModel.setContactDetails(buildContactDetailsModel());
+        patientModel.setContacts(List.of(buildPrimaryContactModel()));
 
 
         return patientModel;
