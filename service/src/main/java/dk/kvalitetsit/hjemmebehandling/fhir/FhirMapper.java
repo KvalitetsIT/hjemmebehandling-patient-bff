@@ -112,6 +112,13 @@ public class FhirMapper {
                 .orElseThrow(() -> new IllegalStateException(String.format("Organization with id %s was not present when trying to map careplan %s!", organizationId, carePlan.getId())));
         carePlanModel.setDepartmentName(organization.getName());
 
+        if (organization.getExtensionByUrl(Systems.QUESTIONNAIRE_SUMMARY_BLOB) != null) {
+            final String staticSummaryHtml = organization.getExtensionByUrl(Systems.QUESTIONNAIRE_SUMMARY_BLOB).getValue().primitiveValue();
+            carePlanModel.getQuestionnaires().stream()
+                    .map(w -> w.getQuestionnaire())
+                    .forEach(q -> q.setBlob(staticSummaryHtml));
+        }
+
         return carePlanModel;
     }
 

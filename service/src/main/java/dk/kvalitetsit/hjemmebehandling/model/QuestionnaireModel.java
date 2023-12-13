@@ -8,6 +8,11 @@ public class QuestionnaireModel extends BaseModel {
     private List<QuestionModel> questions;
     private List<QuestionModel> callToActions;
 
+    /**
+     * Some blob of html specifying summary details associated to the contact of the organisation responsible for the questionnaire
+     */
+    private String blob;
+
     public String getTitle() {
         return title;
     }
@@ -38,5 +43,13 @@ public class QuestionnaireModel extends BaseModel {
 
     public void setCallToActions(List<QuestionModel> callToActions) {
         this.callToActions = callToActions;
+    }
+
+    public String getBlob() {
+        return blob;
+    }
+
+    public void setBlob(String blob) {
+        this.blob = blob;
     }
 }

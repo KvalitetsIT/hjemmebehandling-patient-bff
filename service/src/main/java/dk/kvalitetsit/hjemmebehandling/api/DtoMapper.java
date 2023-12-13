@@ -262,6 +262,7 @@ public class DtoMapper {
         if(questionnaireModel.getQuestions() != null) {
             questionnaireDto.setQuestions(questionnaireModel.getQuestions().stream().map(this::mapQuestionModel).collect(Collectors.toList()));
         }
+        questionnaireDto.setBlob(questionnaireModel.getBlob());
 
         return questionnaireDto;
     }

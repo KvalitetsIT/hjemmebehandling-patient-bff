@@ -46,6 +46,10 @@ public class ExtensionMapper {
         return buildStringExtension(Systems.ORGANISATION_BLOB, blob);
     }
 
+    public static Extension mapQuestionnaireSummaryBlob(String blob) {
+        return buildStringExtension(Systems.QUESTIONNAIRE_SUMMARY_BLOB, blob);
+    }
+
 
     public static Extension mapPhoneHours(PhoneHourModel phoneHours) {
         List<Extension> extensions = new ArrayList<>();

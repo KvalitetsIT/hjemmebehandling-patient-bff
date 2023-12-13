@@ -7,6 +7,11 @@ public class QuestionnaireDto extends BaseDto {
     private String status;
     private List<QuestionDto> questions;
 
+    /**
+     * Some blob of html specifying the phone hours and other details associated to the contact of the organisation
+     */
+    private String blob;
+
     public String getTitle() {
         return title;
     }
@@ -29,5 +34,13 @@ public class QuestionnaireDto extends BaseDto {
 
     public void setQuestions(List<QuestionDto> questions) {
         this.questions = questions;
+    }
+
+    public String getBlob() {
+        return blob;
+    }
+
+    public void setBlob(String blob) {
+        this.blob = blob;
     }
 }
