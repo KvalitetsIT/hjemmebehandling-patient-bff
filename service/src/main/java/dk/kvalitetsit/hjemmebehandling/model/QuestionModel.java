@@ -15,7 +15,7 @@ public class QuestionModel {
     private List<String> options;
     private String helperText;
     private List<EnableWhen> enableWhens;
-
+    private List<QuestionModel> subQuestions;
     private boolean deprecated;
 
     public boolean isDeprecated() {
@@ -96,6 +96,14 @@ public class QuestionModel {
 
     public void setAbbreviation(String abbreviation) {
         this.abbreviation = abbreviation;
+    }
+
+    public List<QuestionModel> getSubQuestions() {
+        return subQuestions;
+    }
+
+    public void setSubQuestions(List<QuestionModel> subQuestions) {
+        this.subQuestions = subQuestions;
     }
 
     public static class EnableWhen {

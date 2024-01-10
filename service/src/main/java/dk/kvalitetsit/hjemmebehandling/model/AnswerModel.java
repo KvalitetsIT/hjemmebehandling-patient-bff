@@ -1,13 +1,17 @@
 package dk.kvalitetsit.hjemmebehandling.model;
 
+import dk.kvalitetsit.hjemmebehandling.api.AnswerDto;
 import dk.kvalitetsit.hjemmebehandling.constants.AnswerType;
+import dk.kvalitetsit.hjemmebehandling.constants.TriagingCategory;
 
+import java.util.List;
 import java.util.Objects;
 
 public class AnswerModel {
     private String linkId;
     private String value;
     private AnswerType answerType;
+    private List<AnswerModel> subAnswers;
 
     public String getLinkId() {
         return linkId;
@@ -31,6 +35,14 @@ public class AnswerModel {
 
     public void setAnswerType(AnswerType answerType) {
         this.answerType = answerType;
+    }
+
+    public List<AnswerModel> getSubAnswers() {
+        return subAnswers;
+    }
+
+    public void setSubAnswers(List<AnswerModel> subAnswers) {
+        this.subAnswers = subAnswers;
     }
 
     @Override

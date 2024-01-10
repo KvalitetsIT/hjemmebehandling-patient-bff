@@ -16,7 +16,7 @@ public class QuestionDto {
     private List<QuestionModel.EnableWhen> enableWhens;
 
     private MeasurementTypeDto measurementType;
-
+    private List<QuestionDto> subQuestions;
     private boolean deprecated;
 
     public boolean isDeprecated() {
@@ -101,5 +101,13 @@ public class QuestionDto {
 
     public void setMeasurementType(MeasurementTypeDto measurementType) {
         this.measurementType = measurementType;
+    }
+
+    public List<QuestionDto> getSubQuestions() {
+        return subQuestions;
+    }
+
+    public void setSubQuestions(List<QuestionDto> subQuestions) {
+        this.subQuestions = subQuestions;
     }
 }

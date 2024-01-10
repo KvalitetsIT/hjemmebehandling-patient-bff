@@ -1,6 +1,8 @@
 package dk.kvalitetsit.hjemmebehandling.api;
 
+import dk.kvalitetsit.hjemmebehandling.constants.AnswerType;
 import dk.kvalitetsit.hjemmebehandling.constants.CarePlanStatus;
+import dk.kvalitetsit.hjemmebehandling.constants.QuestionType;
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirUtils;
 import dk.kvalitetsit.hjemmebehandling.model.*;
 import dk.kvalitetsit.hjemmebehandling.model.AnswerModel;
@@ -398,6 +400,10 @@ public class DtoMapper {
             questionDto.setMeasurementType(mapMeasurementTypeModel(questionModel.getMeasurementType()));
         }
 
+        if (questionModel.getQuestionType() == QuestionType.GROUP && questionModel.getSubQuestions() != null) {
+            questionDto.setSubQuestions(questionModel.getSubQuestions().stream().map(this::mapQuestionModel).collect(Collectors.toList()));
+        }
+
         return questionDto;
     }
 
@@ -422,6 +428,10 @@ public class DtoMapper {
         answerModel.setValue(answerDto.getValue());
         answerModel.setAnswerType(answerDto.getAnswerType());
 
+        if (answerDto.getAnswerType() == AnswerType.GROUP && answerDto.getSubAnswers() != null) {
+            answerModel.setSubAnswers(answerDto.getSubAnswers().stream().map(this::mapAnswerDto).collect(Collectors.toList()));
+        }
+
         return answerModel;
     }
 
@@ -431,6 +441,10 @@ public class DtoMapper {
         answerDto.setLinkId(answerModel.getLinkId());
         answerDto.setValue(answerModel.getValue());
         answerDto.setAnswerType(answerModel.getAnswerType());
+
+        if (answerModel.getAnswerType() == AnswerType.GROUP && answerModel.getSubAnswers() != null) {
+            answerDto.setSubAnswers(answerModel.getSubAnswers().stream().map(this::mapAnswerModel).collect(Collectors.toList()));
+        }
 
         return answerDto;
     }
