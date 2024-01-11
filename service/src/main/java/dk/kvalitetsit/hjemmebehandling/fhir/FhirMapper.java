@@ -219,10 +219,11 @@ public class FhirMapper {
         questionnaireModel.setQuestions(questionnaire.getItem().stream()
                 .filter(q -> !q.getLinkId().equals(Systems.CALL_TO_ACTION_LINK_ID)) // filter out call-to-action's
                 .map(this::mapQuestionnaireItem).collect(Collectors.toList()));
-        questionnaireModel.setCallToActions(questionnaire.getItem().stream()
+        questionnaireModel.setCallToAction(questionnaire.getItem().stream()
                 .filter(q -> q.getLinkId().equals(Systems.CALL_TO_ACTION_LINK_ID)) // process call-to-action's
-                .flatMap(group -> group.getItem().stream())
-                .map(this::mapQuestionnaireItem).collect(Collectors.toList()));
+                .findFirst()
+                .map(this::mapQuestionnaireItem)
+                .orElse(null));
 
         return questionnaireModel;
     }

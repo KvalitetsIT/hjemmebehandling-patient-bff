@@ -6,7 +6,7 @@ public class QuestionnaireModel extends BaseModel {
     private String title;
     private String status;
     private List<QuestionModel> questions;
-    private List<QuestionModel> callToActions;
+    private QuestionModel callToAction;
 
     /**
      * Some blob of html specifying summary details associated to the contact of the organisation responsible for the questionnaire
@@ -37,12 +37,12 @@ public class QuestionnaireModel extends BaseModel {
         this.questions = questions;
     }
 
-    public List<QuestionModel> getCallToActions() {
-        return callToActions;
+    public QuestionModel getCallToAction() {
+        return callToAction;
     }
 
-    public void setCallToActions(List<QuestionModel> callToActions) {
-        this.callToActions = callToActions;
+    public void setCallToAction(QuestionModel callToAction) {
+        this.callToAction = callToAction;
     }
 
     public String getBlob() {

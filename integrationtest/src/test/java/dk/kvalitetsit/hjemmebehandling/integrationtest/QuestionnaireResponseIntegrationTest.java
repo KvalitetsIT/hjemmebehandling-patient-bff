@@ -130,7 +130,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
         // Assert
         assertEquals(201, response.getStatusCode());
         assertTrue(response.getHeaders().containsKey("location"));
-        assertTrue(response.getData().getCallToActions().isEmpty());
+        assertEquals("", response.getData().getCallToAction());
     }
 
     @Test
@@ -169,7 +169,7 @@ public class QuestionnaireResponseIntegrationTest extends AbstractIntegrationTes
         // Assert
         assertEquals(201, response.getStatusCode());
         assertTrue(response.getHeaders().containsKey("location"));
-        assertEquals(1, response.getData().getCallToActions().size());
+        assertNotEquals("", response.getData().getCallToAction());
     }
 
     private AnswerDto buildAnswerDto(String linkId, AnswerDto.AnswerTypeEnum type, String value) {

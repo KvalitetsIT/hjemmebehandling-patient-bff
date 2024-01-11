@@ -123,7 +123,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         return fhirClient.saveQuestionnaireResponse(fhirMapper.mapQuestionnaireResponseModel(questionnaireResponseModel), fhirMapper.mapCarePlanModel(carePlanModel));
     }
 
-    public List<String> getCallToActions(QuestionnaireResponseModel questionnaireResponseModel) throws ServiceException {
+    public String getCallToAction(QuestionnaireResponseModel questionnaireResponseModel) throws ServiceException {
         String questionnaireId = questionnaireResponseModel.getQuestionnaireId().toString();
         var questionnaireResult = fhirClient.lookupQuestionnaires(List.of(questionnaireId));
         if (questionnaireResult.getQuestionnaires().isEmpty()) {
@@ -133,12 +133,10 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         Questionnaire questionnaire = questionnaireResult.getQuestionnaire(questionnaireId).get();
         QuestionnaireModel questionnaireModel = fhirMapper.mapQuestionnaire(questionnaire);
 
-        Set<String> callToActions = new HashSet<>();
+        String callToActionString = "";
         // for call-to-actions:
-        for (QuestionModel callToAction : questionnaireModel.getCallToActions()) {
-            if (callToAction.getEnableWhens() == null) {
-                continue;
-            }
+        QuestionModel callToAction = questionnaireModel.getCallToAction();
+        if (callToAction != null && callToAction.getEnableWhens() != null) {
             // find matchende spørgmål for call-to-actions enableWhen
             for (QuestionModel.EnableWhen enableWhen : callToAction.getEnableWhens()) {
                 // led efter et svar der matcher vores enable-when condition
@@ -148,12 +146,12 @@ public class QuestionnaireResponseService extends AccessValidatingService {
 
                 if (answer.isPresent()) {
                     // vi har et match
-                    callToActions.add(callToAction.getText());
+                    callToActionString = callToAction.getText();
                 }
             }
         }
 
-        return new ArrayList<>(callToActions);
+        return callToActionString;
     }
 
     private void refreshFrequencyTimestamps(CarePlanModel carePlanModel, QualifiedId questionnaireId) {

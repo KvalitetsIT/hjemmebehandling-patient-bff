@@ -1,15 +1,13 @@
 package dk.kvalitetsit.hjemmebehandling.api;
 
-import java.util.List;
-
 public class CallToActionDTO {
-  private List<String> callToActions;
+  private String callToAction;
 
-  public List<String> getCallToActions() {
-    return callToActions;
+  public String getCallToAction() {
+    return callToAction;
   }
 
-  public void setCallToActions(List<String> callToActions) {
-    this.callToActions = callToActions;
+  public void setCallToAction(String callToAction) {
+    this.callToAction = callToAction;
   }
 }

@@ -110,14 +110,14 @@ public class QuestionnaireResponseController extends BaseController {
     @PostMapping(value = "/v1/questionnaireresponse")
     public ResponseEntity<CallToActionDTO> submitQuestionnaireResponse(@RequestBody QuestionnaireResponseDto questionnaireResponseDto) {
         String questionnaireResponseId = null;
-        List<String> callToActions = null;
+        String callToAction = null;
 
         String cpr = userContextProvider.getUserContext().getCpr();
         try {
             QuestionnaireResponseModel questionnaireResponseModel = dtoMapper.mapQuestionnaireResponseDto(questionnaireResponseDto);
             questionnaireResponseId = questionnaireResponseService.submitQuestionnaireResponse(questionnaireResponseModel, cpr);
 
-            callToActions = questionnaireResponseService.getCallToActions(questionnaireResponseModel);
+            callToAction = questionnaireResponseService.getCallToAction(questionnaireResponseModel);
 
         }
         catch(AccessValidationException | ServiceException e) {
@@ -127,7 +127,7 @@ public class QuestionnaireResponseController extends BaseController {
 
         URI location = locationHeaderBuilder.buildLocationHeader(questionnaireResponseId);
         CallToActionDTO responseCallToAction = new CallToActionDTO();
-        responseCallToAction.setCallToActions(callToActions);
+        responseCallToAction.setCallToAction(callToAction);
         return ResponseEntity.created(location).body(responseCallToAction);
     }
 }
