@@ -1,5 +1,6 @@
 package dk.kvalitetsit.hjemmebehandling.service.triage;
 
+import dk.kvalitetsit.hjemmebehandling.constants.AnswerType;
 import dk.kvalitetsit.hjemmebehandling.constants.TriagingCategory;
 import dk.kvalitetsit.hjemmebehandling.model.AnswerModel;
 import dk.kvalitetsit.hjemmebehandling.model.ThresholdModel;
@@ -46,6 +47,11 @@ public class TriageEvaluator {
             if (thresholdsWereFound)
                 categoryForAnswer = evaluateAnswer(answer, thresholdsForAnswer);
             result = mostCriticalCategory(result, categoryForAnswer);
+
+            if (answer.getAnswerType() == AnswerType.GROUP && answer.getSubAnswers() != null) {
+                var subAnswersResult = this.determineTriagingCategory(answer.getSubAnswers(), thresholds);
+                result = mostCriticalCategory(result, subAnswersResult);
+            }
         }
         return result;
     }
