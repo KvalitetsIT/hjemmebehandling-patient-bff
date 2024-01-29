@@ -1,5 +1,6 @@
 package dk.kvalitetsit.hjemmebehandling.fhir;
 
+import dk.kvalitetsit.hjemmebehandling.api.Option;
 import dk.kvalitetsit.hjemmebehandling.constants.*;
 import dk.kvalitetsit.hjemmebehandling.model.*;
 import dk.kvalitetsit.hjemmebehandling.model.AnswerModel;
@@ -640,10 +641,10 @@ public class FhirMapper {
         }
     }
 
-    private List<String> mapOptions(List<Questionnaire.QuestionnaireItemAnswerOptionComponent> optionComponents) {
+    private List<Option> mapOptions(List<Questionnaire.QuestionnaireItemAnswerOptionComponent> optionComponents) {
         return optionComponents
                 .stream()
-                .map(oc -> oc.getValue().primitiveValue())
+                .map(oc -> new Option(oc.getValue().primitiveValue(), ExtensionMapper.extractAnswerOptionComment(oc.getExtension())))
                 .collect(Collectors.toList());
     }
 

@@ -11,7 +11,7 @@ public class QuestionDto {
     private String abbreviation;
     private boolean required;
     private QuestionType questionType;
-    private List<String> options;
+    private List<Option> options;
     private String helperText;
     private List<QuestionModel.EnableWhen> enableWhens;
 
@@ -63,11 +63,11 @@ public class QuestionDto {
         this.questionType = questionType;
     }
 
-    public List<String> getOptions() {
+    public List<Option> getOptions() {
         return options;
     }
 
-    public void setOptions(List<String> options) {
+    public void setOptions(List<Option> options) {
         this.options = options;
     }
 

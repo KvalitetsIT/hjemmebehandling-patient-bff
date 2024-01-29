@@ -33,4 +33,5 @@ public class Systems {
     public static final String QUESTIONNAIRE_SUMMARY_BLOB = "http://hjemmebehandling.rm.dk/questionnaire-summary-blob";
 
 
+    public static final String ANSWER_OPTION_COMMENT = "http://hjemmebehandling.rm.dk/answer-option-comment";
 }

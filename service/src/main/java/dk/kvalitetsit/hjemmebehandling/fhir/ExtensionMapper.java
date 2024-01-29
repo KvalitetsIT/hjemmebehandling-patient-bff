@@ -257,4 +257,8 @@ public class ExtensionMapper {
         }
         return Optional.empty();
     }
+
+    public static String extractAnswerOptionComment(List<Extension> extensions) {
+        return extractStringFromExtensions(extensions, Systems.ANSWER_OPTION_COMMENT);
+    }
 }
