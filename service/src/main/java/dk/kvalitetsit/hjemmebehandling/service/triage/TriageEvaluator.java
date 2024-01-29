@@ -77,6 +77,9 @@ public class TriageEvaluator {
                 case QUANTITY:
                     answerCoveredByThreshold = evaluateQuantityAnswer(answer, threshold);
                     break;
+                case STRING:
+                    answerCoveredByThreshold = evaluateStringAnswer(answer, threshold);
+                    break;
                 default:
                     throw new IllegalArgumentException(String.format("Don't know how to handle AnswerType %s!", answer.getAnswerType().toString()));
             }
@@ -86,6 +89,17 @@ public class TriageEvaluator {
             }
         }
         return TriagingCategory.RED;
+    }
+
+    private boolean evaluateStringAnswer(AnswerModel answer, ThresholdModel threshold) {
+        if (answer.getValue() == null || "".equals(answer.getValue())) {
+            throw new IllegalArgumentException(String.format("Could not evaluate string answer for linkId %s: Value is empty.", answer.getLinkId(), answer.getValue()));
+        }
+        if (threshold.getValueOption() == null) {
+            throw new IllegalStateException(String.format("Could not evaluate string answer for linkId %s: Threshold did not contain a string value.", answer.getLinkId()));
+        }
+
+        return threshold.getValueOption().equals(answer.getValue());
     }
 
     private boolean evaluateBooleanAnswer(AnswerModel answer, ThresholdModel threshold) {

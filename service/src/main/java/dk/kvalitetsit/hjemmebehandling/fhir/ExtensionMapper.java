@@ -161,6 +161,10 @@ public class ExtensionMapper {
                 thresholdModel.setValueQuantityHigh( valueRange.getHigh().getValue().doubleValue() );
             }
         }
+        if ( extension.hasExtension(Systems.THRESHOLD_VALUE_OPTION) ) {
+            StringType valueOption = (StringType) extension.getExtensionByUrl(Systems.THRESHOLD_VALUE_OPTION).getValue();
+            thresholdModel.setValueOption( valueOption.getValue() );
+        }
 
         return thresholdModel;
     }

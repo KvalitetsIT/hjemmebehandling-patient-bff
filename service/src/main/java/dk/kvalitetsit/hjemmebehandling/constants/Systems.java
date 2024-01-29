@@ -18,6 +18,7 @@ public class Systems {
     public static final String THRESHOLD_TYPE = "http://hjemmebehandling.rm.dk/threshold-type";
     public static final String THRESHOLD_VALUE_RANGE = "http://hjemmebehandling.rm.dk/threshold-value-range";
     public static final String THRESHOLD_VALUE_BOOLEAN = "http://hjemmebehandling.rm.dk/threshold-value-boolean";
+    public static final String THRESHOLD_VALUE_OPTION = "http://hjemmebehandling.rm.dk/threshold-value-option";
 
     public static final String PHONE_HOURS = "http://hjemmebehandling.rm.dk/phone-hours";
     public static final String PHONE_HOURS_WEEKDAY = "http://hjemmebehandling.rm.dk/phone-hours-weekday";
