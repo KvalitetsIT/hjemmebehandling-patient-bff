@@ -38,6 +38,7 @@ public abstract class BaseController {
             case INCOMPLETE_RESPONSE:
                 throw new BadRequestException(e);
             case NO_ACTIVE_CAREPLAN_EXISTS:
+            case QUESTIONNAIRE_DOES_NOT_EXIST:
                 throw new ResourceNotFoundException(e);
             case ACCESS_VIOLATION:
                 throw new ForbiddenException(e);

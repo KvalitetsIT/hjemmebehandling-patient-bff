@@ -113,6 +113,12 @@ public class QuestionnaireResponseService extends AccessValidatingService {
 
         var carePlanModel = fhirMapper.mapCarePlan(careplansWithMatchingId.get(0), carePlanResult);
 
+        // make sure the questionnaire is still active
+        boolean questionnaireExists = carePlanModel.getQuestionnaires().stream().anyMatch(q -> q.getQuestionnaire().getId().equals(questionnaireResponseModel.getQuestionnaireId()));
+        if (!questionnaireExists) {
+            throw new ServiceException("The questionnaire is no longer active", ErrorKind.BAD_REQUEST, ErrorDetails.QUESTIONNAIRE_DOES_NOT_EXIST);
+        }
+
         // Update the frequency timestamps on the careplan (the specific activity and the careplan itself)
         refreshFrequencyTimestamps(carePlanModel, questionnaireResponseModel.getQuestionnaireId());
 
