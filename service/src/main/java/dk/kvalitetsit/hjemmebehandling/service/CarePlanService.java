@@ -30,7 +30,9 @@ public class CarePlanService extends AccessValidatingService {
         FhirLookupResult lookupResult = fhirClient.lookupActiveCarePlans(cpr);
         List<CarePlan> carePlans = lookupResult.getCarePlans();
 
-        validateCorrectSubject(lookupResult);
+        if (!carePlans.isEmpty()) {
+            validateCorrectSubject(lookupResult);
+        }
         return carePlans.stream().map((carePlan) -> fhirMapper.mapCarePlan(carePlan, lookupResult)).collect(Collectors.toList());
     }
 }

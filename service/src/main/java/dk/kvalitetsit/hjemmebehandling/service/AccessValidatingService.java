@@ -16,12 +16,9 @@ public abstract class AccessValidatingService {
 
     protected void validateCorrectSubject(FhirLookupResult lookupResult) throws AccessValidationException {
         // Validate that the user is allowed to retrieve the resource (ie. exactly one Patient-resource was retrieved, and the current user is allowed to access it).
-        /*
         if(lookupResult.getPatients().size() != 1) {
             throw new IllegalStateException(String.format("Expected to look up exactly one patient when retrieving resource, got %d.", lookupResult.getPatients().size()));
         }
-        */
-
         validateAccess(lookupResult.getPatients().get(0));
     }
 
