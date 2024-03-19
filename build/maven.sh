@@ -9,7 +9,7 @@ if [ -d $SRC_FOLDER ]; then
   cd $SRC_FOLDER
 
   # Build the bff service
-  mvn clean install
+  mvn clean install -s settings.xml
 
   # Start the hapi server
 
