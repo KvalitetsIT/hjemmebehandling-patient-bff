@@ -1,7 +1,7 @@
 package dk.kvalitetsit.hjemmebehandling.context;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirClient;
 import org.springframework.web.servlet.HandlerInterceptor;
