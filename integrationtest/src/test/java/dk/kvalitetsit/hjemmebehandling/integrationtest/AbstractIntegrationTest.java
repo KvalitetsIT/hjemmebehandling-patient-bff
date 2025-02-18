@@ -7,7 +7,8 @@ public abstract class AbstractIntegrationTest {
     private static String exposedServicePort = "8080";
 
     @BeforeAll
-    public static void setupEnvironment() throws Exception {
+    public static void
+    setupEnvironment() throws Exception {
         System.out.print("Inside AbstractIntegrationTest.setupEnvironment");
 
         if(System.getProperty("patient-bff-host") != null) {

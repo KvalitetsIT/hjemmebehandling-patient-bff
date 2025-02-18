@@ -1,4 +1,3 @@
-version: '2.1'
 services:
   patient-bff:
     image: kvalitetsit/hjemmebehandling-patient-bff:latest
@@ -17,8 +16,6 @@ services:
       - userrole_monitor_values=monitorrole
       - userrole_provisioner_values=provisionerrole
       - JVM_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
-    networks:
-      - hjemmebehandling_patient
 
   hapi-server:
     image: kvalitetsit/hjemmebehandling-hapi-fhir-server:dev
@@ -26,6 +23,9 @@ services:
       - spring.datasource.url=jdbc:postgresql://postgres:5432/hapi
       - spring.datasource.username=hapi
       - spring.datasource.password=hapi
+    ports:
+      - 8082:8080
+      - 8083:8081
     depends_on:
       - postgres
     healthcheck:
@@ -35,9 +35,6 @@ services:
       retries: 3
       start_period: 40s
 
-    networks:
-      - hjemmebehandling_patient
-
   hapi-server-initializer:
     image: kvalitetsit/hjemmebehandling-data-initializer:latest
     depends_on:
@@ -45,8 +42,7 @@ services:
         condition: service_healthy
     environment:
       - init_test_data=true
-    networks:
-      - hjemmebehandling_patient
+      - init_questionnaire_and_plandefinition_infektionsmedicinsk=true
 
   postgres:
     image: postgres:16-alpine
@@ -55,11 +51,5 @@ services:
       - POSTGRES_PASSWORD=hapi
       - POSTGRES_ROOT_PASSWORD=hapi
       - POSTGRES_DATABASE=hapi
-    networks:
-      - hjemmebehandling_patient
     ports:
       - 5432:5432
-
-networks:
-  hjemmebehandling_patient:
-    driver: bridge
