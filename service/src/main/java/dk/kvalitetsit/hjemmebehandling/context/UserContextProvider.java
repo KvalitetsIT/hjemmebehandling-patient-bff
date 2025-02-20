@@ -3,7 +3,7 @@ package dk.kvalitetsit.hjemmebehandling.context;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 @Component
 @RequestScope
