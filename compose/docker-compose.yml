@@ -18,7 +18,7 @@ services:
       - JVM_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
 
   hapi-server:
-    image: kvalitetsit/hjemmebehandling-hapi-fhir-server:dev
+    image: kvalitetsit/hjemmebehandling-hapi-fhir-server:a321e0eb5f8b3249ff1c76cc98f94fabf7494b69
     environment:
       - spring.datasource.url=jdbc:postgresql://postgres:5432/hapi
       - spring.datasource.username=hapi
