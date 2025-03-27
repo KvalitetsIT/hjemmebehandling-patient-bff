@@ -1,5 +1,7 @@
 package dk.kvalitetsit.hjemmebehandling.api;
 
+import org.openapitools.model.ThresholdDto;
+
 import java.util.ArrayList;
 import java.util.List;
 

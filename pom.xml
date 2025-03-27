@@ -160,6 +160,12 @@
 				<version>0.2.6</version>
 			</dependency>
 
+			<dependency>
+				<groupId>dk.kvalitetsit.hjemmebehandling-patient-bff</groupId>
+				<artifactId>documentation</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 

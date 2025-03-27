@@ -39,7 +39,8 @@ public class PatientController extends BaseController {
         var cpr = userContextProvider.getUserContext().getCpr();
 
         try {
-            return ResponseEntity.ok(dtoMapper.mapPatientModel(patientService.getPatient(cpr)));
+            // TODO: handle 'Optional.get()' without 'isPresent()' check
+            return ResponseEntity.ok(dtoMapper.mapPatientModel(patientService.getPatient(cpr.get())));
         } catch(ServiceException e) {
             logger.error("Could not retrieve patient", e);
             throw toStatusCodeException(e);

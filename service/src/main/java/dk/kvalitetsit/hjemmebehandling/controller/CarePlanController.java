@@ -38,7 +38,9 @@ public class CarePlanController extends BaseController {
 
     @GetMapping(value = "/v1/careplans/active")
     public ResponseEntity<List<CarePlanDto>> getActiveCarePlans() {
-        String cpr = userContextProvider.getUserContext().getCpr();
+
+        // TODO: handle 'Optional.get()' without 'isPresent()' check
+        String cpr = userContextProvider.getUserContext().getCpr().get();
 
         if(cpr == null || cpr.isEmpty()) {
             throw new BadRequestException(ErrorDetails.MISSING_CONTEXT);

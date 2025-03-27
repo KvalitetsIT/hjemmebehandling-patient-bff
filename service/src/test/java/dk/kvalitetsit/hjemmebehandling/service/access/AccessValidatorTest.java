@@ -1,39 +1,34 @@
 package dk.kvalitetsit.hjemmebehandling.service.access;
 
 import dk.kvalitetsit.hjemmebehandling.constants.Systems;
-import dk.kvalitetsit.hjemmebehandling.context.UserContext;
 import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirClient;
 import dk.kvalitetsit.hjemmebehandling.service.exception.AccessValidationException;
-import org.hl7.fhir.r4.model.*;
-import org.junit.jupiter.api.Disabled;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openapitools.model.UserContext;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class AccessValidatorTest {
-    @InjectMocks
-    private AccessValidator subject;
-
-    @Mock
-    private UserContextProvider userContextProvider;
-
-    @Mock
-    private FhirClient fhirClient;
-
     private final String PATIENT_ID_1 = "Patient/patient-1";
-
     private final String CPR_1 = "0101010101";
     private final String CPR_2 = "0202020202";
+    @InjectMocks
+    private AccessValidator subject;
+    @Mock
+    private UserContextProvider userContextProvider;
+    @Mock
+    private FhirClient fhirClient;
 
     @Test
     public void validateAccess_unknownResourceType() {
@@ -96,10 +91,6 @@ public class AccessValidatorTest {
     }
 
     private UserContext buildContext(String cpr) {
-        UserContext context = new UserContext();
-
-        context.setCpr(cpr);
-
-        return context;
+        return new UserContext().cpr(cpr);
     }
 }

@@ -2,6 +2,7 @@ package dk.kvalitetsit.hjemmebehandling.api;
 
 import dk.kvalitetsit.hjemmebehandling.constants.QuestionType;
 import dk.kvalitetsit.hjemmebehandling.model.QuestionModel;
+import org.openapitools.model.MeasurementTypeDto;
 
 import java.util.List;
 

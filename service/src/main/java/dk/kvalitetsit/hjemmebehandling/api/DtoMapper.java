@@ -5,13 +5,15 @@ import dk.kvalitetsit.hjemmebehandling.constants.CarePlanStatus;
 import dk.kvalitetsit.hjemmebehandling.constants.QuestionType;
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirUtils;
 import dk.kvalitetsit.hjemmebehandling.model.*;
-import dk.kvalitetsit.hjemmebehandling.model.AnswerModel;
-import dk.kvalitetsit.hjemmebehandling.model.QuestionModel;
+import dk.kvalitetsit.hjemmebehandling.types.ThresholdType;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.openapitools.model.MeasurementTypeDto;
+import org.openapitools.model.ThresholdDto;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -22,7 +24,7 @@ public class DtoMapper {
         mapBaseAttributesToModel(carePlanModel, carePlanDto, ResourceType.CarePlan);
 
         carePlanModel.setTitle(carePlanDto.getTitle());
-        if(carePlanDto.getStatus() != null) {
+        if (carePlanDto.getStatus() != null) {
             carePlanModel.setStatus(Enum.valueOf(CarePlanStatus.class, carePlanDto.getStatus()));
         }
         carePlanModel.setCreated(carePlanDto.getCreated());
@@ -30,11 +32,11 @@ public class DtoMapper {
         carePlanModel.setEndDate(carePlanDto.getEndDate());
         carePlanModel.setPatient(mapPatientDto(carePlanDto.getPatientDto()));
         carePlanModel.setQuestionnaires(List.of());
-        if(carePlanDto.getQuestionnaires() != null) {
+        if (carePlanDto.getQuestionnaires() != null) {
             carePlanModel.setQuestionnaires(carePlanDto.getQuestionnaires().stream().map(this::mapQuestionnaireWrapperDto).collect(Collectors.toList()));
         }
         carePlanModel.setPlanDefinitions(List.of());
-        if(carePlanDto.getPlanDefinitions() != null) {
+        if (carePlanDto.getPlanDefinitions() != null) {
             carePlanModel.setPlanDefinitions(carePlanDto.getPlanDefinitions().stream().map(this::mapPlanDefinitionDto).collect(Collectors.toList()));
         }
         carePlanModel.setDepartmentName(carePlanDto.getDepartmentName());
@@ -73,7 +75,7 @@ public class DtoMapper {
         FrequencyDto frequencyDto = new FrequencyDto();
 
         frequencyDto.setWeekdays(frequencyModel.getWeekdays());
-        if(frequencyModel.getTimeOfDay() != null)
+        if (frequencyModel.getTimeOfDay() != null)
             frequencyDto.setTimeOfDay(frequencyModel.getTimeOfDay().toString());
 
         return frequencyDto;
@@ -86,7 +88,7 @@ public class DtoMapper {
 
         organizationModel.setContactDetails(mapContactDetailsDto(organizationDto.getContactDetails()));
 
-        if(organizationDto.getPhoneHours() != null) {
+        if (organizationDto.getPhoneHours() != null) {
             organizationModel.setPhoneHours(organizationDto.getPhoneHours()
                     .stream()
                     .map(ph -> {
@@ -113,7 +115,7 @@ public class DtoMapper {
         organizationDto.setBlob(organizationModel.getBlob());
         organizationDto.setContactDetails(mapContactDetailsModel(organizationModel.getContactDetails()));
 
-        if(organizationModel.getPhoneHours() != null) {
+        if (organizationModel.getPhoneHours() != null) {
             organizationDto.setPhoneHours(organizationModel.getPhoneHours()
                     .stream()
                     .map(ph -> {
@@ -134,7 +136,7 @@ public class DtoMapper {
         patientModel.setCpr(patient.getCpr());
         patientModel.setFamilyName(patient.getFamilyName());
         patientModel.setGivenName(patient.getGivenName());
-        if(patient.getContactsDetails() != null) {
+        if (patient.getContactsDetails() != null) {
             patientModel.setContactDetails(mapContactDetailsDto(patient.getContactsDetails()));
         }
         patientModel.setContacts(mapPrimaryContactDtos(patient.getPrimaryContacts()));
@@ -152,7 +154,7 @@ public class DtoMapper {
         model.setOrganisation(contact.getOrganization());
         model.setAffiliation(contact.getAffiliation());
         model.setName(contact.getName());
-        if(contact.getContactDetails() != null) {
+        if (contact.getContactDetails() != null) {
             model.setContactDetails(mapContactDetailsDto(contact.getContactDetails()));
         }
 
@@ -166,22 +168,25 @@ public class DtoMapper {
         patientDto.setFamilyName(patient.getFamilyName());
         patientDto.setGivenName(patient.getGivenName());
         // patientDto.setCustomUserName(patient.getCustomUserName());
-        if(patient.getContactDetails() != null) {
+        if (patient.getContactDetails() != null) {
             patientDto.setContactsDetails(mapContactDetailsModel(patient.getContactDetails()));
         }
-        patientDto.setPrimaryContacts(mapPrimaryContactModels(patient.getContacts()));;
+        patientDto.setPrimaryContacts(mapPrimaryContactModels(patient.getContacts()));
+        ;
         return patientDto;
     }
 
     private List<PrimaryContactDto> mapPrimaryContactModels(List<PrimaryContactModel> contacts) {
         return contacts.stream().map(this::mapPrimaryContactModel).collect(Collectors.toList());
     }
+
     private PrimaryContactDto mapPrimaryContactModel(PrimaryContactModel contact) {
         PrimaryContactDto dto = new PrimaryContactDto();
         dto.setName(contact.getName());
         dto.setAffiliation(contact.getAffiliation());
         dto.setOrganization(contact.getOrganisation());
-        if (contact.getContactDetails() != null) dto.setContactDetails(mapContactDetailsModel(contact.getContactDetails()));
+        if (contact.getContactDetails() != null)
+            dto.setContactDetails(mapContactDetailsModel(contact.getContactDetails()));
         return dto;
     }
 
@@ -193,7 +198,7 @@ public class DtoMapper {
         planDefinitionModel.setName(planDefinitionDto.getName());
         planDefinitionModel.setTitle(planDefinitionDto.getTitle());
         // TODO - planDefinitionModel.getQuestionnaires() should never return null - but it can for now.
-        if(planDefinitionDto.getQuestionnaires() != null) {
+        if (planDefinitionDto.getQuestionnaires() != null) {
             planDefinitionModel.setQuestionnaires(planDefinitionDto.getQuestionnaires().stream().map(this::mapQuestionnaireWrapperDto).collect(Collectors.toList()));
         }
 
@@ -208,7 +213,7 @@ public class DtoMapper {
         planDefinitionDto.setName(planDefinitionModel.getName());
         planDefinitionDto.setTitle(planDefinitionModel.getTitle());
         // TODO - planDefinitionModel.getQuestionnaires() should never return null - but it can for now.
-        if(planDefinitionModel.getQuestionnaires() != null) {
+        if (planDefinitionModel.getQuestionnaires() != null) {
             planDefinitionDto.setQuestionnaires(planDefinitionModel.getQuestionnaires().stream().map(this::mapQuestionnaireWrapperModel).collect(Collectors.toList()));
         }
 
@@ -217,27 +222,40 @@ public class DtoMapper {
 
     public ThresholdModel mapThresholdDto(ThresholdDto thresholdDto) {
         ThresholdModel thresholdModel = new ThresholdModel();
-
-        thresholdModel.setQuestionnaireItemLinkId(thresholdDto.getQuestionId());
-        thresholdModel.setType(thresholdDto.getType());
-        thresholdModel.setValueBoolean(thresholdDto.getValueBoolean());
-        thresholdModel.setValueQuantityLow(thresholdDto.getValueQuantityLow());
-        thresholdModel.setValueQuantityHigh(thresholdDto.getValueQuantityHigh());
-
+        thresholdDto.getQuestionId().ifPresent(thresholdModel::setQuestionnaireItemLinkId);
+        thresholdDto.getType().map(this::mapThresholdTypeDto).ifPresent(thresholdModel::setType);
+        thresholdDto.getValueBoolean().ifPresent(thresholdModel::setValueBoolean);
+        thresholdDto.getValueQuantityLow().ifPresent(thresholdModel::setValueQuantityLow);
+        thresholdDto.getValueQuantityHigh().ifPresent(thresholdModel::setValueQuantityHigh);
         return thresholdModel;
     }
 
-    public ThresholdDto mapThresholdModel(ThresholdModel thresholdModel) {
-        ThresholdDto thresholdDto = new ThresholdDto();
+    private ThresholdType mapThresholdTypeDto(ThresholdDto.TypeEnum x) {
+        return switch (x) {
+            case NORMAL -> ThresholdType.NORMAL;
+            case ABNORMAL -> ThresholdType.ABNORMAL;
+            case CRITICAL -> ThresholdType.CRITICAL;
+        };
+    }
 
-        thresholdDto.setQuestionId(thresholdModel.getQuestionnaireItemLinkId());
-        thresholdDto.setConceptCode(thresholdModel.getConceptCode());
-        thresholdDto.setType(thresholdModel.getType());
-        thresholdDto.setValueBoolean(thresholdModel.getValueBoolean());
-        thresholdDto.setValueQuantityLow(thresholdModel.getValueQuantityLow());
-        thresholdDto.setValueQuantityHigh(thresholdModel.getValueQuantityHigh());
+    public ThresholdDto mapThresholdModel(ThresholdModel thresholdModel) {
+        ThresholdDto thresholdDto = new ThresholdDto()
+                .questionId(thresholdModel.getQuestionnaireItemLinkId())
+                .conceptCode(thresholdModel.getConceptCode())
+                .type(mapThresholdTypeModel(thresholdModel.getType()))
+    .valueBoolean(thresholdModel.getValueBoolean())
+    .valueQuantityLow(thresholdModel.getValueQuantityLow())
+    .valueQuantityHigh(thresholdModel.getValueQuantityHigh());
 
         return thresholdDto;
+    }
+
+    private ThresholdDto.TypeEnum mapThresholdTypeModel(ThresholdType type) {
+        return switch (type){
+            case NORMAL -> ThresholdDto.TypeEnum.NORMAL;
+            case ABNORMAL -> ThresholdDto.TypeEnum.ABNORMAL;
+            case CRITICAL -> ThresholdDto.TypeEnum.CRITICAL;
+        };
     }
 
     public QuestionnaireModel mapQuestionnaireDto(QuestionnaireDto questionnaireDto) {
@@ -247,7 +265,7 @@ public class DtoMapper {
 
         questionnaireModel.setTitle(questionnaireDto.getTitle());
         questionnaireModel.setStatus(questionnaireDto.getStatus());
-        if(questionnaireDto.getQuestions() != null) {
+        if (questionnaireDto.getQuestions() != null) {
             questionnaireModel.setQuestions(questionnaireDto.getQuestions().stream().map(this::mapQuestionDto).collect(Collectors.toList()));
         }
 
@@ -261,7 +279,7 @@ public class DtoMapper {
 
         questionnaireDto.setTitle(questionnaireModel.getTitle());
         questionnaireDto.setStatus(questionnaireModel.getStatus());
-        if(questionnaireModel.getQuestions() != null) {
+        if (questionnaireModel.getQuestions() != null) {
             questionnaireDto.setQuestions(questionnaireModel.getQuestions().stream().map(this::mapQuestionModel).collect(Collectors.toList()));
         }
         questionnaireDto.setBlob(questionnaireModel.getBlob());
@@ -300,7 +318,7 @@ public class DtoMapper {
     }
 
     private void mapBaseAttributesToModel(BaseModel target, BaseDto source, ResourceType resourceType) {
-        if(source.getId() == null) {
+        if (source.getId() == null) {
             // OK, in case a resource is being created.
             return;
         }
@@ -309,13 +327,11 @@ public class DtoMapper {
     }
 
     private QualifiedId toQualifiedId(String id, ResourceType resourceType) {
-        if(FhirUtils.isPlainId(id)) {
+        if (FhirUtils.isPlainId(id)) {
             return new QualifiedId(id, resourceType);
-        }
-        else if(FhirUtils.isQualifiedId(id, resourceType)) {
+        } else if (FhirUtils.isQualifiedId(id, resourceType)) {
             return new QualifiedId(id);
-        }
-        else {
+        } else {
             throw new IllegalArgumentException(String.format("Illegal id provided for resource of type %s: %s!", resourceType.toString(), id));
         }
     }
@@ -396,7 +412,7 @@ public class DtoMapper {
         questionDto.setQuestionType(questionModel.getQuestionType());
         questionDto.setEnableWhens(questionModel.getEnableWhens());
 
-        if (questionModel.getMeasurementType() != null){
+        if (questionModel.getMeasurementType() != null) {
             questionDto.setMeasurementType(mapMeasurementTypeModel(questionModel.getMeasurementType()));
         }
 
@@ -408,15 +424,14 @@ public class DtoMapper {
     }
 
     public MeasurementTypeDto mapMeasurementTypeModel(MeasurementTypeModel measurementTypeModel) {
-        MeasurementTypeDto measurementTypeDto = new MeasurementTypeDto();
+        MeasurementTypeDto measurementTypeDto = new MeasurementTypeDto()
+                .system(measurementTypeModel.getSystem())
+                .code(measurementTypeModel.getCode())
+                .display(measurementTypeModel.getDisplay());
 
-        measurementTypeDto.setSystem(measurementTypeModel.getSystem());
-        measurementTypeDto.setCode(measurementTypeModel.getCode());
-        measurementTypeDto.setDisplay(measurementTypeModel.getDisplay());
 
-        if (measurementTypeModel.getThreshold() != null) {
-            measurementTypeDto.setThreshold(mapThresholdModel(measurementTypeModel.getThreshold()));
-        }
+        measurementTypeDto.setThreshold(Optional.ofNullable(measurementTypeModel.getThreshold()).map(this::mapThresholdModel));
+
 
         return measurementTypeDto;
     }
@@ -454,7 +469,7 @@ public class DtoMapper {
 
         questionnaireWrapperModel.setQuestionnaire(mapQuestionnaireDto(questionnaireWrapper.getQuestionnaire()));
         questionnaireWrapperModel.setFrequency(mapFrequencyDto(questionnaireWrapper.getFrequency()));
-        questionnaireWrapperModel.setThresholds( questionnaireWrapper.getThresholds().stream().map(this::mapThresholdDto).collect(Collectors.toList()) );
+        questionnaireWrapperModel.setThresholds(questionnaireWrapper.getThresholds().stream().map(this::mapThresholdDto).collect(Collectors.toList()));
 
         return questionnaireWrapperModel;
     }
@@ -464,7 +479,8 @@ public class DtoMapper {
 
         questionnaireWrapperDto.setQuestionnaire(mapQuestionnaireModel(questionnaireWrapper.getQuestionnaire()));
         questionnaireWrapperDto.setFrequency(mapFrequencyModel(questionnaireWrapper.getFrequency()));
-        questionnaireWrapperDto.setThresholds( questionnaireWrapper.getThresholds().stream().map(this::mapThresholdModel).collect(Collectors.toList()) );
+
+        questionnaireWrapperDto.setThresholds(questionnaireWrapper.getThresholds().stream().map(this::mapThresholdModel).collect(Collectors.toList()));
 
         return questionnaireWrapperDto;
     }

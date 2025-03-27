@@ -2,6 +2,7 @@ package dk.kvalitetsit.hjemmebehandling.context;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirClient;
+import org.openapitools.model.UserContext;
 
 public class DIASUserContextHandler implements IUserContextHandler {
 
@@ -12,13 +13,7 @@ public class DIASUserContextHandler implements IUserContextHandler {
 	private static String NAME = "name";
 	
 	public UserContext mapTokenToUser(FhirClient client, DecodedJWT jwt) {
-        var context = new UserContext();
-        
         // for now we only use cpr (the rest of the patientinformation comes from FHIRPatient)
-        context.setCpr(jwt.getClaim(DIASUserContextHandler.CPR) !=null ? jwt.getClaim(DIASUserContextHandler.CPR).asString() : null );
-
-        return context;
-
-
+		return new UserContext().cpr(jwt.getClaim(DIASUserContextHandler.CPR) !=null ? jwt.getClaim(DIASUserContextHandler.CPR).asString() : null );
 	}
 }

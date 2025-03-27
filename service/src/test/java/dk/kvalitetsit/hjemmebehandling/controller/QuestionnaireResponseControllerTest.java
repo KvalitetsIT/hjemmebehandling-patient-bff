@@ -4,7 +4,6 @@ import dk.kvalitetsit.hjemmebehandling.api.CallToActionDTO;
 import dk.kvalitetsit.hjemmebehandling.api.DtoMapper;
 import dk.kvalitetsit.hjemmebehandling.api.QuestionnaireResponseDto;
 import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
-import dk.kvalitetsit.hjemmebehandling.context.UserContext;
 import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.BadRequestException;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.ForbiddenException;
@@ -25,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openapitools.model.UserContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -84,7 +84,7 @@ public class QuestionnaireResponseControllerTest {
         Mockito.when(dtoMapper.mapQuestionnaireResponseModel(responseModel2)).thenReturn(responseDto2);
 
         // Act
-        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId, List.of(questionnaireId),pageNumber, pageSize);
+        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesByCarePlanId(carePlanId, List.of(questionnaireId), pageNumber, pageSize);
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
@@ -92,8 +92,6 @@ public class QuestionnaireResponseControllerTest {
         assertTrue(result.getBody().contains(responseDto1));
         assertTrue(result.getBody().contains(responseDto2));
     }
-
-
 
 
     @Test
@@ -109,7 +107,7 @@ public class QuestionnaireResponseControllerTest {
         QuestionnaireResponseModel responseModel2 = new QuestionnaireResponseModel();
 
         responseModel1.setCarePlanId(new QualifiedId("CarePlan/" + carePlanIds.get(0)));
-        responseModel2.setCarePlanId(new QualifiedId("CarePlan/" +carePlanIds.get(1)));
+        responseModel2.setCarePlanId(new QualifiedId("CarePlan/" + carePlanIds.get(1)));
 
         QuestionnaireResponseDto responseDto1 = new QuestionnaireResponseDto();
         QuestionnaireResponseDto responseDto2 = new QuestionnaireResponseDto();
@@ -121,7 +119,7 @@ public class QuestionnaireResponseControllerTest {
         Mockito.when(dtoMapper.mapQuestionnaireResponseModel(responseModel2)).thenReturn(responseDto2);
 
         // Act
-        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesForMultipleCarePlans(carePlanIds,questionnaireId,pageNumber, pageSize);
+        ResponseEntity<List<QuestionnaireResponseDto>> result = subject.getQuestionnaireResponsesForMultipleCarePlans(carePlanIds, questionnaireId, pageNumber, pageSize);
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
@@ -136,13 +134,13 @@ public class QuestionnaireResponseControllerTest {
         List<String> carePlanIds = List.of("careplan-1", "careplan-2");
         List<String> questionnaireId = List.of("questionnaire-1", "questionnaire-2");
 
-        int pageNumber =1;
-        int pageSize =10;
+        int pageNumber = 1;
+        int pageSize = 10;
         PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
         Mockito.when(questionnaireResponseService.getQuestionnaireResponsesForMultipleCarePlans(carePlanIds, questionnaireId, pageDetails)).thenThrow(AccessValidationException.class);
 
         // Act + Assert
-        assertThrows(ForbiddenException.class, () -> subject.getQuestionnaireResponsesForMultipleCarePlans(carePlanIds,  questionnaireId,pageNumber, pageSize));
+        assertThrows(ForbiddenException.class, () -> subject.getQuestionnaireResponsesForMultipleCarePlans(carePlanIds, questionnaireId, pageNumber, pageSize));
     }
 
     @Test
@@ -151,15 +149,15 @@ public class QuestionnaireResponseControllerTest {
         String carePlanId = "careplan-1";
         String questionnaireId = "questionnaire-1";
 
-        int pageNumber =1;
-        int pageSize =10;
+        int pageNumber = 1;
+        int pageSize = 10;
         PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
         Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId, List.of(questionnaireId), pageDetails)).thenThrow(AccessValidationException.class);
 
         // Act
 
         // Assert
-        assertThrows(ForbiddenException.class, () -> subject.getQuestionnaireResponsesByCarePlanId(carePlanId,  List.of(questionnaireId),pageNumber, pageSize));
+        assertThrows(ForbiddenException.class, () -> subject.getQuestionnaireResponsesByCarePlanId(carePlanId, List.of(questionnaireId), pageNumber, pageSize));
     }
 
     @Test
@@ -171,12 +169,12 @@ public class QuestionnaireResponseControllerTest {
         int pageSize = 10;
 
         PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
-        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId, List.of(questionnaireId),pageDetails)).thenThrow(new ServiceException("error", ErrorKind.INTERNAL_SERVER_ERROR, ErrorDetails.INTERNAL_SERVER_ERROR));
+        Mockito.when(questionnaireResponseService.getQuestionnaireResponses(carePlanId, List.of(questionnaireId), pageDetails)).thenThrow(new ServiceException("error", ErrorKind.INTERNAL_SERVER_ERROR, ErrorDetails.INTERNAL_SERVER_ERROR));
 
         // Act
 
         // Assert
-        assertThrows(InternalServerErrorException.class, () -> subject.getQuestionnaireResponsesByCarePlanId(carePlanId,  List.of(questionnaireId), pageNumber, pageSize));
+        assertThrows(InternalServerErrorException.class, () -> subject.getQuestionnaireResponsesByCarePlanId(carePlanId, List.of(questionnaireId), pageNumber, pageSize));
     }
 
     @Test
@@ -198,8 +196,6 @@ public class QuestionnaireResponseControllerTest {
     }
 
 
-
-
     @Test
     public void getQuestionnaireResponseById_responseMissing_404() throws Exception {
         // Arrange
@@ -212,8 +208,6 @@ public class QuestionnaireResponseControllerTest {
         // Assert
         assertThrows(ResourceNotFoundException.class, () -> subject.getQuestionnaireResponseById(questionnaireResponseId));
     }
-
-
 
 
     @Test
@@ -295,7 +289,7 @@ public class QuestionnaireResponseControllerTest {
         QuestionnaireResponseModel questionnaireResponseModel = new QuestionnaireResponseModel();
         Mockito.when(dtoMapper.mapQuestionnaireResponseDto(questionnaireResponseDto)).thenReturn(questionnaireResponseModel);
 
-        Mockito.when(questionnaireResponseService.submitQuestionnaireResponse(questionnaireResponseModel, cpr)).thenThrow(new ServiceException("error", ErrorKind.BAD_REQUEST, ErrorDetails. INCOMPLETE_RESPONSE));
+        Mockito.when(questionnaireResponseService.submitQuestionnaireResponse(questionnaireResponseModel, cpr)).thenThrow(new ServiceException("error", ErrorKind.BAD_REQUEST, ErrorDetails.INCOMPLETE_RESPONSE));
 
         setupUserContext(cpr);
 
@@ -325,8 +319,8 @@ public class QuestionnaireResponseControllerTest {
     }
 
     private void setupUserContext(String cpr) {
-        var userContext = new UserContext();
-        userContext.setCpr(cpr);
+        var userContext = new UserContext()
+                .cpr(cpr);
         Mockito.when(userContextProvider.getUserContext()).thenReturn(userContext);
     }
 }

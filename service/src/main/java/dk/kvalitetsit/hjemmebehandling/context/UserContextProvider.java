@@ -1,5 +1,6 @@
 package dk.kvalitetsit.hjemmebehandling.context;
 
+import org.openapitools.model.UserContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 

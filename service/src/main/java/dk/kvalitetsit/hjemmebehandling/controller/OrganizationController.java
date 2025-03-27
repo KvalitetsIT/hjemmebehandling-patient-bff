@@ -59,14 +59,14 @@ public class OrganizationController extends BaseController {
 
     @GetMapping(value = "/v1/organizations")
     public ResponseEntity<List<OrganizationDto>> getOrganizations() {
-        String cpr = this.userContextProvider.getUserContext().getCpr();
+        Optional<String> cpr = this.userContextProvider.getUserContext().getCpr();
 
-        if(cpr == null || cpr.isEmpty()) {
+        if(cpr.isEmpty()) {
             throw new BadRequestException(ErrorDetails.MISSING_CONTEXT);
         }
 
         try {
-            return ResponseEntity.ok(organizationService.getOrganizations(cpr)
+            return ResponseEntity.ok(organizationService.getOrganizations(cpr.get())
                     .stream()
                     .map(dtoMapper::mapOrganizationModel)
                     .collect(Collectors.toList())

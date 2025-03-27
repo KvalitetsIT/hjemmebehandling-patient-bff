@@ -31,7 +31,8 @@ public class AccessValidator {
             throw new IllegalStateException("UserContext was not initialized!");
         }
 
-        if(!context.getCpr().equals(patient.getIdentifierFirstRep().getValue())) {
+        // TODO: handle 'Optional.get()' without 'isPresent()' check
+        if(!context.getCpr().get().equals(patient.getIdentifierFirstRep().getValue())) {
             throw new AccessValidationException(String.format("The current user is not allowed to access data belonging to patient %s", patient.getId()));
         }
     }

@@ -111,8 +111,9 @@ public class QuestionnaireResponseController extends BaseController {
     public ResponseEntity<CallToActionDTO> submitQuestionnaireResponse(@RequestBody QuestionnaireResponseDto questionnaireResponseDto) {
         String questionnaireResponseId = null;
         String callToAction = null;
-
-        String cpr = userContextProvider.getUserContext().getCpr();
+        
+        // TODO: handle 'Optional.get()' without 'isPresent()' check
+        String cpr = userContextProvider.getUserContext().getCpr().get();
         try {
             QuestionnaireResponseModel questionnaireResponseModel = dtoMapper.mapQuestionnaireResponseDto(questionnaireResponseDto);
             questionnaireResponseId = questionnaireResponseService.submitQuestionnaireResponse(questionnaireResponseModel, cpr);
