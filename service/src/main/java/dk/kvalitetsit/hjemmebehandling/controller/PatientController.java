@@ -1,9 +1,10 @@
 package dk.kvalitetsit.hjemmebehandling.controller;
 
 import dk.kvalitetsit.hjemmebehandling.api.DtoMapper;
-import dk.kvalitetsit.hjemmebehandling.api.PatientDto;
 import dk.kvalitetsit.hjemmebehandling.service.PatientService;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ServiceException;
+import org.openapitools.api.PatientApi;
+import org.openapitools.model.PatientDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @Tag(name = "Patient", description = "API for retrieving information about the patient.")
-public class PatientController extends BaseController {
+public class PatientController extends BaseController implements PatientApi {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserContextProvider userContextProvider;
@@ -32,9 +33,8 @@ public class PatientController extends BaseController {
         this.dtoMapper = dtoMapper;
     }
 
-
-    @GetMapping(value = "/v1/patient")
-    public @ResponseBody ResponseEntity<PatientDto> getPatient() throws JsonMappingException, JsonProcessingException {
+    @Override
+    public ResponseEntity<PatientDto> getPatient() {
         logger.info("Getting current patient");
         var cpr = userContextProvider.getUserContext().getCpr();
 
@@ -47,5 +47,6 @@ public class PatientController extends BaseController {
         }
 
     }
+
 
 }

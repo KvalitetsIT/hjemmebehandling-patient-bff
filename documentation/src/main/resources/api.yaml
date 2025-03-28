@@ -265,6 +265,8 @@ components:
           type: string
         city:
           type: string
+
+
     AnswerDto:
       type: object
       properties:
@@ -284,25 +286,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AnswerDto'
-    AnswerModel:
-      type: object
-      properties:
-        linkId:
-          type: string
-        value:
-          type: string
-        answerType:
-          type: string
-          enum:
-          - INTEGER
-          - STRING
-          - BOOLEAN
-          - QUANTITY
-          - GROUP
-        subAnswers:
-          type: array
-          items:
-            $ref: '#/components/schemas/AnswerModel'
+
     ContactDetailsDto:
       type: object
       properties:
@@ -314,7 +298,7 @@ components:
       type: object
       properties:
         answer:
-          $ref: '#/components/schemas/AnswerModel'
+          $ref: '#/components/schemas/AnswerDto'
         operator:
           type: string
           enum:
@@ -422,47 +406,59 @@ components:
             $ref: '#/components/schemas/QuestionDto'
         deprecated:
           type: boolean
-    QuestionnaireResponseDto:
+
+    BaseDto:
       required:
-      - id
+        - id
       type: object
       properties:
+        organizationId:
+          type: string
+          description: Id of the resource
+          example: CarePlan/10
         id:
           type: string
           description: Id of the resource
           example: CarePlan/10
-        organizationId:
-          type: string
-        questionnaireId:
-          type: string
-        carePlanId:
-          type: string
-        questionnaireName:
-          type: string
-        questionAnswerPairs:
-          type: array
-          items:
-            $ref: '#/components/schemas/QuestionAnswerPairDto'
-        answered:
-          type: string
-          format: date-time
-        examinationStatus:
-          type: string
-          enum:
-          - NOT_EXAMINED
-          - UNDER_EXAMINATION
-          - EXAMINED
-        examined:
-          type: string
-          format: date-time
-        triagingCategory:
-          type: string
-          enum:
-          - RED
-          - YELLOW
-          - GREEN
-        patient:
-          $ref: '#/components/schemas/PatientDto'
+
+
+    QuestionnaireResponseDto:
+      allOf:
+        - $ref: "#/components/schemas/BaseDto"
+        - type: object
+          properties:
+            organizationId:
+              type: string
+            questionnaireId:
+              type: string
+            carePlanId:
+              type: string
+            questionnaireName:
+              type: string
+            questionAnswerPairs:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuestionAnswerPairDto'
+            answered:
+              type: string
+              format: date-time
+            examinationStatus:
+              type: string
+              enum:
+              - NOT_EXAMINED
+              - UNDER_EXAMINATION
+              - EXAMINED
+            examined:
+              type: string
+              format: date-time
+            triagingCategory:
+              type: string
+              enum:
+              - RED
+              - YELLOW
+              - GREEN
+            patient:
+              $ref: '#/components/schemas/PatientDto'
     ThresholdDto:
       type: object
       properties:
@@ -525,118 +521,107 @@ components:
             $ref: '#/components/schemas/PhoneHourDto'
         blob:
           type: string
+
+
     PhoneHourDto:
       type: object
       properties:
         weekdays:
           type: array
           items:
-            type: string
-            enum:
-            - MON
-            - TUE
-            - WED
-            - THU
-            - FRI
-            - SAT
-            - SUN
+            $ref: '#/components/schemas/WeekDayDto'
         from:
           type: string
         to:
           type: string
+
     CarePlanDto:
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-          description: Id of the resource
-          example: CarePlan/10
-        organizationId:
-          type: string
-        title:
-          type: string
-        status:
-          type: string
-        created:
-          type: string
-          format: date-time
-        startDate:
-          type: string
-          format: date-time
-        endDate:
-          type: string
-          format: date-time
-        patientDto:
-          $ref: '#/components/schemas/PatientDto'
-        questionnaires:
-          type: array
-          items:
-            $ref: '#/components/schemas/QuestionnaireWrapperDto'
-        planDefinitions:
-          type: array
-          items:
-            $ref: '#/components/schemas/PlanDefinitionDto'
-        departmentName:
-          type: string
+      allOf:
+        - $ref:  '#/components/schemas/BaseDto'
+        - type: object
+          properties:
+            organizationId:
+              type: string
+            title:
+              type: string
+            status:
+              type: string
+            created:
+              type: string
+              format: date-time
+            startDate:
+              type: string
+              format: date-time
+            endDate:
+              type: string
+              format: date-time
+            patientDto:
+              $ref: '#/components/schemas/PatientDto'
+            questionnaires:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuestionnaireWrapperDto'
+            planDefinitions:
+              type: array
+              items:
+                $ref: '#/components/schemas/PlanDefinitionDto'
+            departmentName:
+              type: string
     FrequencyDto:
       type: object
       properties:
         weekdays:
           type: array
           items:
-            type: string
-            enum:
-            - MON
-            - TUE
-            - WED
-            - THU
-            - FRI
-            - SAT
-            - SUN
+            $ref: '#/components/schemas/WeekDayDto'
         timeOfDay:
           type: string
+
+    WeekDayDto:
+      type: string
+      enum:
+        - MON
+        - TUE
+        - WED
+        - THU
+        - FRI
+        - SAT
+        - SUN
+
     PlanDefinitionDto:
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-          description: Id of the resource
-          example: CarePlan/10
-        organizationId:
-          type: string
-        name:
-          type: string
-        title:
-          type: string
-        questionnaires:
-          type: array
-          items:
-            $ref: '#/components/schemas/QuestionnaireWrapperDto'
+      allOf:
+        - $ref: '#/components/schemas/BaseDto'
+        - type: object
+          properties:
+            organizationId:
+              type: string
+            name:
+              type: string
+            title:
+              type: string
+            questionnaires:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuestionnaireWrapperDto'
+
     QuestionnaireDto:
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-          description: Id of the resource
-          example: CarePlan/10
-        organizationId:
-          type: string
-        title:
-          type: string
-        status:
-          type: string
-        questions:
-          type: array
-          items:
-            $ref: '#/components/schemas/QuestionDto'
-        blob:
-          type: string
+      allOf:
+        - $ref: '#/components/schemas/BaseDto'
+        - type: object
+          properties:
+            organizationId:
+              type: string
+            title:
+              type: string
+            status:
+              type: string
+            questions:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuestionDto'
+            blob:
+              type: string
+
     QuestionnaireWrapperDto:
       type: object
       properties:

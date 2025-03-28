@@ -3,25 +3,24 @@ package dk.kvalitetsit.hjemmebehandling.api;
 import dk.kvalitetsit.hjemmebehandling.constants.AnswerType;
 import dk.kvalitetsit.hjemmebehandling.constants.CarePlanStatus;
 import dk.kvalitetsit.hjemmebehandling.model.*;
-import dk.kvalitetsit.hjemmebehandling.model.AnswerModel;
-import dk.kvalitetsit.hjemmebehandling.model.QuestionModel;
 import dk.kvalitetsit.hjemmebehandling.types.Weekday;
 import org.junit.jupiter.api.Test;
+import org.openapitools.model.*;
 
 import java.time.LocalTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class DtoMapperTest {
-    private DtoMapper subject = new DtoMapper();
-
     private static final String CAREPLAN_ID_1 = "CarePlan/careplan-1";
     private static final String ORGANIZATION_ID_1 = "Organization/organization-1";
     private static final String PATIENT_ID_1 = "Patient/patient-1";
     private static final String PLANDEFINITION_ID_1 = "PlanDefinition/plandefinition-1";
     private static final String QUESTIONNAIRE_ID_1 = "Questionnaire/questionnaire-1";
     private static final String QUESTIONNAIRERESPONSE_ID_1 = "QuestionnaireResponse/questionnaireresponse-1";
+    private DtoMapper subject = new DtoMapper();
 
     @Test
     public void mapCarePlanDto_success() {
@@ -36,7 +35,7 @@ public class DtoMapperTest {
     }
 
     @Test
-    public void mapFrequencyModel_allValuesAreNull_noErrors(){
+    public void mapFrequencyModel_allValuesAreNull_noErrors() {
         var toMap = new FrequencyModel();
         var result = subject.mapFrequencyModel(toMap);
         assertNotNull(result);
@@ -64,8 +63,8 @@ public class DtoMapperTest {
         OrganizationModel result = subject.mapOrganizationDto(organizationDto);
 
         // Assert
-        assertEquals(organizationDto.getContactDetails().getAddress().getCity(), result.getContactDetails().getAddress().getCity());
-        assertEquals(organizationDto.getContactDetails().getAddress().getPostalCode(), result.getContactDetails().getAddress().getPostalCode());
+        assertEquals(organizationDto.getContactDetails().get().getAddress().get().getCity().get(), result.getContactDetails().getAddress().getCity());
+        assertEquals(organizationDto.getContactDetails().get().getAddress().get().getPostalCode().get(), result.getContactDetails().getAddress().getPostalCode());
     }
 
     @Test
@@ -77,8 +76,8 @@ public class DtoMapperTest {
         OrganizationDto result = subject.mapOrganizationModel(organizationModel);
 
         // Assert
-        assertEquals(organizationModel.getContactDetails().getAddress().getCity(), result.getContactDetails().getAddress().getCity());
-        assertEquals(organizationModel.getContactDetails().getAddress().getPostalCode(), result.getContactDetails().getAddress().getPostalCode());
+        assertEquals(organizationModel.getContactDetails().getAddress().getCity(), result.getContactDetails().get().getAddress().get().getCity().get());
+        assertEquals(organizationModel.getContactDetails().getAddress().getPostalCode(), result.getContactDetails().get().getAddress().get().getPostalCode().get());
     }
 
     @Test
@@ -90,12 +89,12 @@ public class DtoMapperTest {
         PatientModel result = subject.mapPatientDto(patientDto);
 
         // Assert
-        assertEquals(patientDto.getCpr(), result.getCpr());
-        assertEquals(patientDto.getContactsDetails().getAddress().getStreet(), result.getContactDetails().getAddress().getStreet());
-        assertEquals(patientDto.getContactsDetails().getAddress().getCountry(), result.getContactDetails().getAddress().getCountry());
-        assertEquals(patientDto.getContactsDetails().getAddress().getPostalCode(), result.getContactDetails().getAddress().getPostalCode());
-        assertEquals(patientDto.getContactsDetails().getPhone().getPrimary(), result.getContactDetails().getPhone().getPrimary());
-        assertEquals(patientDto.getContactsDetails().getPhone().getSecondary(), result.getContactDetails().getPhone().getSecondary());
+        assertEquals(patientDto.getCpr().get(), result.getCpr());
+        assertEquals(patientDto.getContactsDetails().get().getAddress().get().getStreet().get(), result.getContactDetails().getAddress().getStreet());
+        assertEquals(patientDto.getContactsDetails().get().getAddress().get().getCountry().get(), result.getContactDetails().getAddress().getCountry());
+        assertEquals(patientDto.getContactsDetails().get().getAddress().get().getPostalCode().get(), result.getContactDetails().getAddress().getPostalCode());
+        assertEquals(patientDto.getContactsDetails().get().getPhone().get().getPrimary().get(), result.getContactDetails().getPhone().getPrimary());
+        assertEquals(patientDto.getContactsDetails().get().getPhone().get().getSecondary().get(), result.getContactDetails().getPhone().getSecondary());
     }
 
     @Test
@@ -107,15 +106,13 @@ public class DtoMapperTest {
         PatientDto result = subject.mapPatientModel(patientModel);
 
         // Assert
-        assertEquals(patientModel.getCpr(), result.getCpr());
-        assertEquals(patientModel.getContactDetails().getAddress().getStreet(), result.getContactsDetails().getAddress().getStreet());
-        assertEquals(patientModel.getContactDetails().getAddress().getCountry(), result.getContactsDetails().getAddress().getCountry());
-        assertEquals(patientModel.getContactDetails().getAddress().getPostalCode(), result.getContactsDetails().getAddress().getPostalCode());
-        assertEquals(patientModel.getContactDetails().getPhone().getPrimary(), result.getContactsDetails().getPhone().getPrimary());
-        assertEquals(patientModel.getContactDetails().getPhone().getSecondary(), result.getContactsDetails().getPhone().getSecondary());
-
+        assertEquals(patientModel.getCpr(), result.getCpr().get());
+        assertEquals(patientModel.getContactDetails().getAddress().getStreet(), result.getContactsDetails().get().getAddress().get().getStreet().get());
+        assertEquals(patientModel.getContactDetails().getAddress().getCountry(), result.getContactsDetails().get().getAddress().get().getCountry().get());
+        assertEquals(patientModel.getContactDetails().getAddress().getPostalCode(), result.getContactsDetails().get().getAddress().get().getPostalCode().get());
+        assertEquals(patientModel.getContactDetails().getPhone().getPrimary(), result.getContactsDetails().get().getPhone().get().getPrimary().get());
+        assertEquals(patientModel.getContactDetails().getPhone().getSecondary(), result.getContactsDetails().get().getPhone().get().getSecondary().get());
     }
-
 
 
     @Test
@@ -140,15 +137,12 @@ public class DtoMapperTest {
     }
 
     private CarePlanDto buildCarePlanDto() {
-        CarePlanDto carePlanDto = new CarePlanDto();
-
-        carePlanDto.setId(CAREPLAN_ID_1);
-        carePlanDto.setStatus("ACTIVE");
-        carePlanDto.setPatientDto(buildPatientDto());
-        carePlanDto.setQuestionnaires(List.of(buildQuestionnaireWrapperDto()));
-        carePlanDto.setPlanDefinitions(List.of(buildPlanDefinitionDto()));
-
-        return carePlanDto;
+        return new CarePlanDto()
+                .patientDto(buildPatientDto())
+                .questionnaires(List.of(buildQuestionnaireWrapperDto()))
+                .planDefinitions(List.of(buildPlanDefinitionDto()))
+                .status("ACTIVE")
+                .id(CAREPLAN_ID_1);
     }
 
     private CarePlanModel buildCarePlanModel() {
@@ -162,10 +156,9 @@ public class DtoMapperTest {
 
         return carePlanModel;
     }
+
     private PrimaryContactDto buildPrimaryContactDto() {
-        PrimaryContactDto dto = new PrimaryContactDto();
-        dto.setContactDetails(buildContactDetailsDto());
-        return dto;
+        return new PrimaryContactDto().contactDetails(buildContactDetailsDto());
     }
 
     private PrimaryContactModel buildPrimaryContactModel() {
@@ -176,30 +169,42 @@ public class DtoMapperTest {
 
 
     private ContactDetailsDto buildContactDetailsDto() {
-        ContactDetailsDto contactDetailsDto = new ContactDetailsDto();
-        contactDetailsDto.setAddress(new AddressDto());
-        contactDetailsDto.setPhone(new PhoneDto());
-        contactDetailsDto.getAddress().setStreet("Fiskergade");
-
-        return contactDetailsDto;
+        return new ContactDetailsDto()
+                .phone(new PhoneDto()
+                        .primary("88888888")
+                        .secondary("77777777")
+                )
+                .address(new AddressDto()
+                        .street("Fiskergade")
+                        .country("denmark")
+                        .city("aarhus")
+                        .postalCode("8000")
+                );
     }
 
     private ContactDetailsModel buildContactDetailsModel() {
         ContactDetailsModel contactDetailsModel = new ContactDetailsModel();
         contactDetailsModel.setAddress(new AddressModel());
         contactDetailsModel.setPhone(new PhoneModel());
-        contactDetailsModel.getAddress().setStreet("Fiskergade");
+
+        var phone = contactDetailsModel.getPhone();
+
+        phone.setPrimary("88888888");
+        phone.setSecondary("77777777");
+
+        var address = contactDetailsModel.getAddress();
+        address.setStreet("Fiskergade");
+        address.setCountry("Danmark");
+        address.setCity("Århus");
+        address.setPostalCode("8000");
 
         return contactDetailsModel;
     }
 
     private FrequencyDto buildFrequencyDto() {
-        FrequencyDto frequencyDto = new FrequencyDto();
-
-        frequencyDto.setWeekdays(List.of(Weekday.FRI));
-        frequencyDto.setTimeOfDay("04:00");
-
-        return frequencyDto;
+        return new FrequencyDto()
+                .weekdays(List.of(WeekDayDto.FRI))
+                .timeOfDay("04:00");
     }
 
     private FrequencyModel buildFrequencyModel() {
@@ -212,26 +217,20 @@ public class DtoMapperTest {
     }
 
     private OrganizationDto buildOrganizationDto() {
-        OrganizationDto organizationDto = new OrganizationDto();
-
-        organizationDto.setName("Infektionsmedicinsk afdeling");
-        organizationDto.setContactDetails(new ContactDetailsDto());
-        organizationDto.getContactDetails().setAddress(new AddressDto());
-        organizationDto.getContactDetails().setPhone(new PhoneDto());
-
-        organizationDto.getContactDetails().getAddress().setStreet("Fiskergade 66");
-        organizationDto.getContactDetails().getAddress().setPostalCode("8000");
-        organizationDto.getContactDetails().getAddress().setCity("Aarhus");
-        organizationDto.getContactDetails().getAddress().setCountry("Danmark");
-        organizationDto.getContactDetails().getPhone().setPrimary("22334455");
-
-        PhoneHourDto phoneHourDto = new PhoneHourDto();
-        phoneHourDto.setWeekdays(List.of(Weekday.MON, Weekday.FRI));
-        phoneHourDto.setFrom("07:00");
-        phoneHourDto.setTo("11:00");
-        organizationDto.setPhoneHours(List.of(phoneHourDto));
-
-        return organizationDto;
+        return new OrganizationDto()
+                .name("Infektionsmedicinsk afdeling")
+                .contactDetails(new ContactDetailsDto()
+                        .phone(new PhoneDto().primary("22334455"))
+                        .address(new AddressDto()
+                                .street("Fiskergade 66")
+                                .postalCode("8000")
+                                .city("Aarhus")
+                                .country("Danmark")
+                        ))
+                .phoneHours(List.of(new PhoneHourDto()
+                        .weekdays(List.of(WeekDayDto.MON, WeekDayDto.FRI))
+                        .from("07:00")
+                        .to("11:00")));
     }
 
     private OrganizationModel buildOrganizationModel() {
@@ -259,10 +258,9 @@ public class DtoMapperTest {
     }
 
     private PatientDto buildPatientDto() {
-        PatientDto patientDto = new PatientDto();
-
-        patientDto.setCpr("0101010101");
-        patientDto.setContactsDetails(buildContactDetailsDto());
+        PatientDto patientDto = new PatientDto()
+                .cpr("0101010101")
+                .contactsDetails(buildContactDetailsDto());
         patientDto.setPrimaryContacts(List.of(buildPrimaryContactDto()));
 
         return patientDto;
@@ -270,100 +268,74 @@ public class DtoMapperTest {
 
     private PatientModel buildPatientModel() {
         PatientModel patientModel = new PatientModel();
-
         patientModel.setCpr("0101010101");
         patientModel.setContactDetails(buildContactDetailsModel());
         patientModel.setContacts(List.of(buildPrimaryContactModel()));
-
-
         return patientModel;
     }
 
     private PlanDefinitionDto buildPlanDefinitionDto() {
         PlanDefinitionDto planDefinitionDto = new PlanDefinitionDto();
-
         planDefinitionDto.setId(PLANDEFINITION_ID_1);
         planDefinitionDto.setQuestionnaires(List.of(buildQuestionnaireWrapperDto()));
-
         return planDefinitionDto;
     }
 
     private PlanDefinitionModel buildPlanDefinitionModel() {
         PlanDefinitionModel planDefinitionModel = new PlanDefinitionModel();
-
         planDefinitionModel.setId(new QualifiedId(PLANDEFINITION_ID_1));
         planDefinitionModel.setQuestionnaires(List.of(buildQuestionnaireWrapperModel()));
-
         return planDefinitionModel;
     }
 
     private QuestionDto buildQuestionDto() {
-        QuestionDto questionDto = new QuestionDto();
-
-        questionDto.setText("Hvordan har du det?");
-
-        return questionDto;
+        return new QuestionDto().text("Hvordan har du det?");
     }
 
     private QuestionModel buildQuestionModel() {
         QuestionModel questionModel = new QuestionModel();
-
         questionModel.setText("Hvordan har du det?");
-
         return questionModel;
     }
 
     private QuestionAnswerPairModel buildQuestionAnswerPairModel() {
-        QuestionAnswerPairModel questionAnswerPairModel = new QuestionAnswerPairModel(buildQuestionModel(), buildAnswerModel());
-
-        return questionAnswerPairModel;
+        return new QuestionAnswerPairModel(buildQuestionModel(), buildAnswerModel());
     }
 
     private QuestionnaireDto buildQuestionnaireDto() {
         QuestionnaireDto questionnaireDto = new QuestionnaireDto();
-
         questionnaireDto.setId("questionnaire-1");
         questionnaireDto.setQuestions(List.of(buildQuestionDto()));
-
         return questionnaireDto;
     }
 
     private QuestionnaireModel buildQuestionnaireModel() {
         QuestionnaireModel questionnaireModel = new QuestionnaireModel();
-
         questionnaireModel.setId(new QualifiedId(QUESTIONNAIRE_ID_1));
         questionnaireModel.setQuestions(List.of(buildQuestionModel()));
-
         return questionnaireModel;
     }
 
     private QuestionnaireResponseModel buildQuestionnaireResponseModel() {
         QuestionnaireResponseModel questionnaireResponseModel = new QuestionnaireResponseModel();
-
         questionnaireResponseModel.setId(new QualifiedId(QUESTIONNAIRERESPONSE_ID_1));
         questionnaireResponseModel.setQuestionnaireId(new QualifiedId(QUESTIONNAIRE_ID_1));
         questionnaireResponseModel.setCarePlanId(new QualifiedId(CAREPLAN_ID_1));
         questionnaireResponseModel.setQuestionAnswerPairs(List.of(buildQuestionAnswerPairModel()));
         questionnaireResponseModel.setPatient(buildPatientModel());
-
         return questionnaireResponseModel;
     }
 
     private QuestionnaireWrapperDto buildQuestionnaireWrapperDto() {
-        QuestionnaireWrapperDto questionnaireWrapperDto = new QuestionnaireWrapperDto();
-
-        questionnaireWrapperDto.setQuestionnaire(buildQuestionnaireDto());
-        questionnaireWrapperDto.setFrequency(buildFrequencyDto());
-
-        return questionnaireWrapperDto;
+        return new QuestionnaireWrapperDto()
+                .questionnaire(buildQuestionnaireDto())
+                .frequency(buildFrequencyDto());
     }
 
     private QuestionnaireWrapperModel buildQuestionnaireWrapperModel() {
         QuestionnaireWrapperModel questionnaireWrapperModel = new QuestionnaireWrapperModel();
-
         questionnaireWrapperModel.setQuestionnaire(buildQuestionnaireModel());
         questionnaireWrapperModel.setFrequency(buildFrequencyModel());
-
         return questionnaireWrapperModel;
     }
 }

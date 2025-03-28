@@ -1,7 +1,5 @@
 package dk.kvalitetsit.hjemmebehandling.model;
 
-import dk.kvalitetsit.hjemmebehandling.api.ContactDetailsDto;
-
 public class PrimaryContactModel {
 
     private String name;
