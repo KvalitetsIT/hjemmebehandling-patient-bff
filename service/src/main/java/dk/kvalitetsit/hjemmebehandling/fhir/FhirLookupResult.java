@@ -7,14 +7,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FhirLookupResult {
-    private Map<String, CarePlan> carePlansById;
-    private Map<String, Organization> organizationsById;
-    private Map<String, Patient> patientsById;
-    private Map<String, PlanDefinition> planDefinitionsById;
-    private Map<String, Questionnaire> questionnairesById;
-    private Map<String, QuestionnaireResponse> questionnaireResponsesById;
+    private final Map<String, CarePlan> carePlansById;
+    private final Map<String, Organization> organizationsById;
+    private final Map<String, Patient> patientsById;
+    private final Map<String, PlanDefinition> planDefinitionsById;
+    private final Map<String, Questionnaire> questionnairesById;
+    private final Map<String, QuestionnaireResponse> questionnaireResponsesById;
 
-    private Map<String, ValueSet> valueSetsById;
+    private final Map<String, ValueSet> valueSetsById;
 
     private FhirLookupResult() {
         // Using LinkedHashMap preserves the insertion order (necessary for eg. returning sorted results).
@@ -42,7 +42,7 @@ public class FhirLookupResult {
     public static FhirLookupResult fromResources(Resource... resources) {
         FhirLookupResult result = new FhirLookupResult();
 
-        for(Resource resource : resources) {
+        for (Resource resource : resources) {
             result.addResource(resource);
         }
 
@@ -102,22 +102,22 @@ public class FhirLookupResult {
     }
 
     public FhirLookupResult merge(FhirLookupResult result) {
-        for(CarePlan carePlan : result.carePlansById.values()) {
+        for (CarePlan carePlan : result.carePlansById.values()) {
             addResource(carePlan);
         }
-        for(Organization organization : result.organizationsById.values()) {
+        for (Organization organization : result.organizationsById.values()) {
             addResource(organization);
         }
-        for(Patient patient : result.patientsById.values()) {
+        for (Patient patient : result.patientsById.values()) {
             addResource(patient);
         }
-        for(PlanDefinition planDefinition : result.planDefinitionsById.values()) {
+        for (PlanDefinition planDefinition : result.planDefinitionsById.values()) {
             addResource(planDefinition);
         }
-        for(Questionnaire questionnaire: result.questionnairesById.values()) {
+        for (Questionnaire questionnaire : result.questionnairesById.values()) {
             addResource(questionnaire);
         }
-        for(QuestionnaireResponse questionnaireResponse: result.questionnaireResponsesById.values()) {
+        for (QuestionnaireResponse questionnaireResponse : result.questionnaireResponsesById.values()) {
             addResource(questionnaireResponse);
         }
 
@@ -138,19 +138,19 @@ public class FhirLookupResult {
     }
 
     private <T extends Resource> Optional<T> getResource(String resourceId, Map<String, T> resourcesById) {
-        if(!resourcesById.containsKey(resourceId)) {
+        if (!resourcesById.containsKey(resourceId)) {
             return Optional.empty();
         }
         return Optional.of(resourcesById.get(resourceId));
     }
 
     private <T extends Resource> List<T> getResources(Map<String, T> resourcesById) {
-        return resourcesById.values().stream().collect(Collectors.toList());
+        return new ArrayList<>(resourcesById.values());
     }
 
     private void addResource(Resource resource) {
         String resourceId = resource.getIdElement().toUnqualifiedVersionless().getValue();
-        switch(resource.getResourceType()) {
+        switch (resource.getResourceType()) {
             case CarePlan:
                 carePlansById.put(resourceId, (CarePlan) resource);
                 break;

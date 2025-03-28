@@ -11,7 +11,7 @@ public class PatientModel {
     private ContactDetailsModel contactDetails;
 
     private List<PrimaryContactModel> contacts;
-    
+
     public QualifiedId getId() {
         return id;
     }

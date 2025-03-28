@@ -1,8 +1,6 @@
 package dk.kvalitetsit.hjemmebehandling.controller;
 
-import dk.kvalitetsit.hjemmebehandling.api.CallToActionDTO;
 import dk.kvalitetsit.hjemmebehandling.api.DtoMapper;
-import dk.kvalitetsit.hjemmebehandling.api.QuestionnaireResponseDto;
 import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
 import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
 import dk.kvalitetsit.hjemmebehandling.controller.exception.BadRequestException;
@@ -14,12 +12,14 @@ import dk.kvalitetsit.hjemmebehandling.service.QuestionnaireResponseService;
 import dk.kvalitetsit.hjemmebehandling.service.exception.AccessValidationException;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ServiceException;
 import dk.kvalitetsit.hjemmebehandling.types.PageDetails;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.openapitools.api.QuestionnaireResponseApi;
+import org.openapitools.model.CallToActionDTO;
+import org.openapitools.model.QuestionnaireResponseDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.util.List;
@@ -27,8 +27,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@Tag(name = "QuestionnaireResponse", description = "API for manipulating and retrieving QuestionnaireResponses.")
-public class QuestionnaireResponseController extends BaseController {
+public class QuestionnaireResponseController extends BaseController implements QuestionnaireResponseApi {
     private static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseController.class);
 
     private final QuestionnaireResponseService questionnaireResponseService;
@@ -43,91 +42,80 @@ public class QuestionnaireResponseController extends BaseController {
         this.userContextProvider = userContextProvider;
     }
 
-    @GetMapping(params ="questionnaireIds",  value = "/v1/questionnaireresponses/{carePlanId}")
-    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnaireResponsesByCarePlanId(
-            @PathVariable("carePlanId") String carePlanId,
-            @RequestParam("questionnaireIds") List<String> questionnaireIds,
-            int pageNumber,
-            int pageSize
-    ) {
-        if(carePlanId == null || questionnaireIds == null || questionnaireIds.isEmpty()) {
+
+
+    @Override
+    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnaireResponsesByCarePlanId(String carePlanId, List<String> questionnaireIds, Integer pageNumber, Integer pageSize) {
+        if (carePlanId == null || questionnaireIds == null || questionnaireIds.isEmpty()) {
             throw new BadRequestException(ErrorDetails.PARAMETERS_INCOMPLETE);
         }
 
         try {
-            PageDetails pageDetails = new PageDetails(pageNumber,pageSize);
+            PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
             List<QuestionnaireResponseModel> questionnaireResponses = questionnaireResponseService.getQuestionnaireResponses(carePlanId, questionnaireIds, pageDetails);
 
             return ResponseEntity.ok(questionnaireResponses.stream().map(dtoMapper::mapQuestionnaireResponseModel).collect(Collectors.toList()));
-        }
-        catch(AccessValidationException | ServiceException e) {
+        } catch (AccessValidationException | ServiceException e) {
             logger.error("Could not look up questionnaire responses by careplan id", e);
             throw toStatusCodeException(e);
         }
     }
 
-    @GetMapping(value = "/v1/questionnaireresponses/{id}")
-    public ResponseEntity<QuestionnaireResponseDto> getQuestionnaireResponseById(@PathVariable("id") String id) {
-        // Look up the QuestionnaireResponse
+    @Override
+    public ResponseEntity<QuestionnaireResponseDto> getQuestionnaireResponseById(String id) {
         Optional<QuestionnaireResponseModel> questionnaireResponse = Optional.empty();
 
         try {
             questionnaireResponse = questionnaireResponseService.getQuestionnaireResponseById(new QualifiedId(id, ResourceType.QuestionnaireResponse));
-        }
-        catch(AccessValidationException | ServiceException e) {
+        } catch (AccessValidationException | ServiceException e) {
             logger.error("Could not retrieve QuestionnaireResponse", e);
             throw toStatusCodeException(e);
         }
 
-        if(questionnaireResponse.isEmpty()) {
+        if (questionnaireResponse.isEmpty()) {
             throw new ResourceNotFoundException(String.format("QuestionnaireResponse with id %s not found.", id), ErrorDetails.QUESTIONNAIRE_RESPONSE_DOES_NOT_EXIST);
         }
         return ResponseEntity.ok(dtoMapper.mapQuestionnaireResponseModel(questionnaireResponse.get()));
     }
 
-    @GetMapping(value = "/v1/questionnaireresponses")
-    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnaireResponsesForMultipleCarePlans(
-            @RequestParam("carePlanIds") List<String> carePlanIds,
-            @RequestParam("questionnaireIds") List<String> questionnaireIds,
-            int pageNumber, int pageSize) {
-        if(carePlanIds == null || carePlanIds.isEmpty() || questionnaireIds == null || questionnaireIds.isEmpty()) {
+
+    @Override
+    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnaireResponsesForMultipleCarePlans(List<String> carePlanIds, List<String> questionnaireIds, Integer pageNumber, Integer pageSize) {
+        if (carePlanIds == null || carePlanIds.isEmpty() || questionnaireIds == null || questionnaireIds.isEmpty()) {
             throw new BadRequestException(ErrorDetails.PARAMETERS_INCOMPLETE);
         }
 
         try {
-            PageDetails pageDetails = new PageDetails(pageNumber,pageSize);
+            PageDetails pageDetails = new PageDetails(pageNumber, pageSize);
             List<QuestionnaireResponseModel> questionnaireResponses = questionnaireResponseService.getQuestionnaireResponsesForMultipleCarePlans(carePlanIds, questionnaireIds, pageDetails);
 
             return ResponseEntity.ok(questionnaireResponses.stream().map(dtoMapper::mapQuestionnaireResponseModel).collect(Collectors.toList()));
-        }
-        catch(AccessValidationException e) {
+        } catch (AccessValidationException e) {
             logger.error("Could not look up questionnaire responses by careplan id", e);
             throw toStatusCodeException(e);
         }
     }
 
-
-    @PostMapping(value = "/v1/questionnaireresponse")
-    public ResponseEntity<CallToActionDTO> submitQuestionnaireResponse(@RequestBody QuestionnaireResponseDto questionnaireResponseDto) {
+    @Override
+    public ResponseEntity<CallToActionDTO> submitQuestionnaireResponse(QuestionnaireResponseDto questionnaireResponseDto) {
         String questionnaireResponseId = null;
         String callToAction = null;
 
-        String cpr = userContextProvider.getUserContext().getCpr();
+        // TODO: handle 'Optional.get()' without 'isPresent()' check
+        String cpr = userContextProvider.getUserContext().getCpr().get();
         try {
             QuestionnaireResponseModel questionnaireResponseModel = dtoMapper.mapQuestionnaireResponseDto(questionnaireResponseDto);
             questionnaireResponseId = questionnaireResponseService.submitQuestionnaireResponse(questionnaireResponseModel, cpr);
 
             callToAction = questionnaireResponseService.getCallToAction(questionnaireResponseModel);
 
-        }
-        catch(AccessValidationException | ServiceException e) {
+        } catch (AccessValidationException | ServiceException e) {
             logger.error("Error creating CarePlan", e);
             throw toStatusCodeException(e);
         }
 
         URI location = locationHeaderBuilder.buildLocationHeader(questionnaireResponseId);
-        CallToActionDTO responseCallToAction = new CallToActionDTO();
-        responseCallToAction.setCallToAction(callToAction);
+        CallToActionDTO responseCallToAction = new CallToActionDTO().callToAction(callToAction);
         return ResponseEntity.created(location).body(responseCallToAction);
     }
 }

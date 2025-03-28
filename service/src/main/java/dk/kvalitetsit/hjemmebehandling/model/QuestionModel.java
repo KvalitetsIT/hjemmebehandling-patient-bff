@@ -1,6 +1,5 @@
 package dk.kvalitetsit.hjemmebehandling.model;
 
-import dk.kvalitetsit.hjemmebehandling.api.Option;
 import dk.kvalitetsit.hjemmebehandling.constants.EnableWhenOperator;
 import dk.kvalitetsit.hjemmebehandling.constants.QuestionType;
 
@@ -75,12 +74,12 @@ public class QuestionModel {
         this.options = options;
     }
 
-    public void setHelperText(String helperText) {
-        this.helperText = helperText;
-    }
-
     public String getHelperText() {
         return helperText;
+    }
+
+    public void setHelperText(String helperText) {
+        this.helperText = helperText;
     }
 
     public List<EnableWhen> getEnableWhens() {

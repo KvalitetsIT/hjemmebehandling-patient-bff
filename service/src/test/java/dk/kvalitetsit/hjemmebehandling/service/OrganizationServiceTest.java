@@ -15,66 +15,47 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ExtendWith(MockitoExtension.class)
 public class OrganizationServiceTest {
+    private static final String ORGANIZATION_ID_1 = "Organization/organization-1";
     @InjectMocks
     private OrganizationService subject;
-
     @Mock
     private FhirClient fhirClient;
-
     @Mock
     private FhirMapper fhirMapper;
 
-    private static final String ORGANIZATION_ID_1 = "Organization/organization-1";
-
     @Test
     public void getOrganizationById_organizationPresent_returnsOrganization() throws Exception {
-        // Arrange
         String organizationId = ORGANIZATION_ID_1;
-
-        Organization organization = buildOrganization(ORGANIZATION_ID_1);
+        Organization organization = buildOrganization();
         Mockito.when(fhirClient.lookupOrganizationById(organizationId)).thenReturn(FhirLookupResult.fromResources(organization));
-
-        OrganizationModel organizationModel = buildOrganizationModel(ORGANIZATION_ID_1);
+        OrganizationModel organizationModel = buildOrganizationModel();
         Mockito.when(fhirMapper.mapOrganization(organization)).thenReturn(organizationModel);
-
-        // Act
         Optional<OrganizationModel> result = subject.getOrganizationById(new QualifiedId(organizationId));
-
-        // Assert
         assertEquals(organizationModel, result.get());
     }
 
     @Test
     public void getOrganizationById_organizationMissing_returnsEmpty() throws Exception {
-        // Arrange
         String organizationId = ORGANIZATION_ID_1;
-
         Mockito.when(fhirClient.lookupOrganizationById(organizationId)).thenReturn(FhirLookupResult.fromResources());
-
-        // Act
         Optional<OrganizationModel> result = subject.getOrganizationById(new QualifiedId(organizationId));
-
-        // Assert
         assertFalse(result.isPresent());
     }
 
-    private Organization buildOrganization(String organizationId) {
+    private Organization buildOrganization() {
         Organization organization = new Organization();
-
-        organization.setId(organizationId);
-
+        organization.setId(OrganizationServiceTest.ORGANIZATION_ID_1);
         return organization;
     }
 
-    private OrganizationModel buildOrganizationModel(String organizationId) {
+    private OrganizationModel buildOrganizationModel() {
         OrganizationModel organizationModel = new OrganizationModel();
-
-        organizationModel.setId(new QualifiedId(organizationId));
-
+        organizationModel.setId(new QualifiedId(OrganizationServiceTest.ORGANIZATION_ID_1));
         return organizationModel;
     }
 }

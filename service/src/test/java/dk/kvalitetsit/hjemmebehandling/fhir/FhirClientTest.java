@@ -21,47 +21,39 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class FhirClientTest {
-    private FhirClient subject;
-
-    @Mock
-    private FhirContext context;
-
-    private String endpoint = "http://foo";
-
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private IGenericClient client;
-
     private static final String CAREPLAN_ID_1 = "CarePlan/careplan-1";
     private static final String ORGANIZATION_ID_1 = "Organization/organization-1";
     private static final String ORGANIZATION_ID_2 = "Organization/organization-2";
     private static final String PLANDEFINITION_ID_1 = "PlanDefinition/plandefinition-1";
     private static final String QUESTIONNAIRE_RESPONSE_ID_1 = "questionnaireresponse-1";
     private static final String QUESTIONNAIRE_RESPONSE_ID_2 = "questionnaireresponse-2";
-
     private static final String SOR_CODE_1 = "123456";
     private static final String SOR_CODE_2 = "654321";
+    private FhirClient subject;
+
+    @Mock
+    private FhirContext context;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private IGenericClient client;
 
     @BeforeEach
     public void setup() {
+        String endpoint = "http://foo";
         Mockito.when(context.newRestfulGenericClient(endpoint)).thenReturn(client);
         subject = new FhirClient(context, endpoint);
     }
 
     @Test
     public void lookupCarePlanByCpr_carePlanPresent_success() {
-        // Arrange
         String cpr = "0101010101";
         CarePlan carePlan = new CarePlan();
         carePlan.setId(CAREPLAN_ID_1);
         carePlan.addIdentifier().setSystem(Systems.CPR).setValue(cpr);
 
         setupSearchCarePlanByCprClient(carePlan);
-        setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
+        setupOrganization();
 
-        // Act
         FhirLookupResult result = subject.lookupActiveCarePlans(cpr);
-
-        // Assert
         assertTrue(result.getCarePlan(CAREPLAN_ID_1).isPresent());
         assertEquals(carePlan, result.getCarePlan(CAREPLAN_ID_1).get());
         assertEquals(Systems.CPR, result.getCarePlan(CAREPLAN_ID_1).get().getIdentifierFirstRep().getSystem());
@@ -70,72 +62,50 @@ public class FhirClientTest {
 
     @Test
     public void lookupCarePlanByCpr_carePlanMissing_empty() {
-        // Arrange
         String cpr = "0101010101";
-
         setupSearchCarePlanByCprClient();
-        setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
-
-        // Act
+        setupOrganization();
         FhirLookupResult result = subject.lookupActiveCarePlans(cpr);
-
-        // Assert
         assertFalse(result.getCarePlan(CAREPLAN_ID_1).isPresent());
     }
 
     @Test
     public void lookupCarePlanByCpr_resultIncludesOrganization() {
-        // Arrange
         String cpr = "0101010101";
         CarePlan carePlan = new CarePlan();
         carePlan.setId(CAREPLAN_ID_1);
         carePlan.addIdentifier().setSystem(Systems.CPR).setValue(cpr);
-
         setupSearchCarePlanByCprClient(carePlan);
-        setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
-
-        // Act
+        setupOrganization();
+        
         FhirLookupResult result = subject.lookupActiveCarePlans(cpr);
 
-        // Assert
         assertTrue(result.getOrganization(ORGANIZATION_ID_1).isPresent());
     }
 
     @Test
     public void lookupOrganizationById_organizationPresent_success() {
-        // Arrange
         String organizationId = ORGANIZATION_ID_1;
-
         Organization organization = new Organization();
         organization.setId(organizationId);
-
         setupSearchOrganizationClient(organization);
 
-        // Act
         FhirLookupResult result = subject.lookupOrganizationById(organizationId);
-
-        // Assert
+        
         assertTrue(result.getOrganization(organizationId).isPresent());
         assertEquals(organization, result.getOrganization(organizationId).get());
     }
 
     @Test
     public void lookupOrganizationById_organizationMissing_returnsEmptyResult() {
-        // Arrange
         String organizationId = ORGANIZATION_ID_1;
-
         setupSearchOrganizationClient();
-
-        // Act
         FhirLookupResult result = subject.lookupOrganizationById(organizationId);
-
-        // Assert
         assertFalse(result.getOrganization(organizationId).isPresent());
     }
 
     @Test
     public void lookupQuestionnaireResponses_carePlanAndQuestionnairesPresent_success() {
-        // Arrange
         String carePlanId = "careplan-1";
         String questionnaireId = "questionnaire-1";
 
@@ -145,12 +115,10 @@ public class FhirClientTest {
         questionnaireResponse2.setId(QUESTIONNAIRE_RESPONSE_ID_2);
         setupSearchQuestionnaireResponseClient(2, questionnaireResponse1, questionnaireResponse2);
 
-        setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
+        setupOrganization();
 
-        // Act
         FhirLookupResult result = subject.lookupQuestionnaireResponses(carePlanId, List.of(questionnaireId));
 
-        // Assert
         assertEquals(2, result.getQuestionnaireResponses().size());
         assertTrue(result.getQuestionnaireResponses().contains(questionnaireResponse1));
         assertTrue(result.getQuestionnaireResponses().contains(questionnaireResponse2));
@@ -158,7 +126,6 @@ public class FhirClientTest {
 
     @Test
     public void lookupQuestionnaireResponses_includesPlanDefinition() {
-        // Arrange
         String carePlanId = "careplan-1";
         String questionnaireId = "questionnaire-1";
 
@@ -168,12 +135,10 @@ public class FhirClientTest {
         questionnaireResponse2.setId(QUESTIONNAIRE_RESPONSE_ID_2);
         setupSearchQuestionnaireResponseClient(2, questionnaireResponse1, questionnaireResponse2);
 
-        setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
+        setupOrganization();
 
-        // Act
         FhirLookupResult result = subject.lookupQuestionnaireResponses(carePlanId, List.of(questionnaireId));
 
-        // Assert
         assertEquals(2, result.getQuestionnaireResponses().size());
         assertEquals(1, result.getPlanDefinitions().size());
         assertTrue(result.getPlanDefinition(PLANDEFINITION_ID_1).isPresent());
@@ -181,58 +146,47 @@ public class FhirClientTest {
 
     @Test
     public void lookupQuestionnaireResponseById_responsePresent_success() {
-        // Arrange
         String questionnaireResponseId = QUESTIONNAIRE_RESPONSE_ID_1;
         QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
         questionnaireResponse.setId(questionnaireResponseId);
 
         setupSearchQuestionnaireResponseClient(1, questionnaireResponse);
-        setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
+        setupOrganization();
 
-        // Act
         FhirLookupResult result = subject.lookupQuestionnaireResponseById(questionnaireResponseId);
 
-        // Assert
         assertTrue(result.getQuestionnaireResponse(questionnaireResponseId).isPresent());
         assertEquals(questionnaireResponse, result.getQuestionnaireResponse(questionnaireResponseId).get());
     }
 
     @Test
     public void lookupQuestionnaireResponseById_responseMissing_empty() {
-        // Arrange
         String questionnaireResponseId = QUESTIONNAIRE_RESPONSE_ID_1;
         QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
 
         setupSearchQuestionnaireResponseClient(1, questionnaireResponse);
-        setupOrganization(SOR_CODE_1, ORGANIZATION_ID_1);
+        setupOrganization();
 
-        // Act
         FhirLookupResult result = subject.lookupQuestionnaireResponseById(questionnaireResponseId);
 
-        // Assert
         assertFalse(result.getQuestionnaireResponse(questionnaireResponseId).isPresent());
     }
 
     @Test
     public void saveQuestionnaireResponse_returnsQuestionnaireResponseId() {
-        // Arrange
         QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
         CarePlan carePlan = new CarePlan();
         carePlan.addExtension(ExtensionMapper.mapOrganizationId(ORGANIZATION_ID_2));
-
         Bundle responseBundle = buildResponseBundle("201", "QuestionnaireResponse/2", "200", "CarePlan/3");
         setupTransactionClient(responseBundle);
 
-        // Act
         String result = subject.saveQuestionnaireResponse(questionnaireResponse, carePlan);
 
-        // Assert
         assertEquals("QuestionnaireResponse/2", result);
     }
 
     @Test
     public void saveQuestionnaireResponse_questionnaireResponseLocationMissing_throwsException() {
-        // Arrange
         QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
         CarePlan carePlan = new CarePlan();
         carePlan.addExtension(ExtensionMapper.mapOrganizationId(ORGANIZATION_ID_2));
@@ -240,15 +194,11 @@ public class FhirClientTest {
         Bundle responseBundle = buildResponseBundle("201", "Questionnaire/4", "200", "CarePlan/3");
         setupTransactionClient(responseBundle);
 
-        // Act
-
-        // Assert
         assertThrows(IllegalStateException.class, () -> subject.saveQuestionnaireResponse(questionnaireResponse, carePlan));
     }
 
     @Test
     public void saveQuestionnaireResponse_unwantedHttpStatus_throwsException() {
-        // Arrange
         QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
         CarePlan carePlan = new CarePlan();
         carePlan.addExtension(ExtensionMapper.mapOrganizationId(ORGANIZATION_ID_2));
@@ -256,15 +206,11 @@ public class FhirClientTest {
         Bundle responseBundle = buildResponseBundle("400", null, "400", null);
         setupTransactionClient(responseBundle);
 
-        // Act
-
-        // Assert
         assertThrows(IllegalStateException.class, () -> subject.saveQuestionnaireResponse(questionnaireResponse, carePlan));
     }
 
     @Test
     public void saveQuestionnaireResponse_addsOrganizationTag() {
-        // Arrange
         QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
         CarePlan carePlan = new CarePlan();
         carePlan.addExtension(ExtensionMapper.mapOrganizationId(ORGANIZATION_ID_2));
@@ -272,11 +218,9 @@ public class FhirClientTest {
         Bundle responseBundle = buildResponseBundle("201", "QuestionnaireResponse/2", "201", "CarePlan/3");
         setupTransactionClient(responseBundle, SOR_CODE_2, ORGANIZATION_ID_2);
 
-        // Act
-        String result = subject.saveQuestionnaireResponse(questionnaireResponse, carePlan);
+        subject.saveQuestionnaireResponse(questionnaireResponse, carePlan);
 
-        // Assert
-        assertTrue(isTaggedWithId(questionnaireResponse, ORGANIZATION_ID_2));
+        assertTrue(isTaggedWithId(questionnaireResponse));
     }
 
     private Bundle buildResponseBundle(String questionnaireResponseStatus, String questionnaireResponseLocation, String carePlanStatus, String carePlanLocation) {
@@ -297,8 +241,7 @@ public class FhirClientTest {
 
     private void setupSearchCarePlanByCprClient(CarePlan... carePlans) {
         setupSearchClient(2, 2, CarePlan.class, carePlans);
-
-        if(carePlans.length > 0) {
+        if (carePlans.length > 0) {
             setupSearchQuestionnaireClient();
         }
     }
@@ -310,7 +253,7 @@ public class FhirClientTest {
     private void setupSearchQuestionnaireResponseClient(int criteriaCount, QuestionnaireResponse... questionnaireResponses) {
         setupSearchClient(criteriaCount, 3, QuestionnaireResponse.class, questionnaireResponses);
 
-        if(questionnaireResponses.length > 0) {
+        if (questionnaireResponses.length > 0) {
             PlanDefinition planDefinition = new PlanDefinition();
             planDefinition.setId(PLANDEFINITION_ID_1);
             setupSearchPlanDefinitionClient(planDefinition);
@@ -332,7 +275,7 @@ public class FhirClientTest {
     private void setupSearchClient(int criteriaCount, int includeCount, boolean withSort, boolean withOffset, boolean withCount, Class<? extends Resource> resourceClass, Resource... resources) {
         Bundle bundle = new Bundle();
 
-        for(Resource resource : resources) {
+        for (Resource resource : resources) {
             Bundle.BundleEntryComponent component = new Bundle.BundleEntryComponent();
             component.setResource(resource);
             bundle.addEntry(component);
@@ -340,35 +283,34 @@ public class FhirClientTest {
         bundle.setTotal(resources.length);
 
         var query = client.search().forResource(resourceClass);
-        if(criteriaCount > 0) {
+        if (criteriaCount > 0) {
             query = query.where(Mockito.any(ICriterion.class));
         }
-        for(var i = 1; i < criteriaCount; i++) {
+        for (var i = 1; i < criteriaCount; i++) {
             query = query.and(Mockito.any(ICriterion.class));
         }
-        for(var i = 0; i < includeCount; i++) {
+        for (var i = 0; i < includeCount; i++) {
             query = query.include(Mockito.any(Include.class));
         }
-        if(withSort) {
+        if (withSort) {
             query = query.sort(Mockito.any(SortSpec.class));
         }
-        if(withOffset) {
+        if (withOffset) {
             query = query.offset(Mockito.anyInt());
         }
-        if(withCount) {
+        if (withCount) {
             query = query.count(Mockito.anyInt());
         }
 
         Mockito.when(query
-                .execute())
+                        .execute())
                 .thenReturn(bundle);
     }
 
-    private void setupOrganization(String sorCode, String organizationId) {
+    private void setupOrganization() {
         var organization = new Organization();
-        organization.setId(organizationId);
-        organization.addIdentifier().setSystem(Systems.SOR).setValue(sorCode);
-
+        organization.setId(FhirClientTest.ORGANIZATION_ID_1);
+        organization.addIdentifier().setSystem(Systems.SOR).setValue(FhirClientTest.SOR_CODE_1);
         setupSearchOrganizationClient(organization);
     }
 
@@ -385,18 +327,18 @@ public class FhirClientTest {
     }
 
     private boolean isTagged(DomainResource resource) {
-        return resource.getExtension().stream().anyMatch(e -> isOrganizationTag(e));
+        return resource.getExtension().stream().anyMatch(this::isOrganizationTag);
     }
 
-    private boolean isTaggedWithId(DomainResource resource, String organizationId) {
-        return resource.getExtension().stream().anyMatch(e -> isOrganizationTag(e) && isTagForOrganization(e, organizationId));
+    private boolean isTaggedWithId(DomainResource resource) {
+        return resource.getExtension().stream().anyMatch(e -> isOrganizationTag(e) && isTagForOrganization(e));
     }
 
     private boolean isOrganizationTag(Extension e) {
         return e.getUrl().equals(Systems.ORGANIZATION);
     }
 
-    private boolean isTagForOrganization(Extension e, String organizationId) {
-        return e.getValue() instanceof Reference && ((Reference) e.getValue()).getReference().equals(organizationId);
+    private boolean isTagForOrganization(Extension e) {
+        return e.getValue() instanceof Reference && ((Reference) e.getValue()).getReference().equals(FhirClientTest.ORGANIZATION_ID_2);
     }
 }

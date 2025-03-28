@@ -8,7 +8,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.net.URI;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LocationHeaderBuilderTest {
     private LocationHeaderBuilder subject;
@@ -20,9 +20,7 @@ public class LocationHeaderBuilderTest {
 
     @Test
     public void buildLocationHeader_appendsToRequestUri() {
-        // Arrange
         String id = "123";
-
         int port = 8787;
         String requestUri = "/api/v1/careplan";
 
@@ -31,10 +29,8 @@ public class LocationHeaderBuilderTest {
         request.setRequestURI(requestUri);
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-        // Act
         URI result = subject.buildLocationHeader(id);
 
-        // Assert
         URI expected = URI.create("http://localhost:" + port + requestUri + "/" + id);
         assertEquals(expected, result);
     }

@@ -1,4 +1,4 @@
-package dk.kvalitetsit.hjemmebehandling.api;
+package dk.kvalitetsit.hjemmebehandling.model;
 
 public class Option {
     private String option;
@@ -11,6 +11,9 @@ public class Option {
     public Option(String option, String comment) {
         this.option = option;
         this.comment = comment;
+    }
+
+    public Option() {
     }
 
     public String getOption() {

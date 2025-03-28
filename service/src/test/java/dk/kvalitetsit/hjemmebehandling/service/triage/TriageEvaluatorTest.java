@@ -10,134 +10,89 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TriageEvaluatorTest {
-    private TriageEvaluator subject = new TriageEvaluator();
+    private final TriageEvaluator subject = new TriageEvaluator();
 
     @Test
     public void determineTriagingCategory_badArguments_throwsException() {
-        // Arrange
         List<AnswerModel> answers = List.of();
         List<ThresholdModel> thresholds = null;
-
-        // Act
-
-        // Assert
         assertThrows(IllegalArgumentException.class, () -> subject.determineTriagingCategory(answers, thresholds));
     }
 
     @Test
     public void determineTriagingCategory_handlesBooleanAnswer_normal() {
-        // Arrange
         var answers = List.of(buildBooleanAnswer("1", true));
         var thresholds = List.of(buildBooleanThreshold("1", ThresholdType.NORMAL, true));
-
-        // Act
         var result = subject.determineTriagingCategory(answers, thresholds);
-
-        // Assert
         assertEquals(TriagingCategory.GREEN, result);
     }
 
     @Test
     public void determineTriagingCategory_handlesBooleanAnswer_critical() {
-        // Arrange
         var answers = List.of(buildBooleanAnswer("1", true));
         var thresholds = List.of(buildBooleanThreshold("1", ThresholdType.CRITICAL, true));
-
-        // Act
         var result = subject.determineTriagingCategory(answers, thresholds);
-
-        // Assert
         assertEquals(TriagingCategory.RED, result);
     }
 
     @Test
     public void determineTriagingCategory_multipleAnswers_returnsMostCriticalCategory() {
-        // Arrange
         var answers = List.of(buildBooleanAnswer("1", true), buildBooleanAnswer("2", true));
         var thresholds = List.of(buildBooleanThreshold("1", ThresholdType.NORMAL, true), buildBooleanThreshold("2", ThresholdType.CRITICAL, true));
-
-        // Act
         var result = subject.determineTriagingCategory(answers, thresholds);
-
-        // Assert
         assertEquals(TriagingCategory.RED, result);
     }
 
     @Test
     public void determineTriagingCategory_handlesQuantityAnswer_halfOpenToTheLeft() {
-        // Arrange
         var answers = List.of(buildQuantityAnswer("1", 2.4));
         var thresholds = List.of(buildQuantityThreshold("1", ThresholdType.ABNORMAL, null, 5.0));
-
-        // Act
         var result = subject.determineTriagingCategory(answers, thresholds);
-
-        // Assert
         assertEquals(TriagingCategory.YELLOW, result);
     }
 
     @Test
     public void determineTriagingCategory_handlesQuantityAnswer_closed() {
-        // Arrange
         var answers = List.of(buildQuantityAnswer("1", 12.4));
         var thresholds = List.of(buildQuantityThreshold("1", ThresholdType.CRITICAL, 5.0, 17.0));
-
-        // Act
         var result = subject.determineTriagingCategory(answers, thresholds);
-
-        // Assert
         assertEquals(TriagingCategory.RED, result);
     }
 
     @Test
     public void determineTriagingCategory_handlesQuantityAnswer_halfOpenToTheRight() {
-        // Arrange
         var answers = List.of(buildQuantityAnswer("1", 12.4));
         var thresholds = List.of(buildQuantityThreshold("1", ThresholdType.NORMAL, 5.0, null));
-
-        // Act
         var result = subject.determineTriagingCategory(answers, thresholds);
-
-        // Assert
         assertEquals(TriagingCategory.GREEN, result);
     }
 
     @Test
     public void determineTriagingCategory_handlesQuantityAnswer_unbounded() {
-        // Arrange
         var answers = List.of(buildQuantityAnswer("1", -12.4));
         var thresholds = List.of(buildQuantityThreshold("1", ThresholdType.NORMAL, null, null));
-
-        // Act
         var result = subject.determineTriagingCategory(answers, thresholds);
-
-        // Assert
         assertEquals(TriagingCategory.GREEN, result);
     }
 
     @Test
     public void determineTriagingCategory_handlesQuantityAnswer_lowerBoundInclusive() {
-        // Arrange
         var answers = List.of(buildQuantityAnswer("1", 6.0));
         var thresholds = List.of(
                 buildQuantityThreshold("1", ThresholdType.ABNORMAL, null, 5.0),
                 buildQuantityThreshold("1", ThresholdType.CRITICAL, 5.0, 6.0),
                 buildQuantityThreshold("1", ThresholdType.NORMAL, 6.0, null)
         );
-
-        // Act
         var result = subject.determineTriagingCategory(answers, thresholds);
-
-        // Assert
         assertEquals(TriagingCategory.RED, result);
     }
 
     @Test
     public void determineTriagingCategory_MoreAnswerDifferentTypes_ManyThresholds() {
-        // Arrange
         var answers = List.of(
                 buildQuantityAnswer("1", 12.0), //Indtast din morgen temperatur?
                 buildQuantityAnswer("2", 12.0), //Indtast den målte CRP værdi
@@ -156,94 +111,67 @@ public class TriageEvaluatorTest {
                 buildQuantityThreshold("2", ThresholdType.ABNORMAL, 25.0, 49.9),
                 buildQuantityThreshold("2", ThresholdType.CRITICAL, 50.0, null),
 
-                buildBooleanThreshold("4",ThresholdType.CRITICAL,true),
-                buildBooleanThreshold("4",ThresholdType.NORMAL,false)
+                buildBooleanThreshold("4", ThresholdType.CRITICAL, true),
+                buildBooleanThreshold("4", ThresholdType.NORMAL, false)
         );
-
-        // Act
         var result = subject.determineTriagingCategory(answers, thresholds);
-
-        // Assert
         assertEquals(TriagingCategory.RED, result);
     }
+
     @Test
     public void determineTriagingCategory_redTriagingCategory_WhenNullThresholds() {
-        // Arrange
         var answers = List.of(buildQuantityAnswer("1", 6.0));
         ArrayList<ThresholdModel> thresholds = null;
-
-        // Act
-        assertThrows(IllegalArgumentException.class,() -> subject.determineTriagingCategory(answers, thresholds));
+        assertThrows(IllegalArgumentException.class, () -> subject.determineTriagingCategory(answers, thresholds));
     }
 
     @Test
     public void determineTriagingCategory_redTriagingCategory_WhenNoThresholds() {
-        // Arrange
         var answers = List.of(buildQuantityAnswer("1", 6.0));
         var thresholds = new ArrayList<ThresholdModel>();
-
-        // Act
         var result = subject.determineTriagingCategory(answers, thresholds);
-
-        // Assert
         assertEquals(TriagingCategory.GREEN, result);
     }
 
     @Test
     public void determineTriagingCategory_redTriagingCategory_WhenNoThresholdMatchesAnswer_lowerEnd() {
-        // Arrange
         var answers = List.of(buildQuantityAnswer("1", 1.0));
         var thresholds = List.of(
                 buildQuantityThreshold("1", ThresholdType.ABNORMAL, 2.0, 5.0),
                 buildQuantityThreshold("1", ThresholdType.CRITICAL, 5.0, 6.0),
                 buildQuantityThreshold("1", ThresholdType.NORMAL, 6.0, null)
         );
-
-        // Act
         var result = subject.determineTriagingCategory(answers, thresholds);
-
-        // Assert
         assertEquals(TriagingCategory.RED, result);
     }
 
 
     @Test
     public void determineTriagingCategory_redTriagingCategory_WhenNoThresholdMatchesAnswer_higherEnd() {
-        // Arrange
         var answers = List.of(buildQuantityAnswer("1", 8.0));
         var thresholds = List.of(
                 buildQuantityThreshold("1", ThresholdType.ABNORMAL, null, 5.0),
                 buildQuantityThreshold("1", ThresholdType.CRITICAL, 5.0, 6.0),
                 buildQuantityThreshold("1", ThresholdType.NORMAL, 6.0, 7.0)
         );
-
-        // Act
         var result = subject.determineTriagingCategory(answers, thresholds);
-
-        // Assert
         assertEquals(TriagingCategory.RED, result);
     }
 
     @Test
     public void determineTriagingCategory_handlesQuantityAnswer_upperBoundExclusive() {
-        // Arrange
         var answers = List.of(buildQuantityAnswer("1", 5.0));
         var thresholds = List.of(
                 buildQuantityThreshold("1", ThresholdType.ABNORMAL, null, 5.0),
                 buildQuantityThreshold("1", ThresholdType.CRITICAL, 5.0, 6.0),
                 buildQuantityThreshold("1", ThresholdType.NORMAL, 6.0, null)
         );
-
-        // Act
         var result = subject.determineTriagingCategory(answers, thresholds);
-
-        // Assert
         assertEquals(TriagingCategory.RED, result);
     }
 
     @Test
     public void determineTriagingCategory_OneIsGreenWithNoThresholds_OneIsYellowWithThresholds_ReturnsYellow() {
-        // Arrange
         var answers = List.of(
                 buildQuantityAnswer("1", 40),
                 buildQuantityAnswer("2", 40)
@@ -254,11 +182,7 @@ public class TriageEvaluatorTest {
                 buildQuantityThreshold("2", ThresholdType.ABNORMAL, 25.0, 49.9),
                 buildQuantityThreshold("2", ThresholdType.CRITICAL, 50.0, null)
         );
-
-        // Act
         var result = subject.determineTriagingCategory(answers, thresholds);
-
-        // Assert
         assertEquals(TriagingCategory.YELLOW, result);
     }
 
@@ -272,11 +196,9 @@ public class TriageEvaluatorTest {
 
     private AnswerModel buildAnswer(String linkId, AnswerType answerType, String value) {
         AnswerModel answer = new AnswerModel();
-
         answer.setLinkId(linkId);
         answer.setAnswerType(answerType);
         answer.setValue(value);
-
         return answer;
     }
 
@@ -290,13 +212,11 @@ public class TriageEvaluatorTest {
 
     private ThresholdModel buildThreshold(String linkId, ThresholdType thresholdType, Boolean valueBoolean, Double low, Double high) {
         ThresholdModel threshold = new ThresholdModel();
-
         threshold.setQuestionnaireItemLinkId(linkId);
         threshold.setType(thresholdType);
         threshold.setValueBoolean(valueBoolean);
         threshold.setValueQuantityLow(low);
         threshold.setValueQuantityHigh(high);
-
         return threshold;
     }
 }

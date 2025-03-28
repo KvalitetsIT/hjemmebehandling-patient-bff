@@ -1,7 +1,5 @@
 package dk.kvalitetsit.hjemmebehandling.model;
 
-import java.util.Optional;
-
 public class PhoneModel {
 
     private String primary;

@@ -1,0 +1,633 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+  - url: http://localhost:8080/api
+    description: Generated server url
+tags:
+  - name: User
+    description: API for retrieving information about users.
+  - name: ValueSet
+    description: "API for retrieving various valuesets, such as measurement types, supported\
+    \ by the system."
+  - name: Patient
+    description: API for retrieving information about the patient.
+  - name: QuestionnaireResponse
+    description: API for manipulating and retrieving QuestionnaireResponses.
+  - name: Organization
+    description: API for retrieving Organizations.
+  - name: CarePlan
+    description: API for retrieving CarePlans.
+paths:
+  /v1/questionnaireresponse:
+    post:
+      tags:
+        - QuestionnaireResponse
+      operationId: submitQuestionnaireResponse
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionnaireResponseDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CallToActionDTO'
+  /v1/{organizationId}/measurementtype:
+    get:
+      tags:
+        - ValueSet
+      summary: Get measurement types.
+      description: Retrieves list of measurement types supported by the requestors
+        organization.
+      operationId: getMeasurementTypes
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MeasurementTypeDto'
+  /v1/{organizationId}/measurementtype/threshold:
+    get:
+      tags:
+        - ValueSet
+      summary: Get thresholds for measurement types.
+      description: Retrieves list of thresholds for measurement types supported by
+        the requestors organization.
+      operationId: getMeasurementTypeThresholds
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ThresholdDto'
+  /v1/user:
+    get:
+      tags:
+        - User
+      operationId: getUser
+      responses:
+        "200":
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UserContext'
+  /v1/questionnaireresponses:
+    get:
+      tags:
+        - QuestionnaireResponse
+      operationId: getQuestionnaireResponsesForMultipleCarePlans
+      parameters:
+        - name: carePlanIds
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: questionnaireIds
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: pageNumber
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuestionnaireResponseDto'
+  /v1/questionnaireresponses/{id}:
+    get:
+      tags:
+        - QuestionnaireResponse
+      operationId: getQuestionnaireResponseById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/QuestionnaireResponseDto'
+  /v1/questionnaireresponses/careplan/{carePlanId}:
+    get:
+      tags:
+        - QuestionnaireResponse
+      operationId: getQuestionnaireResponsesByCarePlanId
+      parameters:
+        - name: carePlanId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: questionnaireIds
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: pageNumber
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuestionnaireResponseDto'
+  /v1/patient:
+    get:
+      tags:
+        - Patient
+      operationId: getPatient
+      responses:
+        "200":
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/PatientDto'
+  /v1/organizations:
+    get:
+      tags:
+        - Organization
+      operationId: getOrganizations
+      responses:
+        "200":
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrganizationDto'
+  /v1/organizations/{id}:
+    get:
+      tags:
+        - Organization
+      operationId: getOrganization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/OrganizationDto'
+  /v1/careplans/active:
+    get:
+      tags:
+        - CarePlan
+      operationId: getActiveCarePlans
+      responses:
+        "200":
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CarePlanDto'
+components:
+  schemas:
+    AddressDto:
+      type: object
+      properties:
+        street:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+        city:
+          type: string
+
+
+    AnswerDto:
+      type: object
+      properties:
+        linkId:
+          type: string
+        value:
+          type: string
+        answerType:
+          type: string
+          enum:
+            - INTEGER
+            - STRING
+            - BOOLEAN
+            - QUANTITY
+            - GROUP
+        subAnswers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnswerDto'
+
+    ContactDetailsDto:
+      type: object
+      properties:
+        address:
+          $ref: '#/components/schemas/AddressDto'
+        phone:
+          $ref: '#/components/schemas/PhoneDto'
+    EnableWhen:
+      type: object
+      properties:
+        answer:
+          $ref: '#/components/schemas/AnswerDto'
+        operator:
+          type: string
+          enum:
+            - EQUAL
+            - GREATER_THAN
+            - LESS_THAN
+            - GREATER_OR_EQUAL
+            - LESS_OR_EQUAL
+    MeasurementTypeDto:
+      type: object
+      properties:
+        system:
+          type: string
+        code:
+          type: string
+        display:
+          type: string
+        threshold:
+          $ref: '#/components/schemas/ThresholdDto'
+    Option:
+      type: object
+      properties:
+        option:
+          type: string
+        comment:
+          type: string
+    PatientDto:
+      type: object
+      properties:
+        givenName:
+          type: string
+        familyName:
+          type: string
+        cpr:
+          type: string
+        customUserName:
+          type: string
+        contactsDetails:
+          $ref: '#/components/schemas/ContactDetailsDto'
+        primaryContacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrimaryContactDto'
+    PhoneDto:
+      type: object
+      properties:
+        primary:
+          type: string
+        secondary:
+          type: string
+    PrimaryContactDto:
+      type: object
+      properties:
+        name:
+          type: string
+        affiliation:
+          type: string
+        contactDetails:
+          $ref: '#/components/schemas/ContactDetailsDto'
+        organization:
+          type: string
+    QuestionAnswerPairDto:
+      type: object
+      properties:
+        question:
+          $ref: '#/components/schemas/QuestionDto'
+        answer:
+          $ref: '#/components/schemas/AnswerDto'
+    QuestionDto:
+      type: object
+      properties:
+        linkId:
+          type: string
+        text:
+          type: string
+        abbreviation:
+          type: string
+        required:
+          type: boolean
+        questionType:
+          type: string
+          enum:
+            - CHOICE
+            - INTEGER
+            - QUANTITY
+            - STRING
+            - BOOLEAN
+            - DISPLAY
+            - GROUP
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/Option'
+        helperText:
+          type: string
+        enableWhens:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnableWhen'
+        measurementType:
+          $ref: '#/components/schemas/MeasurementTypeDto'
+        subQuestions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionDto'
+        deprecated:
+          type: boolean
+
+    BaseDto:
+      type: object
+      properties:
+        organizationId:
+          type: string
+          description: Id of the resource
+          example: CarePlan/10
+        id:
+          type: string
+          description: Id of the resource
+          example: CarePlan/10
+
+
+    QuestionnaireResponseDto:
+      allOf:
+        - $ref: "#/components/schemas/BaseDto"
+        - type: object
+          properties:
+            organizationId:
+              type: string
+            questionnaireId:
+              type: string
+            carePlanId:
+              type: string
+            questionnaireName:
+              type: string
+            questionAnswerPairs:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuestionAnswerPairDto'
+            answered:
+              type: string
+              format: date-time
+            examinationStatus:
+              type: string
+              enum:
+                - NOT_EXAMINED
+                - UNDER_EXAMINATION
+                - EXAMINED
+            examined:
+              type: string
+              format: date-time
+            triagingCategory:
+              type: string
+              enum:
+                - RED
+                - YELLOW
+                - GREEN
+            patient:
+              $ref: '#/components/schemas/PatientDto'
+    ThresholdDto:
+      type: object
+      properties:
+        questionId:
+          type: string
+        conceptCode:
+          type: string
+        type:
+          type: string
+          enum:
+            - NORMAL
+            - ABNORMAL
+            - CRITICAL
+        valueBoolean:
+          type: boolean
+        valueQuantityLow:
+          type: number
+          format: double
+        valueQuantityHigh:
+          type: number
+          format: double
+    CallToActionDTO:
+      type: object
+      properties:
+        callToAction:
+          type: string
+    UserContext:
+      type: object
+      properties:
+        cpr:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        fullName:
+          type: string
+        userId:
+          type: string
+        entitlements:
+          type: array
+          items:
+            type: string
+    OrganizationDto:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id of the resource
+          example: CarePlan/10
+        name:
+          type: string
+        contactDetails:
+          $ref: '#/components/schemas/ContactDetailsDto'
+        phoneHours:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhoneHourDto'
+        blob:
+          type: string
+
+
+    PhoneHourDto:
+      type: object
+      properties:
+        weekdays:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeekDayDto'
+        from:
+          type: string
+        to:
+          type: string
+
+    CarePlanDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseDto'
+        - type: object
+          properties:
+            organizationId:
+              type: string
+            title:
+              type: string
+            status:
+              type: string
+            created:
+              type: string
+              format: date-time
+            startDate:
+              type: string
+              format: date-time
+            endDate:
+              type: string
+              format: date-time
+            patientDto:
+              $ref: '#/components/schemas/PatientDto'
+            questionnaires:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuestionnaireWrapperDto'
+            planDefinitions:
+              type: array
+              items:
+                $ref: '#/components/schemas/PlanDefinitionDto'
+            departmentName:
+              type: string
+    FrequencyDto:
+      type: object
+      properties:
+        weekdays:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeekDayDto'
+        timeOfDay:
+          type: string
+
+    WeekDayDto:
+      type: string
+      enum:
+        - MON
+        - TUE
+        - WED
+        - THU
+        - FRI
+        - SAT
+        - SUN
+
+    PlanDefinitionDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseDto'
+        - type: object
+          properties:
+            organizationId:
+              type: string
+            name:
+              type: string
+            title:
+              type: string
+            questionnaires:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuestionnaireWrapperDto'
+
+    QuestionnaireDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseDto'
+        - type: object
+          properties:
+            organizationId:
+              type: string
+            title:
+              type: string
+            status:
+              type: string
+            questions:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuestionDto'
+            blob:
+              type: string
+
+    QuestionnaireWrapperDto:
+      type: object
+      properties:
+        questionnaire:
+          $ref: '#/components/schemas/QuestionnaireDto'
+        frequency:
+          $ref: '#/components/schemas/FrequencyDto'
+        thresholds:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThresholdDto'

@@ -2,7 +2,6 @@ package dk.kvalitetsit.hjemmebehandling.service;
 
 import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirClient;
-import dk.kvalitetsit.hjemmebehandling.fhir.FhirLookupResult;
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirMapper;
 import dk.kvalitetsit.hjemmebehandling.model.PatientModel;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ErrorKind;
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PatientService {
-    private static final Logger logger = LoggerFactory.getLogger(OrganizationService.class);
+    private static final Logger logger = LoggerFactory.getLogger(PatientService.class);
 
     private final FhirClient fhirClient;
 
