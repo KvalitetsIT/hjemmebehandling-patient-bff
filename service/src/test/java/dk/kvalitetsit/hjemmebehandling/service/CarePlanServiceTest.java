@@ -4,6 +4,7 @@ import dk.kvalitetsit.hjemmebehandling.fhir.ExtensionMapper;
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirClient;
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirLookupResult;
 import dk.kvalitetsit.hjemmebehandling.fhir.FhirMapper;
+import dk.kvalitetsit.hjemmebehandling.model.CarePlanModel;
 import dk.kvalitetsit.hjemmebehandling.service.access.AccessValidator;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
@@ -20,109 +21,64 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CarePlanServiceTest {
-    @InjectMocks
-    private CarePlanService subject;
-
-    @Mock
-    private FhirClient fhirClient;
-
-    @Mock
-    private FhirMapper fhirMapper;
-
-    @Mock
-    private AccessValidator accessValidator;
-
     private static final String CPR_1 = "0101010101";
-
     private static final String CAREPLAN_ID_1 = "CarePlan/careplan-1";
     private static final String CAREPLAN_ID_2 = "CarePlan/careplan-2";
     private static final String PATIENT_ID_1 = "Patient/patient-1";
-
     private static final Instant POINT_IN_TIME = Instant.parse("2021-11-23T00:00:00.000Z");
-
-    /*
-    3 tests below have been invalidated because of RIM-1150
-    Todo: Remove or correct these
+    @InjectMocks
+    private CarePlanService subject;
+    @Mock
+    private FhirClient fhirClient;
+    @Mock
+    private FhirMapper fhirMapper;
+    @Mock
+    private AccessValidator accessValidator;
 
     @Test
     public void getActiveCarePlan_carePlanPresent_returnsCarePlan() throws Exception {
-        // Arrange
         String cpr = CPR_1;
-
-        CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1, PATIENT_ID_1);
-        Patient patient = buildPatient(PATIENT_ID_1);
-
+        CarePlan carePlan = buildCarePlan(CAREPLAN_ID_1);
+        Patient patient = buildPatient();
         FhirLookupResult lookupResult = FhirLookupResult.fromResources(carePlan, patient);
-        Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(lookupResult);
 
+        Mockito.when(fhirClient.lookupActiveCarePlans(cpr)).thenReturn(lookupResult);
         CarePlanModel carePlanModel = new CarePlanModel();
         Mockito.when(fhirMapper.mapCarePlan(carePlan, lookupResult)).thenReturn(carePlanModel);
 
-        // Act
-        Optional<CarePlanModel> result = subject.getActiveCarePlan(cpr);
-
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals(carePlanModel, result.get());
+        List<CarePlanModel> result = subject.getActiveCarePlans(cpr);
+        assertFalse(result.isEmpty());
+        assertEquals(carePlanModel, result.getFirst());
     }
 
     @Test
     public void getActiveCarePlan_carePlanMissing_returnsEmpty() throws Exception {
-        // Arrange
         String cpr = CPR_1;
-
-        Mockito.when(fhirClient.lookupActiveCarePlan(cpr)).thenReturn(FhirLookupResult.fromResources());
-
-        // Act
-        Optional<CarePlanModel> result = subject.getActiveCarePlan(cpr);
-
-        // Assert
-        assertFalse(result.isPresent());
+        Mockito.when(fhirClient.lookupActiveCarePlans(cpr)).thenReturn(FhirLookupResult.fromResources());
+        List<CarePlanModel> result = subject.getActiveCarePlans(cpr);
+        assertTrue(result.isEmpty());
     }
 
     @Test
     public void getActiveCarePlan_malformedResult_throwsException() throws Exception {
-        // Arrange
         String cpr = CPR_1;
-
-        CarePlan carePlan1 = buildCarePlan(CAREPLAN_ID_1, PATIENT_ID_1);
-        CarePlan carePlan2 = buildCarePlan(CAREPLAN_ID_2, PATIENT_ID_1);
-
+        CarePlan carePlan1 = buildCarePlan(CAREPLAN_ID_1);
+        CarePlan carePlan2 = buildCarePlan(CAREPLAN_ID_2);
         Mockito.when(fhirClient.lookupActiveCarePlans(cpr)).thenReturn(FhirLookupResult.fromResources(carePlan1, carePlan2));
-
-        // Act
-
-        // Assert
         assertThrows(IllegalStateException.class, () -> subject.getActiveCarePlans(cpr));
     }
 
-    */
-    private CarePlan buildCarePlan(String carePlanId, String patientId) {
-        return buildCarePlan(carePlanId, patientId, null);
-    }
 
-    private CarePlan buildCarePlan(String carePlanId, String patientId, String questionnaireId) {
+    private CarePlan buildCarePlan(String carePlanId) {
         CarePlan carePlan = new CarePlan();
-
         carePlan.setId(carePlanId);
-        carePlan.setSubject(new Reference(patientId));
-
-        if(questionnaireId != null) {
-            CarePlan.CarePlanActivityDetailComponent detail = new CarePlan.CarePlanActivityDetailComponent();
-            detail.setInstantiatesCanonical(List.of(new CanonicalType(questionnaireId)));
-            detail.setScheduled(new Timing());
-            detail.addExtension(ExtensionMapper.mapActivitySatisfiedUntil(POINT_IN_TIME));
-            carePlan.addActivity().setDetail(detail);
-        }
-
+        carePlan.setSubject(new Reference(CarePlanServiceTest.PATIENT_ID_1));
         return carePlan;
     }
 
-    private Patient buildPatient(String patientId) {
+    private Patient buildPatient() {
         Patient patient = new Patient();
-
-        patient.setId(patientId);
-
+        patient.setId(CarePlanServiceTest.PATIENT_ID_1);
         return patient;
     }
 }

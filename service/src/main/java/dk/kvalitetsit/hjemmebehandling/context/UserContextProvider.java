@@ -1,9 +1,9 @@
 package dk.kvalitetsit.hjemmebehandling.context;
 
+import jakarta.servlet.http.HttpSession;
+import org.openapitools.model.UserContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
-
-import jakarta.servlet.http.HttpSession;
 
 @Component
 @RequestScope

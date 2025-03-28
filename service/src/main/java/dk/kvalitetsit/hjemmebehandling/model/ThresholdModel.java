@@ -3,67 +3,67 @@ package dk.kvalitetsit.hjemmebehandling.model;
 import dk.kvalitetsit.hjemmebehandling.types.ThresholdType;
 
 public class ThresholdModel {
-  private String questionnaireItemLinkId;
-  private String conceptCode;
-  private ThresholdType type;
-  private Double valueQuantityLow;
-  private Double valueQuantityHigh;
-  private Boolean valueBoolean;
-  private String valueOption;
+    private String questionnaireItemLinkId;
+    private String conceptCode;
+    private ThresholdType type;
+    private Double valueQuantityLow;
+    private Double valueQuantityHigh;
+    private Boolean valueBoolean;
+    private String valueOption;
 
-  public String getQuestionnaireItemLinkId() {
-    return questionnaireItemLinkId;
-  }
+    public String getQuestionnaireItemLinkId() {
+        return questionnaireItemLinkId;
+    }
 
-  public void setQuestionnaireItemLinkId(String questionnaireItemLinkId) {
-    this.questionnaireItemLinkId = questionnaireItemLinkId;
-  }
+    public void setQuestionnaireItemLinkId(String questionnaireItemLinkId) {
+        this.questionnaireItemLinkId = questionnaireItemLinkId;
+    }
 
-  public String getConceptCode() {
-    return conceptCode;
-  }
+    public String getConceptCode() {
+        return conceptCode;
+    }
 
-  public void setConceptCode(String conceptCode) {
-    this.conceptCode = conceptCode;
-  }
+    public void setConceptCode(String conceptCode) {
+        this.conceptCode = conceptCode;
+    }
 
-  public ThresholdType getType() {
-    return type;
-  }
+    public ThresholdType getType() {
+        return type;
+    }
 
-  public void setType(ThresholdType type) {
-    this.type = type;
-  }
+    public void setType(ThresholdType type) {
+        this.type = type;
+    }
 
-  public Double getValueQuantityLow() {
-    return valueQuantityLow;
-  }
+    public Double getValueQuantityLow() {
+        return valueQuantityLow;
+    }
 
-  public void setValueQuantityLow(Double valueQuantityLow) {
-    this.valueQuantityLow = valueQuantityLow;
-  }
+    public void setValueQuantityLow(Double valueQuantityLow) {
+        this.valueQuantityLow = valueQuantityLow;
+    }
 
-  public Double getValueQuantityHigh() {
-    return valueQuantityHigh;
-  }
+    public Double getValueQuantityHigh() {
+        return valueQuantityHigh;
+    }
 
-  public void setValueQuantityHigh(Double valueQuantityHigh) {
-    this.valueQuantityHigh = valueQuantityHigh;
-  }
+    public void setValueQuantityHigh(Double valueQuantityHigh) {
+        this.valueQuantityHigh = valueQuantityHigh;
+    }
 
-  public Boolean getValueBoolean() {
-    return valueBoolean;
-  }
+    public Boolean getValueBoolean() {
+        return valueBoolean;
+    }
 
-  public void setValueBoolean(Boolean valueBoolean) {
-    this.valueBoolean = valueBoolean;
-  }
+    public void setValueBoolean(Boolean valueBoolean) {
+        this.valueBoolean = valueBoolean;
+    }
 
-  public String getValueOption() {
-    return valueOption;
-  }
+    public String getValueOption() {
+        return valueOption;
+    }
 
-  public void setValueOption(String valueOption) {
-    this.valueOption = valueOption;
-  }
+    public void setValueOption(String valueOption) {
+        this.valueOption = valueOption;
+    }
 }

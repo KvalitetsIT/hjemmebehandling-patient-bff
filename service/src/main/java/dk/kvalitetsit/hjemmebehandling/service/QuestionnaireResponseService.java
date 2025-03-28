@@ -2,7 +2,9 @@ package dk.kvalitetsit.hjemmebehandling.service;
 
 import dk.kvalitetsit.hjemmebehandling.constants.ExaminationStatus;
 import dk.kvalitetsit.hjemmebehandling.constants.errors.ErrorDetails;
-import dk.kvalitetsit.hjemmebehandling.fhir.*;
+import dk.kvalitetsit.hjemmebehandling.fhir.FhirClient;
+import dk.kvalitetsit.hjemmebehandling.fhir.FhirLookupResult;
+import dk.kvalitetsit.hjemmebehandling.fhir.FhirMapper;
 import dk.kvalitetsit.hjemmebehandling.model.*;
 import dk.kvalitetsit.hjemmebehandling.service.access.AccessValidator;
 import dk.kvalitetsit.hjemmebehandling.service.exception.AccessValidationException;
@@ -12,26 +14,26 @@ import dk.kvalitetsit.hjemmebehandling.service.frequency.FrequencyEnumerator;
 import dk.kvalitetsit.hjemmebehandling.service.triage.TriageEvaluator;
 import dk.kvalitetsit.hjemmebehandling.types.PageDetails;
 import dk.kvalitetsit.hjemmebehandling.util.DateProvider;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
 public class QuestionnaireResponseService extends AccessValidatingService {
     private static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseService.class);
 
-    private FhirClient fhirClient;
-
-    private FhirMapper fhirMapper;
-
-    private DateProvider dateProvider;
-
-    private TriageEvaluator triageEvaluator;
+    private final FhirClient fhirClient;
+    private final FhirMapper fhirMapper;
+    private final DateProvider dateProvider;
+    private final TriageEvaluator triageEvaluator;
 
     public QuestionnaireResponseService(FhirClient fhirClient, FhirMapper fhirMapper, DateProvider dateProvider, TriageEvaluator triageEvaluator, AccessValidator accessValidator) {
         super(accessValidator);
@@ -71,7 +73,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         FhirLookupResult lookupResult = fhirClient.lookupQuestionnaireResponseById(id.toString());
 
         Optional<QuestionnaireResponse> questionnaireResponse = lookupResult.getQuestionnaireResponse(id.toString());
-        if (!questionnaireResponse.isPresent()) {
+        if (questionnaireResponse.isEmpty()) {
             return Optional.empty();
         }
 
@@ -99,19 +101,19 @@ public class QuestionnaireResponseService extends AccessValidatingService {
         var careplansWithMatchingId = carePlanResult.getCarePlans().stream().filter(carePlan -> {
             var id = carePlan.getIdElement().getIdPart();
             return id.equals(carePlanId);
-        }).collect(Collectors.toList());
+        }).toList();
 
 
         // Check that the carePlan indicated by the client is that of the patient's active careplan
-        if (careplansWithMatchingId.size() < 1) {
+        if (careplansWithMatchingId.isEmpty()) {
             throw new ServiceException("The provided CarePlan id does not identify the patient's current active careplan.", ErrorKind.BAD_REQUEST, ErrorDetails.WRONG_CAREPLAN_ID);
         }
 
         if (careplansWithMatchingId.size() != 1) {
-            throw new IllegalStateException(String.format("Error looking up active careplan! Expected to retrieve exactly one resource with matching id!"));
+            throw new IllegalStateException("Error looking up active careplan! Expected to retrieve exactly one resource with matching id!");
         }
 
-        var carePlanModel = fhirMapper.mapCarePlan(careplansWithMatchingId.get(0), carePlanResult);
+        var carePlanModel = fhirMapper.mapCarePlan(careplansWithMatchingId.getFirst(), carePlanResult);
 
         // make sure the questionnaire is still active
         boolean questionnaireExists = carePlanModel.getQuestionnaires().stream().anyMatch(q -> q.getQuestionnaire().getId().equals(questionnaireResponseModel.getQuestionnaireId()));
@@ -175,7 +177,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
     private void refreshFrequencyTimestampForCarePlan(CarePlanModel carePlanModel) {
         var carePlanSatisfiedUntil = carePlanModel.getQuestionnaires()
                 .stream()
-                .map(qw -> qw.getSatisfiedUntil())
+                .map(QuestionnaireWrapperModel::getSatisfiedUntil)
                 .min(Comparator.naturalOrder())
                 .orElse(Instant.MAX);
         carePlanModel.setSatisfiedUntil(carePlanSatisfiedUntil);
@@ -202,7 +204,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
     private List<AnswerModel> getAnswers(QuestionnaireResponseModel questionnaireResponseModel) {
         return questionnaireResponseModel.getQuestionAnswerPairs()
                 .stream()
-                .map(qa -> qa.getAnswer())
+                .map(QuestionAnswerPairModel::getAnswer)
                 .collect(Collectors.toList());
     }
 
@@ -221,7 +223,7 @@ public class QuestionnaireResponseService extends AccessValidatingService {
     private List<QuestionnaireResponse> pageResponses(List<QuestionnaireResponse> responses, PageDetails pageDetails) {
         return responses
                 .stream()
-                .skip((pageDetails.getPageNumber() - 1) * pageDetails.getPageSize())
+                .skip((long) (pageDetails.getPageNumber() - 1) * pageDetails.getPageSize())
                 .limit(pageDetails.getPageSize())
                 .collect(Collectors.toList());
     }
