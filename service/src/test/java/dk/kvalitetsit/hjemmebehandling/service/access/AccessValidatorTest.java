@@ -32,57 +32,34 @@ public class AccessValidatorTest {
 
     @Test
     public void validateAccess_unknownResourceType() {
-        // Arrange
         var resource = new QuestionnaireResponse();
-
-        // Act
-
-        // Assert
         assertThrows(IllegalArgumentException.class, () -> subject.validateAccess(resource));
     }
 
     @Test
     public void validateAccess_contextNotInitialized() {
-        // Arrange
         var resource = buildResource(PATIENT_ID_1, CPR_1);
-
-        // Act
-
-        // Assert
         assertThrows(IllegalStateException.class, () -> subject.validateAccess(resource));
     }
 
     @Test
     public void validateAccess_success() {
-        // Arrange
         var resource = buildResource(PATIENT_ID_1, CPR_1);
-
         UserContext context = buildContext(CPR_1);
         Mockito.when(userContextProvider.getUserContext()).thenReturn(context);
-
-        // Act
-
-        // Assert
         assertDoesNotThrow(() -> subject.validateAccess(resource));
     }
 
     @Test
     public void validateAccess_failure() {
-        // Arrange
         var resource = buildResource(PATIENT_ID_1, CPR_1);
-
         UserContext context = buildContext(CPR_2);
         Mockito.when(userContextProvider.getUserContext()).thenReturn(context);
-
-        // Act
-
-        // Assert
         assertThrows(AccessValidationException.class, () -> subject.validateAccess(resource));
     }
 
     private DomainResource buildResource(String patientId, String cpr) {
         var resource = new Patient();
-
         resource.setId(patientId);
         resource.addIdentifier()
                 .setSystem(Systems.CPR)

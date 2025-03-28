@@ -1,12 +1,12 @@
 package dk.kvalitetsit.hjemmebehandling.controller;
 
+import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
 import org.openapitools.api.UserApi;
 import org.openapitools.model.UserContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import dk.kvalitetsit.hjemmebehandling.context.UserContextProvider;
 
 @RestController
 public class UserController extends BaseController implements UserApi {
@@ -21,7 +21,7 @@ public class UserController extends BaseController implements UserApi {
 
     @Override
     public ResponseEntity<UserContext> getUser() {
-            logger.info("Getting user context information");
-            return ResponseEntity.ok(userContextProvider.getUserContext());
+        logger.info("Getting user context information");
+        return ResponseEntity.ok(userContextProvider.getUserContext());
     }
 }

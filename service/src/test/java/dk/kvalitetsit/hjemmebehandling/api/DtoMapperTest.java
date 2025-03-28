@@ -20,18 +20,13 @@ public class DtoMapperTest {
     private static final String PLANDEFINITION_ID_1 = "PlanDefinition/plandefinition-1";
     private static final String QUESTIONNAIRE_ID_1 = "Questionnaire/questionnaire-1";
     private static final String QUESTIONNAIRERESPONSE_ID_1 = "QuestionnaireResponse/questionnaireresponse-1";
-    private DtoMapper subject = new DtoMapper();
+    private final DtoMapper subject = new DtoMapper();
 
     @Test
     public void mapCarePlanDto_success() {
-        // Arrange
         CarePlanDto carePlanDto = buildCarePlanDto();
-
-        // Act
         CarePlanModel result = subject.mapCarePlanDto(carePlanDto);
-
-        // Assert
-        assertEquals(carePlanDto.getId(), result.getId().toString());
+        assertEquals(carePlanDto.getId().get(), result.getId().toString());
     }
 
     @Test
@@ -44,95 +39,79 @@ public class DtoMapperTest {
 
     @Test
     public void mapCarePlanModel_success() {
-        // Arrange
         CarePlanModel carePlanModel = buildCarePlanModel();
-
-        // Act
         CarePlanDto result = subject.mapCarePlanModel(carePlanModel);
-
-        // Assert
-        assertEquals(carePlanModel.getId().toString(), result.getId());
+        assertEquals(carePlanModel.getId().toString(), result.getId().get());
     }
 
     @Test
     public void mapOrganizationDto_success() {
-        // Arrange
         OrganizationDto organizationDto = buildOrganizationDto();
-
-        // Act
         OrganizationModel result = subject.mapOrganizationDto(organizationDto);
-
-        // Assert
         assertEquals(organizationDto.getContactDetails().get().getAddress().get().getCity().get(), result.getContactDetails().getAddress().getCity());
         assertEquals(organizationDto.getContactDetails().get().getAddress().get().getPostalCode().get(), result.getContactDetails().getAddress().getPostalCode());
     }
 
     @Test
     public void mapOrganizationModel_success() {
-        // Arrange
         OrganizationModel organizationModel = buildOrganizationModel();
-
-        // Act
         OrganizationDto result = subject.mapOrganizationModel(organizationModel);
-
-        // Assert
         assertEquals(organizationModel.getContactDetails().getAddress().getCity(), result.getContactDetails().get().getAddress().get().getCity().get());
         assertEquals(organizationModel.getContactDetails().getAddress().getPostalCode(), result.getContactDetails().get().getAddress().get().getPostalCode().get());
     }
 
     @Test
     public void mapPatientDto_success() {
-        // Arrange
         PatientDto patientDto = buildPatientDto();
 
-        // Act
         PatientModel result = subject.mapPatientDto(patientDto);
-
-        // Assert
         assertEquals(patientDto.getCpr().get(), result.getCpr());
-        assertEquals(patientDto.getContactsDetails().get().getAddress().get().getStreet().get(), result.getContactDetails().getAddress().getStreet());
-        assertEquals(patientDto.getContactsDetails().get().getAddress().get().getCountry().get(), result.getContactDetails().getAddress().getCountry());
-        assertEquals(patientDto.getContactsDetails().get().getAddress().get().getPostalCode().get(), result.getContactDetails().getAddress().getPostalCode());
-        assertEquals(patientDto.getContactsDetails().get().getPhone().get().getPrimary().get(), result.getContactDetails().getPhone().getPrimary());
-        assertEquals(patientDto.getContactsDetails().get().getPhone().get().getSecondary().get(), result.getContactDetails().getPhone().getSecondary());
+
+        var contactDetailsDto = patientDto.getContactsDetails().get();
+        var addressDto = contactDetailsDto.getAddress().get();
+        var phoneDto = contactDetailsDto.getPhone().get();
+
+        assertEquals(addressDto.getStreet().get(), result.getContactDetails().getAddress().getStreet());
+        assertEquals(addressDto.getCountry().get(), result.getContactDetails().getAddress().getCountry());
+        assertEquals(addressDto.getPostalCode().get(), result.getContactDetails().getAddress().getPostalCode());
+        assertEquals(phoneDto.getPrimary().get(), result.getContactDetails().getPhone().getPrimary());
+        assertEquals(phoneDto.getSecondary().get(), result.getContactDetails().getPhone().getSecondary());
     }
 
     @Test
     public void mapPatientModel_success() {
-        // Arrange
         PatientModel patientModel = buildPatientModel();
-
-        // Act
         PatientDto result = subject.mapPatientModel(patientModel);
 
-        // Assert
         assertEquals(patientModel.getCpr(), result.getCpr().get());
-        assertEquals(patientModel.getContactDetails().getAddress().getStreet(), result.getContactsDetails().get().getAddress().get().getStreet().get());
-        assertEquals(patientModel.getContactDetails().getAddress().getCountry(), result.getContactsDetails().get().getAddress().get().getCountry().get());
-        assertEquals(patientModel.getContactDetails().getAddress().getPostalCode(), result.getContactsDetails().get().getAddress().get().getPostalCode().get());
-        assertEquals(patientModel.getContactDetails().getPhone().getPrimary(), result.getContactsDetails().get().getPhone().get().getPrimary().get());
-        assertEquals(patientModel.getContactDetails().getPhone().getSecondary(), result.getContactsDetails().get().getPhone().get().getSecondary().get());
+
+        var contactDetailsDto = result.getContactsDetails().get();
+        var addressDto = contactDetailsDto.getAddress().get();
+        var phoneDto = contactDetailsDto.getPhone().get();
+
+        var contactDetailsModel = patientModel.getContactDetails();
+        var addressModel = contactDetailsModel.getAddress();
+        var phoneModel = contactDetailsModel.getPhone();
+
+        assertEquals(addressModel.getStreet(), addressDto.getStreet().get());
+        assertEquals(addressModel.getCountry(), addressDto.getCountry().get());
+        assertEquals(addressModel.getPostalCode(), addressDto.getPostalCode().get());
+        assertEquals(phoneModel.getPrimary(), phoneDto.getPrimary().get());
+        assertEquals(phoneModel.getSecondary(), phoneDto.getSecondary().get());
     }
 
 
     @Test
     public void mapQuestionnaireResponseModel_success() {
-        // Arrange
         QuestionnaireResponseModel questionnaireResponseModel = buildQuestionnaireResponseModel();
-
-        // Act
         QuestionnaireResponseDto result = subject.mapQuestionnaireResponseModel(questionnaireResponseModel);
-
-        // Assert
-        assertEquals(questionnaireResponseModel.getId().toString(), result.getId());
+        assertEquals(questionnaireResponseModel.getId().toString(), result.getId().get());
     }
 
     private AnswerModel buildAnswerModel() {
         AnswerModel answerModel = new AnswerModel();
-
         answerModel.setAnswerType(AnswerType.STRING);
         answerModel.setValue("foo");
-
         return answerModel;
     }
 
@@ -147,13 +126,11 @@ public class DtoMapperTest {
 
     private CarePlanModel buildCarePlanModel() {
         CarePlanModel carePlanModel = new CarePlanModel();
-
         carePlanModel.setId(new QualifiedId(CAREPLAN_ID_1));
         carePlanModel.setStatus(CarePlanStatus.ACTIVE);
         carePlanModel.setPatient(buildPatientModel());
         carePlanModel.setQuestionnaires(List.of(buildQuestionnaireWrapperModel()));
         carePlanModel.setPlanDefinitions(List.of(buildPlanDefinitionModel()));
-
         return carePlanModel;
     }
 
@@ -209,10 +186,8 @@ public class DtoMapperTest {
 
     private FrequencyModel buildFrequencyModel() {
         FrequencyModel frequencyModel = new FrequencyModel();
-
         frequencyModel.setWeekdays(List.of(Weekday.FRI));
         frequencyModel.setTimeOfDay(LocalTime.parse("04:00"));
-
         return frequencyModel;
     }
 
@@ -235,7 +210,6 @@ public class DtoMapperTest {
 
     private OrganizationModel buildOrganizationModel() {
         OrganizationModel organizationModel = new OrganizationModel();
-
         organizationModel.setId(new QualifiedId(ORGANIZATION_ID_1));
         organizationModel.setName("Infektionsmedicinsk afdeling");
         organizationModel.setContactDetails(new ContactDetailsModel());
@@ -258,12 +232,10 @@ public class DtoMapperTest {
     }
 
     private PatientDto buildPatientDto() {
-        PatientDto patientDto = new PatientDto()
+        return new PatientDto()
                 .cpr("0101010101")
-                .contactsDetails(buildContactDetailsDto());
-        patientDto.setPrimaryContacts(List.of(buildPrimaryContactDto()));
-
-        return patientDto;
+                .contactsDetails(buildContactDetailsDto())
+                .primaryContacts(List.of(buildPrimaryContactDto()));
     }
 
     private PatientModel buildPatientModel() {
@@ -275,10 +247,9 @@ public class DtoMapperTest {
     }
 
     private PlanDefinitionDto buildPlanDefinitionDto() {
-        PlanDefinitionDto planDefinitionDto = new PlanDefinitionDto();
-        planDefinitionDto.setId(PLANDEFINITION_ID_1);
-        planDefinitionDto.setQuestionnaires(List.of(buildQuestionnaireWrapperDto()));
-        return planDefinitionDto;
+        return new PlanDefinitionDto()
+                .id(PLANDEFINITION_ID_1)
+                .questionnaires(List.of(buildQuestionnaireWrapperDto()));
     }
 
     private PlanDefinitionModel buildPlanDefinitionModel() {
@@ -303,10 +274,9 @@ public class DtoMapperTest {
     }
 
     private QuestionnaireDto buildQuestionnaireDto() {
-        QuestionnaireDto questionnaireDto = new QuestionnaireDto();
-        questionnaireDto.setId("questionnaire-1");
-        questionnaireDto.setQuestions(List.of(buildQuestionDto()));
-        return questionnaireDto;
+        return new QuestionnaireDto()
+                .id("questionnaire-1")
+                .questions(List.of(buildQuestionDto()));
     }
 
     private QuestionnaireModel buildQuestionnaireModel() {

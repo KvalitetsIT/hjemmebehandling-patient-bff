@@ -3,27 +3,27 @@ info:
   title: OpenAPI definition
   version: v0
 servers:
-- url: http://localhost:8080/api
-  description: Generated server url
+  - url: http://localhost:8080/api
+    description: Generated server url
 tags:
-- name: User
-  description: API for retrieving information about users.
-- name: ValueSet
-  description: "API for retrieving various valuesets, such as measurement types, supported\
+  - name: User
+    description: API for retrieving information about users.
+  - name: ValueSet
+    description: "API for retrieving various valuesets, such as measurement types, supported\
     \ by the system."
-- name: Patient
-  description: API for retrieving information about the patient.
-- name: QuestionnaireResponse
-  description: API for manipulating and retrieving QuestionnaireResponses.
-- name: Organization
-  description: API for retrieving Organizations.
-- name: CarePlan
-  description: API for retrieving CarePlans.
+  - name: Patient
+    description: API for retrieving information about the patient.
+  - name: QuestionnaireResponse
+    description: API for manipulating and retrieving QuestionnaireResponses.
+  - name: Organization
+    description: API for retrieving Organizations.
+  - name: CarePlan
+    description: API for retrieving CarePlans.
 paths:
   /v1/questionnaireresponse:
     post:
       tags:
-      - QuestionnaireResponse
+        - QuestionnaireResponse
       operationId: submitQuestionnaireResponse
       requestBody:
         content:
@@ -35,28 +35,28 @@ paths:
         "200":
           description: OK
           content:
-            '*/*':
+            'application/json':
               schema:
                 $ref: '#/components/schemas/CallToActionDTO'
   /v1/{organizationId}/measurementtype:
     get:
       tags:
-      - ValueSet
+        - ValueSet
       summary: Get measurement types.
       description: Retrieves list of measurement types supported by the requestors
         organization.
       operationId: getMeasurementTypes
       parameters:
-      - name: organizationId
-        in: path
-        required: true
-        schema:
-          type: string
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           description: Successful operation.
           content:
-            '*/*':
+            'application/json':
               schema:
                 type: array
                 items:
@@ -64,22 +64,22 @@ paths:
   /v1/{organizationId}/measurementtype/threshold:
     get:
       tags:
-      - ValueSet
+        - ValueSet
       summary: Get thresholds for measurement types.
       description: Retrieves list of thresholds for measurement types supported by
         the requestors organization.
       operationId: getMeasurementTypeThresholds
       parameters:
-      - name: organizationId
-        in: path
-        required: true
-        schema:
-          type: string
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           description: Successful operation.
           content:
-            '*/*':
+            'application/json':
               schema:
                 type: array
                 items:
@@ -87,52 +87,52 @@ paths:
   /v1/user:
     get:
       tags:
-      - User
+        - User
       operationId: getUser
       responses:
         "200":
           description: OK
           content:
-            '*/*':
+            'application/json':
               schema:
                 $ref: '#/components/schemas/UserContext'
   /v1/questionnaireresponses:
     get:
       tags:
-      - QuestionnaireResponse
+        - QuestionnaireResponse
       operationId: getQuestionnaireResponsesForMultipleCarePlans
       parameters:
-      - name: carePlanIds
-        in: query
-        required: true
-        schema:
-          type: array
-          items:
-            type: string
-      - name: questionnaireIds
-        in: query
-        required: true
-        schema:
-          type: array
-          items:
-            type: string
-      - name: pageNumber
-        in: query
-        required: true
-        schema:
-          type: integer
-          format: int32
-      - name: pageSize
-        in: query
-        required: true
-        schema:
-          type: integer
-          format: int32
+        - name: carePlanIds
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: questionnaireIds
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: pageNumber
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
       responses:
         "200":
           description: OK
           content:
-            '*/*':
+            'application/json':
               schema:
                 type: array
                 items:
@@ -140,56 +140,56 @@ paths:
   /v1/questionnaireresponses/{id}:
     get:
       tags:
-      - QuestionnaireResponse
+        - QuestionnaireResponse
       operationId: getQuestionnaireResponseById
       parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           description: OK
           content:
-            '*/*':
+            'application/json':
               schema:
                 $ref: '#/components/schemas/QuestionnaireResponseDto'
-  /v1/questionnaireresponses/{carePlanId}:
+  /v1/questionnaireresponses/careplan/{carePlanId}:
     get:
       tags:
-      - QuestionnaireResponse
+        - QuestionnaireResponse
       operationId: getQuestionnaireResponsesByCarePlanId
       parameters:
-      - name: carePlanId
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: questionnaireIds
-        in: query
-        required: true
-        schema:
-          type: array
-          items:
+        - name: carePlanId
+          in: path
+          required: true
+          schema:
             type: string
-      - name: pageNumber
-        in: query
-        required: true
-        schema:
-          type: integer
-          format: int32
-      - name: pageSize
-        in: query
-        required: true
-        schema:
-          type: integer
-          format: int32
+        - name: questionnaireIds
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: pageNumber
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
       responses:
         "200":
           description: OK
           content:
-            '*/*':
+            'application/json':
               schema:
                 type: array
                 items:
@@ -197,25 +197,25 @@ paths:
   /v1/patient:
     get:
       tags:
-      - Patient
+        - Patient
       operationId: getPatient
       responses:
         "200":
           description: OK
           content:
-            '*/*':
+            'application/json':
               schema:
                 $ref: '#/components/schemas/PatientDto'
   /v1/organizations:
     get:
       tags:
-      - Organization
+        - Organization
       operationId: getOrganizations
       responses:
         "200":
           description: OK
           content:
-            '*/*':
+            'application/json':
               schema:
                 type: array
                 items:
@@ -223,31 +223,31 @@ paths:
   /v1/organizations/{id}:
     get:
       tags:
-      - Organization
+        - Organization
       operationId: getOrganization
       parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           description: OK
           content:
-            '*/*':
+            'application/json':
               schema:
                 $ref: '#/components/schemas/OrganizationDto'
   /v1/careplans/active:
     get:
       tags:
-      - CarePlan
+        - CarePlan
       operationId: getActiveCarePlans
       responses:
         "200":
           description: OK
           content:
-            '*/*':
+            'application/json':
               schema:
                 type: array
                 items:
@@ -277,11 +277,11 @@ components:
         answerType:
           type: string
           enum:
-          - INTEGER
-          - STRING
-          - BOOLEAN
-          - QUANTITY
-          - GROUP
+            - INTEGER
+            - STRING
+            - BOOLEAN
+            - QUANTITY
+            - GROUP
         subAnswers:
           type: array
           items:
@@ -302,11 +302,11 @@ components:
         operator:
           type: string
           enum:
-          - EQUAL
-          - GREATER_THAN
-          - LESS_THAN
-          - GREATER_OR_EQUAL
-          - LESS_OR_EQUAL
+            - EQUAL
+            - GREATER_THAN
+            - LESS_THAN
+            - GREATER_OR_EQUAL
+            - LESS_OR_EQUAL
     MeasurementTypeDto:
       type: object
       properties:
@@ -381,13 +381,13 @@ components:
         questionType:
           type: string
           enum:
-          - CHOICE
-          - INTEGER
-          - QUANTITY
-          - STRING
-          - BOOLEAN
-          - DISPLAY
-          - GROUP
+            - CHOICE
+            - INTEGER
+            - QUANTITY
+            - STRING
+            - BOOLEAN
+            - DISPLAY
+            - GROUP
         options:
           type: array
           items:
@@ -408,8 +408,6 @@ components:
           type: boolean
 
     BaseDto:
-      required:
-        - id
       type: object
       properties:
         organizationId:
@@ -445,18 +443,18 @@ components:
             examinationStatus:
               type: string
               enum:
-              - NOT_EXAMINED
-              - UNDER_EXAMINATION
-              - EXAMINED
+                - NOT_EXAMINED
+                - UNDER_EXAMINATION
+                - EXAMINED
             examined:
               type: string
               format: date-time
             triagingCategory:
               type: string
               enum:
-              - RED
-              - YELLOW
-              - GREEN
+                - RED
+                - YELLOW
+                - GREEN
             patient:
               $ref: '#/components/schemas/PatientDto'
     ThresholdDto:
@@ -469,9 +467,9 @@ components:
         type:
           type: string
           enum:
-          - NORMAL
-          - ABNORMAL
-          - CRITICAL
+            - NORMAL
+            - ABNORMAL
+            - CRITICAL
         valueBoolean:
           type: boolean
         valueQuantityLow:
@@ -504,7 +502,7 @@ components:
             type: string
     OrganizationDto:
       required:
-      - id
+        - id
       type: object
       properties:
         id:
@@ -537,7 +535,7 @@ components:
 
     CarePlanDto:
       allOf:
-        - $ref:  '#/components/schemas/BaseDto'
+        - $ref: '#/components/schemas/BaseDto'
         - type: object
           properties:
             organizationId:

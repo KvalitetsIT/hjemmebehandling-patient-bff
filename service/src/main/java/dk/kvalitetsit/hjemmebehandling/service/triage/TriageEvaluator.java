@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class TriageEvaluator {
-    private static Map<TriagingCategory, Integer> ranks = Map.of(
+    private static final Map<TriagingCategory, Integer> ranks = Map.of(
             TriagingCategory.RED, 3,
             TriagingCategory.YELLOW, 2,
             TriagingCategory.GREEN, 1
@@ -28,7 +28,7 @@ public class TriageEvaluator {
         // Group the thresholds by linkId
         var thresholdsByLinkId = thresholds
                 .stream()
-                .collect(Collectors.groupingBy(t -> t.getQuestionnaireItemLinkId()));
+                .collect(Collectors.groupingBy(ThresholdModel::getQuestionnaireItemLinkId));
 
         // Evaluate each answer against its thresholds.
         var result = TriagingCategory.GREEN;
@@ -69,20 +69,13 @@ public class TriageEvaluator {
 
         Optional<TriagingCategory> result = Optional.empty();
         for (ThresholdModel threshold : thresholdsForAnswer) {
-            boolean answerCoveredByThreshold = false;
-            switch (answer.getAnswerType()) {
-                case BOOLEAN:
-                    answerCoveredByThreshold = evaluateBooleanAnswer(answer, threshold);
-                    break;
-                case QUANTITY:
-                    answerCoveredByThreshold = evaluateQuantityAnswer(answer, threshold);
-                    break;
-                case STRING:
-                    answerCoveredByThreshold = evaluateStringAnswer(answer, threshold);
-                    break;
-                default:
-                    throw new IllegalArgumentException(String.format("Don't know how to handle AnswerType %s!", answer.getAnswerType().toString()));
-            }
+            boolean answerCoveredByThreshold = switch (answer.getAnswerType()) {
+                case BOOLEAN -> evaluateBooleanAnswer(answer, threshold);
+                case QUANTITY -> evaluateQuantityAnswer(answer, threshold);
+                case STRING -> evaluateStringAnswer(answer, threshold);
+                default ->
+                        throw new IllegalArgumentException(String.format("Don't know how to handle AnswerType %s!", answer.getAnswerType().toString()));
+            };
 
             if (answerCoveredByThreshold) {
                 return mapThresholdType(threshold.getType()); //Since we sorted the threshold by category, we can just return the first one that matches
@@ -106,7 +99,7 @@ public class TriageEvaluator {
         if (!List.of("true", "false").contains(answer.getValue())) {
             throw new IllegalArgumentException(String.format("Could not evaluate boolean answer for linkId %s: Value %s is not a boolean.", answer.getLinkId(), answer.getValue()));
         }
-        boolean value = Boolean.valueOf(answer.getValue());
+        boolean value = Boolean.parseBoolean(answer.getValue());
 
         if (threshold.getValueBoolean() == null) {
             throw new IllegalStateException(String.format("Could not evaluate boolean answer for linkId %s: Threshold did not contain a boolean value.", answer.getLinkId()));
@@ -116,40 +109,29 @@ public class TriageEvaluator {
     }
 
     private boolean evaluateQuantityAnswer(AnswerModel answer, ThresholdModel threshold) {
-        double value = 0.0;
+        double value;
         try {
-            value = Double.valueOf(answer.getValue());
+            value = Double.parseDouble(answer.getValue());
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(String.format("Could not evaluate quantity answer for linkId %s: Value %s is not a double.", answer.getLinkId(), answer.getValue()));
+            throw new IllegalArgumentException(String.format(
+                    "Could not evaluate quantity answer for linkId %s: Value %s is not a double.",
+                    answer.getLinkId(), answer.getValue()
+            ));
         }
 
-        // Check whether the value is contained in the provided interval (null-values correspond to infinity in wither direction).
-        boolean contained = false;
-        if (threshold.getValueQuantityLow() == null && threshold.getValueQuantityHigh() == null) {
-            contained = true;
-        }
-        if (threshold.getValueQuantityLow() != null && threshold.getValueQuantityHigh() == null) {
-            contained = threshold.getValueQuantityLow() <= value;
-        }
-        if (threshold.getValueQuantityLow() == null && threshold.getValueQuantityHigh() != null) {
-            contained = threshold.getValueQuantityHigh() >= value;
-        }
-        if (threshold.getValueQuantityLow() != null && threshold.getValueQuantityHigh() != null) {
-            contained = threshold.getValueQuantityLow() <= value && value <= threshold.getValueQuantityHigh();
-        }
-        return contained;
+        // Extract threshold values for readability
+        Double low = threshold.getValueQuantityLow();
+        Double high = threshold.getValueQuantityHigh();
+
+        // Determine if the value is within the range
+        return (low == null || low <= value) && (high == null || value <= high);
     }
 
     private TriagingCategory mapThresholdType(ThresholdType type) {
-        switch (type) {
-            case NORMAL:
-                return TriagingCategory.GREEN;
-            case ABNORMAL:
-                return TriagingCategory.YELLOW;
-            case CRITICAL:
-                return TriagingCategory.RED;
-            default:
-                throw new IllegalArgumentException(String.format("Don't know how to handle ThresholdType %s!", type.toString()));
-        }
+        return switch (type) {
+            case NORMAL -> TriagingCategory.GREEN;
+            case ABNORMAL -> TriagingCategory.YELLOW;
+            case CRITICAL -> TriagingCategory.RED;
+        };
     }
 }

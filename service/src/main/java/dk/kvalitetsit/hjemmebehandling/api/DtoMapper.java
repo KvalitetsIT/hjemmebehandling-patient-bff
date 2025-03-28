@@ -245,15 +245,13 @@ public class DtoMapper {
     }
 
     public ThresholdDto mapThresholdModel(ThresholdModel thresholdModel) {
-        ThresholdDto thresholdDto = new ThresholdDto()
+        return new ThresholdDto()
                 .questionId(thresholdModel.getQuestionnaireItemLinkId())
                 .conceptCode(thresholdModel.getConceptCode())
                 .type(mapThresholdTypeModel(thresholdModel.getType()))
                 .valueBoolean(thresholdModel.getValueBoolean())
                 .valueQuantityLow(thresholdModel.getValueQuantityLow())
                 .valueQuantityHigh(thresholdModel.getValueQuantityHigh());
-
-        return thresholdDto;
     }
 
     private ThresholdDto.TypeEnum mapThresholdTypeModel(ThresholdType type) {
@@ -334,12 +332,12 @@ public class DtoMapper {
     }
 
     private void mapBaseAttributesToModel(BaseModel target, BaseDto source, ResourceType resourceType) {
-        if (source.getId() == null) {
+        if (source.getId().isEmpty()) {
             // OK, in case a resource is being created.
             return;
         }
 
-        target.setId(toQualifiedId(source.getId(), resourceType));
+        target.setId(toQualifiedId(source.getId().get(), resourceType));
     }
 
     private QualifiedId toQualifiedId(String id, ResourceType resourceType) {
@@ -353,7 +351,7 @@ public class DtoMapper {
     }
 
     private void mapBaseAttributesToDto(BaseDto target, BaseModel source) {
-        target.setId(source.getId().toString());
+        target.setId(Optional.ofNullable(source.getId()).map(Object::toString));
         target.setOrganizationId(Optional.ofNullable(source.getOrganizationId()));
     }
 

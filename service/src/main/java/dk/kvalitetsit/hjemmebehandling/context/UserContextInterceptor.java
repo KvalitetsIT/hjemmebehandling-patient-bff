@@ -1,22 +1,21 @@
 package dk.kvalitetsit.hjemmebehandling.context;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import dk.kvalitetsit.hjemmebehandling.fhir.FhirClient;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import dk.kvalitetsit.hjemmebehandling.fhir.FhirClient;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.interfaces.DecodedJWT;
-
 public class UserContextInterceptor implements HandlerInterceptor {
-	
-	private static final String BEARER = "Bearer";
 
-    private IUserContextHandler contextHandler;
-    private UserContextProvider userContextProvider;
-    private FhirClient client;
+    private static final String BEARER = "Bearer";
+
+    private final IUserContextHandler contextHandler;
+    private final UserContextProvider userContextProvider;
+    private final FhirClient client;
 
     public UserContextInterceptor(FhirClient client, UserContextProvider userContextProvider, IUserContextHandler userContextHandler) {
         this.client = client;
@@ -25,26 +24,24 @@ public class UserContextInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
         DecodedJWT jwt = null;
         // get authorizationheader.Jwt token could/should be cached.
         String autHeader = request.getHeader("authorization");
-        if(autHeader!=null) {
-        	String[] token = autHeader.split(" ");
-        	if(token != null && token[0]!=null && BEARER.equals(token[0])) {
-        		//Removes "Bearer"
-        		jwt = JWT.decode(token[1]);
-        		//We should verify bearer token
-        	}
+        if (autHeader != null) {
+            String[] token = autHeader.split(" ");
+            if (token[0] != null && BEARER.equals(token[0])) {
+                //Removes "Bearer"
+                jwt = JWT.decode(token[1]);
+                //We should verify bearer token
+            }
         }
-
-        userContextProvider.setUserContext(request.getSession(), contextHandler.mapTokenToUser(client,jwt));
-
+        userContextProvider.setUserContext(request.getSession(), contextHandler.mapTokenToUser(client, jwt));
         return true;
     }
 
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+    public void postHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler, ModelAndView modelAndView) throws Exception {
 
     }
 }

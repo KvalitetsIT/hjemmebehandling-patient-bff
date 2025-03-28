@@ -21,7 +21,8 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class OrganizationControllerTest {
@@ -36,7 +37,6 @@ public class OrganizationControllerTest {
 
     @Test
     public void getOrganization_organizationPresent_200() throws Exception {
-        // Arrange
         String organizationId = "Organization/organization-1";
 
         OrganizationModel organizationModel = new OrganizationModel();
@@ -45,35 +45,23 @@ public class OrganizationControllerTest {
         Mockito.when(organizationService.getOrganizationById(new QualifiedId(organizationId))).thenReturn(Optional.of(organizationModel));
         Mockito.when(dtoMapper.mapOrganizationModel(organizationModel)).thenReturn(organizationDto);
 
-        // Act
         ResponseEntity<OrganizationDto> result = subject.getOrganization(organizationId);
 
-        // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(organizationDto, result.getBody());
     }
 
     @Test
     public void getOrganization_organizationMissing_404() throws Exception {
-        // Arrange
         String organizationId = "Organization/organization-1";
         Mockito.when(organizationService.getOrganizationById(new QualifiedId(organizationId))).thenReturn(Optional.empty());
-
-        // Act
-
-        // Assert
         assertThrows(ResourceNotFoundException.class, () -> subject.getOrganization(organizationId));
     }
 
     @Test
     public void getOrganization_failure_500() throws Exception {
-        // Arrange
         String organizationId = "Organization/organization-1";
         Mockito.doThrow(new ServiceException("error", ErrorKind.INTERNAL_SERVER_ERROR, ErrorDetails.INTERNAL_SERVER_ERROR)).when(organizationService).getOrganizationById(new QualifiedId(organizationId));
-
-        // Act
-
-        // Assert
         assertThrows(InternalServerErrorException.class, () -> subject.getOrganization(organizationId));
     }
 }

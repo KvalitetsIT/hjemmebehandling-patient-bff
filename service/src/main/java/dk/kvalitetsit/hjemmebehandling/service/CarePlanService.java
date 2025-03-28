@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class CarePlanService extends AccessValidatingService {
-    private FhirClient fhirClient;
+    private final FhirClient fhirClient;
 
-    private FhirMapper fhirMapper;
+    private final FhirMapper fhirMapper;
 
     public CarePlanService(FhirClient fhirClient, FhirMapper fhirMapper, AccessValidator accessValidator) {
         super(accessValidator);

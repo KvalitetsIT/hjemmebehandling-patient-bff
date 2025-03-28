@@ -10,6 +10,7 @@ import dk.kvalitetsit.hjemmebehandling.service.CarePlanService;
 import dk.kvalitetsit.hjemmebehandling.service.exception.AccessValidationException;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ServiceException;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.openapitools.api.CarePlanApi;
 import org.openapitools.model.CarePlanDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@Tag(name = "CarePlan", description = "API for retrieving CarePlans.")
-public class CarePlanController extends BaseController {
+public class CarePlanController extends BaseController implements CarePlanApi {
     private static final Logger logger = LoggerFactory.getLogger(CarePlanController.class);
 
     private final CarePlanService carePlanService;
@@ -36,20 +36,18 @@ public class CarePlanController extends BaseController {
         this.userContextProvider = userContextProvider;
     }
 
-    @GetMapping(value = "/v1/careplans/active")
+    @Override
     public ResponseEntity<List<CarePlanDto>> getActiveCarePlans() {
-
-
         Optional<String> cpr = userContextProvider.getUserContext().getCpr();
 
-        if(cpr.isEmpty()) {
+        if (cpr.isEmpty()) {
             throw new BadRequestException(ErrorDetails.MISSING_CONTEXT);
         }
 
         try {
             List<CarePlanModel> carePlans = carePlanService.getActiveCarePlans(cpr.get());
 
-            if(carePlans.isEmpty()) {
+            if (carePlans.isEmpty()) {
                 throw new ResourceNotFoundException("No active careplans exists for the current user.", ErrorDetails.NO_ACTIVE_CAREPLAN_EXISTS);
             }
 
@@ -57,11 +55,9 @@ public class CarePlanController extends BaseController {
                     .stream()
                     .map(dtoMapper::mapCarePlanModel)
                     .collect(Collectors.toList()));
-        }
-        catch(AccessValidationException | ServiceException e) {
+        } catch (AccessValidationException | ServiceException e) {
             logger.error("Could not update questionnaire response", e);
             throw toStatusCodeException(e);
         }
-
     }
 }

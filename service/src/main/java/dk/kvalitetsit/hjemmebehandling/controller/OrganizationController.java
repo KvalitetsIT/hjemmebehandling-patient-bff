@@ -12,6 +12,7 @@ import dk.kvalitetsit.hjemmebehandling.service.OrganizationService;
 import dk.kvalitetsit.hjemmebehandling.service.exception.ServiceException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.openapitools.api.OrganizationApi;
 import org.openapitools.model.OrganizationDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +26,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@Tag(name = "Organization", description = "API for retrieving Organizations.")
-public class OrganizationController extends BaseController {
+public class OrganizationController extends BaseController implements OrganizationApi {
     private static final Logger logger = LoggerFactory.getLogger(OrganizationController.class);
 
     private final OrganizationService organizationService;
@@ -39,29 +39,28 @@ public class OrganizationController extends BaseController {
         this.userContextProvider = userContextProvider;
     }
 
-    @GetMapping(value = "/v1/organizations/{id}")
+    @Override
     public ResponseEntity<OrganizationDto> getOrganization(@PathVariable("id") String id) {
         // Look up the Organization
         Optional<OrganizationModel> organization = Optional.empty();
 
         try {
             organization = organizationService.getOrganizationById(new QualifiedId(FhirUtils.qualifyId(id, ResourceType.Organization)));
-        }
-        catch(ServiceException e) {
+        } catch (ServiceException e) {
             logger.error("Could not retrieve QuestionnaireResponse", e);
             throw toStatusCodeException(e);
         }
-        if(organization.isEmpty()) {
+        if (organization.isEmpty()) {
             throw new ResourceNotFoundException(String.format("Organization with id %s not found.", id), ErrorDetails.ORGANIZATION_DOES_NOT_EXIST);
         }
         return ResponseEntity.ok(dtoMapper.mapOrganizationModel(organization.get()));
     }
 
-    @GetMapping(value = "/v1/organizations")
+    @Override
     public ResponseEntity<List<OrganizationDto>> getOrganizations() {
         Optional<String> cpr = this.userContextProvider.getUserContext().getCpr();
 
-        if(cpr.isEmpty()) {
+        if (cpr.isEmpty()) {
             throw new BadRequestException(ErrorDetails.MISSING_CONTEXT);
         }
 
@@ -71,7 +70,7 @@ public class OrganizationController extends BaseController {
                     .map(dtoMapper::mapOrganizationModel)
                     .collect(Collectors.toList())
             );
-        } catch(ServiceException e) {
+        } catch (ServiceException e) {
             logger.error("Could not retrieve QuestionnaireResponse", e);
             throw toStatusCodeException(e);
         }

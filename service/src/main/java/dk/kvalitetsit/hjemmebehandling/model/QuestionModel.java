@@ -74,12 +74,12 @@ public class QuestionModel {
         this.options = options;
     }
 
-    public void setHelperText(String helperText) {
-        this.helperText = helperText;
-    }
-
     public String getHelperText() {
         return helperText;
+    }
+
+    public void setHelperText(String helperText) {
+        this.helperText = helperText;
     }
 
     public List<EnableWhen> getEnableWhens() {
