@@ -13,12 +13,12 @@ public enum ErrorDetails {
 
     NO_ORGANIZATIONS("Ingen organisations blev fundet", 18),
     MISSING_CONTEXT("Konteksten for det pågældende kald mangler", 19),
-    PATIENT_NOT_FOUND("En patient med det angivede cpr-nummer kunne ikke fremsøges",20 ),
-    INTERNAL_SERVER_ERROR("Der opstod en intern fejl i systemet.", 99),;
+    PATIENT_NOT_FOUND("En patient med det angivede cpr-nummer kunne ikke fremsøges", 20),
+    INTERNAL_SERVER_ERROR("Der opstod en intern fejl i systemet.", 99);
 
 
-    private String errorMessage;
-    private int errorCode;
+    private final String errorMessage;
+    private final int errorCode;
 
     ErrorDetails(String errorMessage, int errorCode) {
         this.errorMessage = errorMessage;

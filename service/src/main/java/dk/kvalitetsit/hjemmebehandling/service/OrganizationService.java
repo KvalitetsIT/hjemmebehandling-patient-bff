@@ -31,10 +31,8 @@ public class OrganizationService {
 
     /**
      * @param id the id of the organisation
-     * @returns the organisation if it exist. Otherwise it returns none
-     * @throws ServiceException
      */
-    public Optional<OrganizationModel> getOrganizationById(QualifiedId id) throws ServiceException  {
+    public Optional<OrganizationModel> getOrganizationById(QualifiedId id) throws ServiceException {
         FhirLookupResult lookupResult = fhirClient.lookupOrganizationById(id.toString());
 
         Optional<Organization> organization = lookupResult.getOrganization(id.toString());
@@ -42,10 +40,6 @@ public class OrganizationService {
 
     }
 
-    /**
-     * @returns a list of associated organizations
-     * @throws ServiceException
-     */
     public List<OrganizationModel> getOrganizations(String cpr) throws ServiceException {
         FhirLookupResult lookupResult = fhirClient.lookupActiveCarePlans(cpr);
 

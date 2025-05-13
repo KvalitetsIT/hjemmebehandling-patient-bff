@@ -1,8 +1,6 @@
 package dk.kvalitetsit.hjemmebehandling.model;
 
-import dk.kvalitetsit.hjemmebehandling.api.AnswerDto;
 import dk.kvalitetsit.hjemmebehandling.constants.AnswerType;
-import dk.kvalitetsit.hjemmebehandling.constants.TriagingCategory;
 
 import java.util.List;
 import java.util.Objects;

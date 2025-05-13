@@ -1,5 +1,6 @@
 package dk.kvalitetsit.hjemmebehandling.fhir;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -8,13 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import ca.uhn.fhir.context.FhirContext;
-
 @ExtendWith(MockitoExtension.class)
 public class FhirQuestionnaireTest {
 
-  /*
-  @Test
+  /*@Test
     void questionnaire() {
       Coding NPU08676 = new Coding("urn:oid:1.2.208.176.2.1","NPU08676","Legeme temp.;Pt");
       Coding UCUM_NPU08676 = new Coding().setSystem("http://unitsofmeasure.org").setCode("Cel").setDisplay("grader Celsius");
@@ -120,6 +118,6 @@ public class FhirQuestionnaireTest {
       System.out.println("----");
       System.out.println( FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(questionnaire) );
       System.out.println("----");
-    }
-*/
+    }*/
+
 }

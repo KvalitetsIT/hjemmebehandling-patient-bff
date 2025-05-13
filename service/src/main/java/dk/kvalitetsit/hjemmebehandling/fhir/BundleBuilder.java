@@ -1,6 +1,9 @@
 package dk.kvalitetsit.hjemmebehandling.fhir;
 
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Resource;
 
 public class BundleBuilder {
     public Bundle buildQuestionnaireResponseBundle(QuestionnaireResponse questionnaireResponse, CarePlan carePlan) {
