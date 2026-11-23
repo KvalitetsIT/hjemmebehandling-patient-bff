@@ -57,7 +57,6 @@
             <plugin>
                 <artifactId>exec-maven-plugin</artifactId>
                 <groupId>org.codehaus.mojo</groupId>
-                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <id>Get old doc versions</id>
@@ -126,7 +125,7 @@
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>7.10.0</version>
+                <version>7.27.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -166,8 +165,8 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>get-the-git-infos</id>
@@ -179,8 +178,7 @@
                 </executions>
                 <configuration>
                     <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties
-                    </generateGitPropertiesFilename>
+                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
                     <includeOnlyProperties>
                         <includeOnlyProperty>git.commit.id.describe</includeOnlyProperty>
                     </includeOnlyProperties>
